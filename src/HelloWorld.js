@@ -6,7 +6,7 @@ import {
   updateMessage,
   loadCurrentMessage,
   getCurrentWalletConnected,
-} from "../../../571G_proj/src/util/interact.js.js";
+} from "./util/interact.js";
 
 import alchemylogo from "./alchemylogo.svg";
 

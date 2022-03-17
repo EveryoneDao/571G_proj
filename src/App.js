@@ -1,4 +1,4 @@
-import HelloWorld from '../../../hello-world-part-four-tutorial-master/starter-files/src/HelloWorld'
+import HelloWorld from './HelloWorld'
 import './App.css';
 
 function App() {
