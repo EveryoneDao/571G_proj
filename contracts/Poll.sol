@@ -22,9 +22,10 @@ contract Poll {
     // }
 
     struct Participant{
+        address participantAddr;
         string voterName;
         address delegate;
-        address[] represent;
+        //address[] represent;
     }
 
     struct PollEvent{
@@ -49,18 +50,17 @@ contract Poll {
     mapping(address => Participant) public participants;
     mapping(string => address) public participantName; 
 
-	constructor() public {
+	constructor() {
         numberOfParticipant = 0;
     }
 
     event participantRegistered(string name);
-    event participantLookedUp(string name, address _address);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
     event voteDone(address voter, bool voted);
 
     modifier newParticipantCheck(string memory name){
         require(bytes(name).length > 0, "Participant name is empty");
-        require(bytes(participantName[name]).length == 0, "Participant already registered");
+        require(participantName[name] == address(0x0), "Participant already registered");
 
         require(msg.value >= registrationPrice, "Asset not enough to register");
         require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
@@ -68,8 +68,8 @@ contract Poll {
     }
 
     // Do this when connecting to wallet 
-    function registerParticipant(string memory _name) newParticipantCheck(_name) public {
-        Participant memory newParticipant = Participant(_name);
+    function registerParticipant(string memory _name) newParticipantCheck(_name) public payable {
+        Participant memory newParticipant = Participant(msg.sender, _name, address(0x00));
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
@@ -78,14 +78,12 @@ contract Poll {
 
     modifier participantLookUpCheck(string memory name){
         require(bytes(name).length > 0, "Participant name is empty");
-        require(bytes(participantName[name]).length > 0, "Can't find the name in all participants");
+        require(participantName[name] != address(0x0), "Can't find the name in all participants");
         _;
     }
 
-    function lookUpParticipant(string memory _name) participantLookUpCheck(_name) public view returns (address participantAddress) {
-        participantAddress = participantName[_name];
-
-        emit participantRegistered(_name, participantAddress);
+    function lookUpParticipant(string memory _name) participantLookUpCheck(_name) public view returns (address) {
+        return participantName[_name];
     }
 
     //       /// Delegate your vote to the voter `to`.
@@ -133,23 +131,26 @@ contract Poll {
     // function cancel delegation
 
 
-    modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] sel) 
+    modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
         require(bytes(name).length > 0, "Poll name is empty");
         require(bytes(desc).length > 0, "Poll description is empty");
         require(dur > 0, "Poll duration is empty");
-        require(bytes(sel).length > 0, "Choice to select from not given");
+        require(sel.length > 0, "Choice to select from not given");
         
         _;
     }
 
-    function createPoll(string memory name, string memory desc, uint dur, bool blind, bool aboutDAO, Selection[] sel) 
+    function createPoll(string memory name, string memory desc, uint dur, bool blind, bool aboutDAO, Selection[] memory sel) 
         newPollCreateionCheck(name, desc, dur, sel) public
     {
 
-        require(bytes(participants[msg.sender]).length > 0, "Not registered in the system");
+        require(participants[msg.sender].participantAddr != address(0x00), "Participant not registered in the system");
 
-        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, dur, blind, aboutDAO, sel);
+        address[] memory voted;
+        Selection[] memory votedChoices;
+        Selection result;
+        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, dur, blind, aboutDAO, sel, 0, voted, votedChoices, result);
         polls[nextPollId] = newPoll;
 
         emit pollCreated(msg.sender, name, dur, blind, aboutDAO);
@@ -158,9 +159,9 @@ contract Poll {
     modifier voteCheck(uint pollId, Selection choice) 
     {
         PollEvent storage thisPoll = polls[pollId];
-        require(bytes(thisPoll).length > 0, "Poll not created");
+        require(thisPoll.pollId > 0, "Poll not created");
         require(thisPoll.state == State.VOTING, "The poll has ended");
-        require(bytes(choice).length > 0, "No choice made yet");
+        //require(bytes(choice).length > 0, "No choice made yet");
 
         _;
     }
@@ -168,7 +169,7 @@ contract Poll {
     function vote(uint pollId, Selection choice)
         voteCheck(pollId, choice) public 
     {
-        require(bytes(participants[msg.sender]).length > 0, "Participant not registered in the system");
+        require(participants[msg.sender].participantAddr != address(0x00), "Participant not registered in the system");
 
         PollEvent storage thisPoll = polls[pollId];
 
@@ -205,24 +206,28 @@ contract Poll {
 
     // function viewTempResult()
 
+
     function viewResult(uint pollId) public view returns (Selection)
     {
-        PollEvent storage thisPoll = polls[pollId];
-        require(bytes(thisPoll).length > 0, "Poll not created");
-        require(thisPoll.state == State.ENDED, "The poll has not ended"); // If this is a blind vote
+        PollEvent memory thisPoll = polls[pollId];
 
-        mapping(Selection => uint) memory counts;
-
-        for(uint i = 0; i < thisPoll.totalVote; i++) {
-            counts[thisPoll.votedChoices[i]] += 1;
+        uint[] memory counts = new uint[](thisPoll.choseFrom.length);
+        uint i = 0;
+        for(; i < thisPoll.totalVote; i++) {
+            for (uint j = 0; j < thisPoll.choseFrom.length; j++) {
+                if (thisPoll.choseFrom[j] == thisPoll.votedChoices[i]) {
+                    counts[j] += 1;
+                    break;
+                }
+            }
         }
 
         uint winnerVoteCount = 0;
 
         for (uint j = 0; j < thisPoll.choseFrom.length; j++){
-            if (counts[thisPoll.choseFrom[j]] > winnerVoteCount) {
+            if (counts[j] > winnerVoteCount) {
                 thisPoll.result = thisPoll.choseFrom[j];
-                winnerVoteCount = counts[thisPoll.choseFrom[j]];
+                winnerVoteCount = counts[j];
             }
         }
 
