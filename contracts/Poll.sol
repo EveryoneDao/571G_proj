@@ -81,6 +81,8 @@ contract Poll {
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
+        numberOfParticipant += 1;
+
         emit participantRegistered(_name);
     }
 
@@ -122,7 +124,7 @@ contract Poll {
         PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, block.timestamp, dur, blind, aboutDAO, sel, 0, voted, votedChoices, result);
         polls[nextPollId] = newPoll;
 
-        nextPollId ++; 
+        nextPollId += 1;
 
         emit pollCreated(msg.sender, name, dur, blind, aboutDAO);
     }
@@ -167,7 +169,7 @@ contract Poll {
     modifier voteCheck(uint pollId, Selection choice) 
     {
         PollEvent storage thisPoll = polls[pollId];
-        require(thisPoll.pollId > 0, "Poll not created");
+        require(thisPoll.pollId > 0, "Poll not created");  
         require(thisPoll.state == State.VOTING, "The poll has ended");
         require(thisPoll.startTime + thisPoll.votingDuration > block.timestamp, "Vote time has passed");
         //require(bytes(choice).length > 0, "No choice made yet");
@@ -194,7 +196,7 @@ contract Poll {
         }
 
         if (voted) {
-            thisPoll.votedChoices[i] = choice; 
+            thisPoll.votedChoices[i] = choice;
         } else {
             thisPoll.voted.push(msg.sender);
             thisPoll.votedChoices.push(choice);
