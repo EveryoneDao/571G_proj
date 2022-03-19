@@ -3,11 +3,15 @@
 // some of the logic cited from Jackson Ng's ballot.sol and solidity official documentation
 // However, this contract incorporates some theories of DAO to achieve a higher autonomous level
 // Everyone is able to organize a voting event
+// And no one has real control over the poll
 
 pragma solidity >=0.8.0;
 
 
-// Preliminary version without time, delegation, blind vote
+// Version 1 with all desired functions
+// TODO: check usage of memory/storage and public/external
+// TODO: view all polls function
+
 contract Poll {
 
     uint256 constant public registrationPrice = 100000000000000000;
@@ -15,32 +19,30 @@ contract Poll {
     enum State { VOTING, ENDED }
     enum Selection { YES, NO, A, B, C, D }
 
-    // struct time{
-    //     uint year;
-    //     uint month;
-    //     uint day;
-    // }
-
     struct Participant{
         address participantAddr;
         string voterName;
-        address delegate;
-        //address[] represent;
     }
+
+    // From what I understand, time in solidity is 1 == 1 second
+    // https://ethereum.stackexchange.com/questions/3034/how-to-get-current-time-by-solidity
+    // While time in js avascript's timestamp is always a factor 1000 larger than the one used by Solidity
+    // https://ethereum.stackexchange.com/questions/68217/smart-contract-now-vs-javascript-now
 
     struct PollEvent{
         State state;
         uint pollId;
         string name;
         string description;        
-        uint votingDuration;
+        uint startTime;
+        uint votingDuration; // In seconds 
         bool blind; // Show result in real time or in the end 
         bool aboutDAO; // The prposal is about this dao (tag type)        
         Selection[] choseFrom;
         uint totalVote;
         address[] voted; // An array to store who has already voted 
         Selection[] votedChoices; // An array to store voter's choices 
-        Selection result;
+        Selection result; // Temporary result or final result depend on state
     }
 
     uint public numberOfParticipant;
@@ -57,8 +59,12 @@ contract Poll {
     event participantRegistered(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
     event voteDone(address voter, bool voted);
+    event voteEnded(Selection result);
+    event resultViewed(Selection result, State state, bool blind); // state is used to determine whether the result is temporary
+    // event viewPolls(PollEvent[] polls);
 
-    modifier newParticipantCheck(string memory name){
+    modifier newParticipantCheck(string memory name)
+    {
         require(bytes(name).length > 0, "Participant name is empty");
         require(participantName[name] == address(0x0), "Participant already registered");
 
@@ -68,8 +74,10 @@ contract Poll {
     }
 
     // Do this when connecting to wallet 
-    function registerParticipant(string memory _name) newParticipantCheck(_name) public payable {
-        Participant memory newParticipant = Participant(msg.sender, _name, address(0x00));
+    function registerParticipant(string memory _name) 
+        newParticipantCheck(_name) public payable 
+    {
+        Participant memory newParticipant = Participant(msg.sender, _name);
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
@@ -78,60 +86,20 @@ contract Poll {
         emit participantRegistered(_name);
     }
 
-    modifier participantLookUpCheck(string memory name){
+    modifier participantLookUpCheck(string memory name)
+    {
         require(bytes(name).length > 0, "Participant name is empty");
         require(participantName[name] != address(0x0), "Can't find the name in all participants");
         _;
     }
 
-    function lookUpParticipant(string memory _name) participantLookUpCheck(_name) public view returns (address) {
+    function lookUpParticipant(string memory _name) 
+        participantLookUpCheck(_name) public view returns (address) 
+    {
         return participantName[_name];
     }
 
-    //       /// Delegate your vote to the voter `to`.
-    // function delegate(address to) external {
-    //     // assigns reference
-    //     Voter storage sender = voters[msg.sender];
-    //     require(!sender.voted, "You already voted.");
-
-    //     require(to != msg.sender, "Self-delegation is disallowed.");
-
-    //     // Forward the delegation as long as
-    //     // `to` also delegated.
-    //     // In general, such loops are very dangerous,
-    //     // because if they run too long, they might
-    //     // need more gas than is available in a block.
-    //     // In this case, the delegation will not be executed,
-    //     // but in other situations, such loops might
-    //     // cause a contract to get "stuck" completely.
-    //     while (voters[to].delegate != address(0)) {
-    //         to = voters[to].delegate;
-
-    //         // We found a loop in the delegation, not allowed.
-    //         require(to != msg.sender, "Found loop in delegation.");
-    //     }
-
-    //     // Since `sender` is a reference, this
-    //     // modifies `voters[msg.sender].voted`
-    //     Voter storage delegate_ = voters[to];
-
-    //     // Voters cannot delegate to wallets that cannot vote.
-    //     require(delegate_.weight >= 1);
-    //     sender.voted = true;
-    //     sender.delegate = to;
-    //     if (delegate_.voted) {
-    //         // If the delegate already voted,
-    //         // directly add to the number of votes
-    //         proposals[delegate_.vote].voteCount += sender.weight;
-    //     } else {
-    //         // If the delegate did not vote yet,
-    //         // add to her weight.
-    //         delegate_.weight += sender.weight;
-    //     }
-    // }
-
-    // function cancel delegation
-
+ 
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
@@ -139,6 +107,7 @@ contract Poll {
         require(bytes(desc).length > 0, "Poll description is empty");
         require(dur > 0, "Poll duration is empty");
         require(sel.length > 0, "Choice to select from not given");
+        // TODO: Check whether selection in enum
         
         _;
     }
@@ -152,7 +121,7 @@ contract Poll {
         address[] memory voted;
         Selection[] memory votedChoices;
         Selection result;
-        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, dur, blind, aboutDAO, sel, 0, voted, votedChoices, result);
+        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, block.timestamp, dur, blind, aboutDAO, sel, 0, voted, votedChoices, result);
         polls[nextPollId] = newPoll;
 
         nextPollId += 1;
@@ -160,18 +129,58 @@ contract Poll {
         emit pollCreated(msg.sender, name, dur, blind, aboutDAO);
     }
 
+
+    modifier updateResult(uint pollId) 
+    {
+        PollEvent storage thisPoll = polls[pollId];
+
+        if (thisPoll.state ==  State.VOTING) {
+
+            uint[] memory counts = new uint[](thisPoll.choseFrom.length);
+            uint i = 0;
+            for(; i < thisPoll.totalVote; i++) {
+                for (uint j = 0; j < thisPoll.choseFrom.length; j++) {
+                    if (thisPoll.choseFrom[j] == thisPoll.votedChoices[i]) {
+                        counts[j] += 1;
+                        break;
+                    }
+                }
+            }
+
+            uint winnerVoteCount = 0;
+
+            for (uint j = 0; j < thisPoll.choseFrom.length; j++){
+                if (counts[j] > winnerVoteCount) {
+                    thisPoll.result = thisPoll.choseFrom[j];
+                    winnerVoteCount = counts[j];
+                }
+            }
+
+            if (thisPoll.startTime + thisPoll.votingDuration < block.timestamp) {
+                thisPoll.state = State.ENDED;
+                emit voteEnded(thisPoll.result);
+            }
+        }
+
+        _;
+    }
+
+
     modifier voteCheck(uint pollId, Selection choice) 
     {
         PollEvent storage thisPoll = polls[pollId];
         require(thisPoll.pollId > 0, "Poll not created");  
         require(thisPoll.state == State.VOTING, "The poll has ended");
+        require(thisPoll.startTime + thisPoll.votingDuration > block.timestamp, "Vote time has passed");
         //require(bytes(choice).length > 0, "No choice made yet");
 
         _;
     }
 
     function vote(uint pollId, Selection choice)
-        voteCheck(pollId, choice) public 
+        updateResult(pollId) 
+        voteCheck(pollId, choice) 
+        public 
     {
         require(participants[msg.sender].participantAddr != address(0x00), "Participant not registered in the system");
 
@@ -195,47 +204,35 @@ contract Poll {
         }
         emit voteDone(msg.sender, voted);
     }
-    
-    // //end votes -> change to the time later 
-    // // Return to all adresses 
-    // function endVote()
-    //     public
-    //     inState(State.Voting)
-    //     onlyOfficial
-    // {
-    //     state = State.Ended;
-    //     finalResult = countResult; //move result from private countResult to public finalResult
-    //     emit voteEnded(finalResult);
-    // }
 
-    // function viewTempResult()
-
-
-    function viewResult(uint pollId) public view returns (Selection) //check pollId?
+    modifier viewResultCheck(uint pollId)
     {
-        PollEvent memory thisPoll = polls[pollId];
-
-        uint[] memory counts = new uint[](thisPoll.choseFrom.length);
-        uint i = 0;
-        for(; i < thisPoll.totalVote; i++) {
-            for (uint j = 0; j < thisPoll.choseFrom.length; j++) {
-                if (thisPoll.choseFrom[j] == thisPoll.votedChoices[i]) {
-                    counts[j] += 1;
-                    break;
-                }
-            }
+        PollEvent storage thisPoll = polls[pollId];
+        require(thisPoll.pollId > 0, "Poll not created");
+        if (thisPoll.blind) {
+            require(thisPoll.state == State.VOTING, "This voting is blind, still in voting");
+            require(thisPoll.startTime + thisPoll.votingDuration < block.timestamp, "This voting is blind, result not revealed yet");
         }
 
-        uint winnerVoteCount = 0;
+        _;
+    }
 
-        for (uint j = 0; j < thisPoll.choseFrom.length; j++){
-            if (counts[j] > winnerVoteCount) {
-                thisPoll.result = thisPoll.choseFrom[j];
-                winnerVoteCount = counts[j];
-            }
-        }
+    function viewResult(uint pollId) 
+        updateResult(pollId) 
+        viewResultCheck(pollId)
+        public returns (Selection)
+    {
+        PollEvent storage thisPoll = polls[pollId];
 
+        emit resultViewed(thisPoll.result, thisPoll.state, thisPoll.blind);
         return thisPoll.result;
     }
+
+    // function viewAllPolls()
+    //     public returns ()
+    // {
+
+    //     for (uint i = 0; i < thisPoll.voted.length; i++) {
+    // }
 }
 
