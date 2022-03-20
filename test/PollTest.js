@@ -20,7 +20,7 @@ describe("Poll", function() {
 
     });
 
-    xdescribe("Participant Registration", function() {
+    describe("Participant Registration", function() {
         it("1. Unsuccessful registration if name is empty.", async function() {
             await expect(deployedPoll.connect(participant1).registerParticipant("",{value: "100000000000000000"})).to.be.revertedWith(
                 "Participant name is empty");
@@ -74,7 +74,7 @@ describe("Poll", function() {
         });
     });
 
-    xdescribe("New Poll Creation", function() {
+    describe("New Poll Creation", function() {
         it("1. Unsuccessful creation if poll name or discription is empty.", async function() {
             await expect(deployedPoll.connect(pollCreator).createPoll("", "Test poll", 10, true, true, availableSelections)).to.be.revertedWith(
                 "Poll name is empty");
@@ -128,11 +128,12 @@ describe("Poll", function() {
             expect(singlePoll.totalVote).to.equal(0);
             expect(singlePoll.voted).to.eql([]);
             expect(singlePoll.votedChoices).to.eql([]);
-            expect(singlePoll.result).to.equal(0);
+            expect(singlePoll.result).to.eql([]);
+            expect(singlePoll.tie).to.equal(false);
         });
     });
 
-    xdescribe("Poll Voting: voting is not blind", function() {
+    describe("Poll Voting: voting is not blind", function() {
 
         beforeEach(async function() {
             
@@ -147,10 +148,7 @@ describe("Poll", function() {
             });
     
             it("2. Result should be DEFAULT (i.e. 0) when no one has voted", async function() {
-                // CallStatic: 
-                // https://ethereum.stackexchange.com/questions/109858/how-to-get-hardhat-to-log-a-returned-variable-rather-than-the-entire-transaction
-                let result = await deployedPoll.connect(participant1).callStatic.viewResult(1);
-                expect(result).to.equal(0);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false, [], 0, false);
             });
         });
 
@@ -177,7 +175,7 @@ describe("Poll", function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant1).vote(1, 1);
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(1);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false);
 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -191,7 +189,8 @@ describe("Poll", function() {
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
                 await deployedPoll.connect(participant2).vote(1, 2);
 
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(1);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(true,[1, 2], 0, false);
+
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");            
@@ -206,7 +205,7 @@ describe("Poll", function() {
                 await deployedPoll.connect(participant2).vote(1, 2);
                 await deployedPoll.connect(participant3).vote(1, 2);
 
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");    
@@ -221,16 +220,19 @@ describe("Poll", function() {
                 await deployedPoll.connect(participant2).vote(1, 2);
                 await deployedPoll.connect(participant3).vote(1, 2);
 
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
 
                 await deployedPoll.connect(participant1).vote(1, 2);
                 await deployedPoll.connect(participant2).vote(1, 1);
                 await deployedPoll.connect(participant3).vote(1, 1);
 
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(1);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false);
+
 
                 await deployedPoll.connect(participant2).vote(1, 2);
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
+                console.log("Actual Time", Date.now()/ 1000);
+
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -250,7 +252,7 @@ describe("Poll", function() {
 
                 await expect(deployedPoll.connect(participant1).vote(1, 1)).to.be.revertedWith("Vote time has passed");
                 await expect(deployedPoll.connect(participant1).vote(1, 1)).to.be.revertedWith("The poll has ended");
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(0);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[], 1, false);
             });
 
             it("1. Correct final results after poll has ended.", async function() {
@@ -272,7 +274,7 @@ describe("Poll", function() {
                 timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful voting due to poll ending but poll didn't end");
 
-                expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 1, false);
             });
         });
     });
@@ -287,11 +289,11 @@ describe("Poll", function() {
             await deployedPoll.connect(pollCreator).createPoll("Poll", "Test poll", pollDuration, true, true, availableSelections);
         });
 
-        xit("1. Cannot view result of non-existent poll.", async function() {
+        it("1. Cannot view result of non-existent poll.", async function() {
             await expect(deployedPoll.connect(participant1).viewResult(2)).to.be.revertedWith("Poll not created");
         });
 
-        xit("2. Cannot view result if voting is still in progress.", async function() {
+        it("2. Cannot view result if voting is still in progress.", async function() {
             let pollCreatedTime = Date.now();
             
             await deployedPoll.connect(participant1).vote(1, 1);
@@ -318,21 +320,12 @@ describe("Poll", function() {
 
             await new Promise(r => setTimeout(r, pollDuration * 1000));
 
-            //setTimeout(() => {}, pollDuration * 1000);
-
             // Confirm poll has now ended
             timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
 
             assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to look up results after poll has ended but poll didn't end");
 
-            console.log("before view result time in js " + Date.now()/ 1000);
-
-            // **********This gets reverted
-            // the second arg 1 means STATE.ENDED
-            await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(2, 1, true);
-            //expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
-
-            console.log("after view result time in js " + Date.now()/ 1000);
+            await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[ 2 ], 1, true);
 
             await expect(deployedPoll.connect(participant1).vote(1, 2)).to.be.revertedWith("The poll has ended");
         })
