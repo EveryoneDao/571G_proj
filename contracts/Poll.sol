@@ -116,7 +116,7 @@ contract Poll {
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
-        console.log("contract creation time in solidity", block.timestamp);
+        //console.log("contract creation time in solidity", block.timestamp);
         require(bytes(name).length > 0, "Poll name is empty");
         require(bytes(desc).length > 0, "Poll description is empty");
         require(dur > 0, "Poll duration is empty");
@@ -152,6 +152,7 @@ contract Poll {
         if (polls[pollId].state ==  State.VOTING) {
 
             uint[] memory counts = new uint[](polls[pollId].choseFrom.length);
+
             uint i = 0;
             for(; i < polls[pollId].totalVote; i++) {
                 for (uint j = 0; j < polls[pollId].choseFrom.length; j++) {
@@ -172,22 +173,22 @@ contract Poll {
             Selection[] memory result;
             polls[pollId].result = result;
             for (uint j = 0; j < polls[pollId].choseFrom.length; j++){
-                if (counts[j] == winnerVoteCount) {
+                if (counts[j] == winnerVoteCount && winnerVoteCount != 0) {
                     polls[pollId].result.push(polls[pollId].choseFrom[j]);
                 }
             }
 
-            if (polls[pollId].result.length == 1) {
-                polls[pollId].tie = false;
-            } else {
+            if (polls[pollId].result.length > 1) {
                 polls[pollId].tie = true;
+            } else {
+                polls[pollId].tie = false;
             }
 
-            console.log("Timestamp needs to pass in sol", polls[pollId].startTime + polls[pollId].votingDuration);
-            console.log("current time in solidity - update", block.timestamp);
+            // console.log("Timestamp needs to pass in sol", polls[pollId].startTime + polls[pollId].votingDuration);
+            // console.log("current time in solidity - update", block.timestamp);
             // End vote in flight 
             if (polls[pollId].startTime + polls[pollId].votingDuration < block.timestamp) {
-                console.log("end!!!!!!!!!!!!!!!!!!");
+                // console.log("end!!!!!!!!!!!!!!!!!!");
                 polls[pollId].state = State.ENDED;
                 emit voteEnded(polls[pollId].tie, polls[pollId].result);
             }
@@ -199,6 +200,8 @@ contract Poll {
 
     modifier voteCheck(uint pollId, Selection choice) 
     {
+        // console.log("trying to vote", block.timestamp);
+        // console.log("Timestamp needs to pass in sol", polls[pollId].startTime + polls[pollId].votingDuration);
         require(polls[pollId].pollId > 0, "Poll not created");  
         require(polls[pollId].state == State.VOTING, "The poll has ended");
         require(polls[pollId].startTime + polls[pollId].votingDuration > block.timestamp, "Vote time has passed");
@@ -236,7 +239,7 @@ contract Poll {
     modifier viewResultCheck(uint pollId)
     {
         // For debugging print 
-        console.log("current time in solidity - check", block.timestamp);
+        //console.log("current time in solidity - check", block.timestamp);
 
         require(polls[pollId].pollId > 0, "Poll not created");
         if (polls[pollId].blind) {
