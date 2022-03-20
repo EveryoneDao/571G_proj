@@ -6,7 +6,6 @@
 // And no one has real control over the poll
 
 pragma solidity >=0.8.0;
-
 import "hardhat/console.sol";
 
 // Version 1:
@@ -16,9 +15,9 @@ import "hardhat/console.sol";
 
 // Version 2 outline (better data delivery to the front end):
 // - login/ register (p.1): add if condition 
-// - view polls (p.2), add filters: blind, my poll, poll type
 // - create poll (p.3): enum and new array in struct 
-// - new func: view poll (p.5)
+// - new func: view one poll (p.5)
+// - view polls (p.2), add filters: blind, my poll, poll type
 
 contract Poll {
 
@@ -52,22 +51,31 @@ contract Poll {
         uint totalVote;
         address[] voted; // An array to store who has already voted 
         Selection[] votedChoices; // An array to store voter's choices 
+        bool tie; // Will comment 
+        Selection[] result; // Temporary result or final result depend on state // Will comment 
+    }
+
+    struct PollResult{
+        State state;
+        uint pollId;
         bool tie;
-        Selection[] result; // Temporary result or final result depend on state
+        Selection[] result;
     }
 
     uint public numberOfParticipant;
     uint private nextPollId = 1;
     
-    mapping(uint => PollEvent) public polls;
     mapping(address => Participant) public participants;
-    mapping(string => address) public participantName; 
+    //mapping(string => address) public participantName; 
+    mapping(uint => PollEvent) public polls;
+    mapping (uint => PollResult) private pollResults;
 
 	constructor() {
         numberOfParticipant = 0;
     }
 
     event participantRegistered(string name);
+    event participantLoggedIn(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
     event voteDone(address voter, bool voted);
     event voteEnded(bool tie, Selection[] result);
@@ -122,7 +130,7 @@ contract Poll {
         require(dur > 0, "Poll duration is empty");
         require(sel.length > 0, "Choice to select from not given");
         for (uint i = 0; i < sel.length; i++) {
-            require(sel[i] >= Selection.YES && sel[i] <= Selection.D, "Input choice not valid");
+            require(sel[i] >= Selection.A && sel[i] <= Selection.H, "Input choice not valid");
         }
         
         _;
@@ -258,10 +266,22 @@ contract Poll {
         emit resultViewed(polls[pollId].tie, polls[pollId].result, polls[pollId].state, polls[pollId].blind);
     }
 
+    function viewPoll(uint pollId) 
+        updateResult(pollId) 
+        viewResultCheck(pollId)
+        external returns (PollEvent memory)
+    {   
+        
+
+    }
+
     // TODO: This function under construction 
     // We could also do only emit poll name and descriptions.
+    // TODO: Need to add functions for filters, tentatively under construction
+    // Poll type for views/ Poll created by me/ Poll blind
+    // Input filters 
     function viewAllPolls()
-        public view returns (PollEvent[] memory)
+        external view returns (PollEvent[] memory)
     {
         PollEvent[] memory pollEvents = new PollEvent[](nextPollId - 1);
         for (uint i = 1; i < nextPollId; i++) {
@@ -271,6 +291,4 @@ contract Poll {
         return pollEvents;
     }
 
-    // TODO: Need to add functions for filters, tentatively under construction
-    // Poll type for views/ Poll created by me/ Poll blind
 }
