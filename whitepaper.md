@@ -1,5 +1,8 @@
 # Whitepaper 
 
+## Introduction 
+Online voting is a trend that is gaining momentum in our society. It lowers the organizational costs and potentially increase voter turning. It eliminates the needs to prepare ballot papers and open polling stations, which means voters can voter as long as there is a secure internet connections. Our application is designed to allow users to create a voting events with many features using blockchain technologies. Also, this application is very useful in an open source community. People can propose a change of design or new development ideas, and stakeholders in the community can vote to pass or reject this proposal. 
+
 ## Features
 1.	The resources, including the power to organize an event and vote an event, are shared among community.
 2.	The decision of proposed events is made by everyone in the community.
