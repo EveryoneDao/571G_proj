@@ -1,5 +1,8 @@
 # Whitepaper 
 
+## Introduction 
+Online voting is a trend that is gaining momentum in our society. It lowers the organizational costs and potentially increase voter turning. It eliminates the needs to prepare ballot papers and open polling stations, which means voters can voter as long as there is a secure internet connections. Our application is designed to allow users to create a voting events with many features using blockchain technologies. Also, this application is very useful in an open source community. People can propose a change of design or new development ideas, and stakeholders in the community can vote to pass or reject this proposal. 
+
 ## Features
 1.	The resources, including the power to organize an event and vote an event, are shared among community.
 2.	The decision of proposed events is made by everyone in the community.
@@ -7,14 +10,15 @@
 
 ## Basic Functions
 ### Participant ```struct Participant```
--	can create a voting event
--	can vote in any event 
--   can re-vote in any event 
+-	can create a voting event with various features such as blind voting and tags.
+-	can vote in any event as long as a gas fee is paid.
+- can re-vote in any ongoing event without paying any extra fees.
 
 ### Voting Event ```struct PollEvent```
 -   is associated with a voting event id ```uint pollId``` and can be viewed in public ```mapping(uint => PollEvent) public polls```;
 -	has a mechanism to end the voting with timed stop ```uint votingDuration```;
 -   has a mechanism to present results in real time or encrypted them before poll ends ```bool blind```.
+
 
 ### Poll Result ```struct PollResult```
 -   is associated with a voting event id ```uint pollId```, but can not be viewed publicly. ```mapping(uint => PollResult) private pollResults```;
