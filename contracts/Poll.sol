@@ -8,18 +8,29 @@
 pragma solidity >=0.8.0;
 
 import "hardhat/console.sol";
-// Version 1.1 with all desired functions and revised external/ public, storage/ memory
+
+// Version 1:
+// - desired functions (blind vote, autonoumously end vote) 
+// - revised external/ public, storage/ memory
+// - Change return with emit for offchain operations 
+
+// Version 2 outline (better data delivery to the front end):
+// - login/ register (p.1): add if condition 
+// - view polls (p.2), add filters: blind, my poll, poll type
+// - create poll (p.3): enum and new array in struct 
+// - new func: view poll (p.5)
 
 contract Poll {
 
     uint256 constant public registrationPrice = 100000000000000000;
 
     enum State { VOTING, ENDED }
-    enum Selection { DEFAULT, YES, NO, A, B, C, D }
+    enum Selection { DEFAULT, A, B, C, D, E, F, G, H } // At most 8 choices 
 
     struct Participant{
         address participantAddr;
         string voterName;
+        uint[] pollIds;
     }
 
     // From what I understand, time in solidity is 1 == 1 second
@@ -73,11 +84,13 @@ contract Poll {
         _;
     }
 
-    // Do this when connecting to wallet 
+    // Do this when connecting to wallet and input a name 
+    // TODO: modifiy this
     function registerParticipant(string memory _name) 
         newParticipantCheck(_name) external payable 
     {
-        Participant memory newParticipant = Participant(msg.sender, _name);
+        uint[] memory pollIds;
+        Participant memory newParticipant = Participant(msg.sender, _name, pollIds);
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
@@ -86,20 +99,19 @@ contract Poll {
         emit participantRegistered(_name);
     }
 
-    // TODO: under construction
-    // Maybe use this as a private function?
-    modifier participantLookUpCheck(string memory name)
-    {
-        require(bytes(name).length > 0, "Participant name is empty");
-        require(participantName[name] != address(0x0), "Can't find the name in all participants");
-        _;
-    }
+    // Looks like we might not need this
+    // modifier participantLookUpCheck(string memory name)
+    // {
+    //     require(bytes(name).length > 0, "Participant name is empty");
+    //     require(participantName[name] != address(0x0), "Can't find the name in all participants");
+    //     _;
+    // }
 
-    function lookUpParticipant(string memory _name) 
-        participantLookUpCheck(_name) public view returns (address) 
-    {
-        return participantName[_name];
-    }
+    // function lookUpParticipant(string memory _name) 
+    //     participantLookUpCheck(_name) public view returns (address) 
+    // {
+    //     return participantName[_name];
+    // }
 
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
@@ -256,6 +268,6 @@ contract Poll {
         return pollEvents;
     }
 
-    // TODO: Need to add functions for filters, under construction
-    // Poll type for views/ Poll created by me/ Poll blind (tentative?)
+    // TODO: Need to add functions for filters, tentatively under construction
+    // Poll type for views/ Poll created by me/ Poll blind
 }
