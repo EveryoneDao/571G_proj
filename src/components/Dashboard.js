@@ -1,12 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import {
-    Grid,
-    Card,
-    CardContent,
-    Typography,
-    CardHeader
-} from '@material-ui/core/'
+import { Grid, Card, CardContent, Typography, CardHeader } from '@material-ui/core/'
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -69,7 +63,6 @@ export default function Dashboard() {
                      </Grid>
                 ))}
             </Grid>
-            
         </div>
     )
 }
