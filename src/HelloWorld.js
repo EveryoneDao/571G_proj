@@ -38,6 +38,10 @@ const HelloWorld = () => {
     
   };
 
+  const onRouteChange = async () => { //TODO: implement
+    
+  };
+
   //the UI of our component
   return (
     <div id="container">
@@ -69,6 +73,9 @@ const HelloWorld = () => {
 
         <button id="publish" onClick={onUpdatePressed}>
           Update
+        </button>
+        <button id="changeRoute" onClick={onRouteChange}>
+          ChangeRoute
         </button>
       </div>
     </div>
