@@ -37,7 +37,8 @@ describe("Poll", function() {
     
         it("3. Successful registration if a first-time participate provides non-empty name and enough registration fee.", async function() {
             //1e17
-            await deployedPoll.connect(participant1).registerParticipant("Monica", {value: "100000000000000000"});
+            await expect(deployedPoll.connect(participant1).registerParticipant("Monica", {value: "100000000000000000"})).to.emit(
+                deployedPoll, 'participantRegistered').withArgs("Monica");
 
             expect(await deployedPoll.numberOfParticipant()).to.equal(1);
 
@@ -107,7 +108,8 @@ describe("Poll", function() {
 
         it("6. Successful creation if all requirements are met.", async function() {
             await deployedPoll.connect(pollCreator).registerParticipant("Ross", {value: "100000000000000000"});
-            await deployedPoll.connect(pollCreator).createPoll("Poll", "Test poll", 10, true, true, availableSelections);
+            await expect(deployedPoll.connect(pollCreator).createPoll("Poll", "Test poll", 10, true, true, availableSelections)).to.emit(
+                deployedPoll, 'pollCreated').withArgs(pollCreator.address, "Poll", 10, true, true);
 
             // A single poll has been created
             let allPolls = await deployedPoll.connect(pollCreator).viewAllPolls();
@@ -164,7 +166,7 @@ describe("Poll", function() {
             it("3. Successful voting at a poll if participant has registered.", async function() {
                 let pollCreatedTime = Date.now();
 
-                await deployedPoll.connect(participant1).vote(1, 1);
+                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false);
                 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -216,20 +218,21 @@ describe("Poll", function() {
 
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
                 await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
-                await deployedPoll.connect(participant1).vote(1, 1);
-                await deployedPoll.connect(participant2).vote(1, 2);
-                await deployedPoll.connect(participant3).vote(1, 2);
+
+                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false);
+                await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, false);
+                await expect(deployedPoll.connect(participant3).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, false);
 
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
 
-                await deployedPoll.connect(participant1).vote(1, 2);
-                await deployedPoll.connect(participant2).vote(1, 1);
-                await deployedPoll.connect(participant3).vote(1, 1);
+                await expect(deployedPoll.connect(participant1).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, true);
+                await expect(deployedPoll.connect(participant2).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
+                await expect(deployedPoll.connect(participant3).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, true);
 
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false);
 
 
-                await deployedPoll.connect(participant2).vote(1, 2);
+                await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
                 console.log("Actual Time", Date.now()/ 1000);
 
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
@@ -255,7 +258,7 @@ describe("Poll", function() {
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[], 1, false);
             });
 
-            it("1. Correct final results after poll has ended.", async function() {
+            it("2. Correct final results after poll has ended.", async function() {
                 let pollCreatedTime = Date.now();
                 
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
@@ -274,6 +277,7 @@ describe("Poll", function() {
                 timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful voting due to poll ending but poll didn't end");
 
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'voteEnded').withArgs(false, [2]);
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 1, false);
             });
         });
