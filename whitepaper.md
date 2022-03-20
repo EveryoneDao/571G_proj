@@ -10,14 +10,15 @@ Online voting is a trend that is gaining momentum in our society. It lowers the 
 
 ## Basic Functions
 ### Participant ```struct Participant```
--	can create a voting event
--	can vote in any event 
--   can re-vote in any event 
+-	can create a voting event with various features such as blind voting and tags.
+-	can vote in any event as long as a gas fee is paid.
+- can re-vote in any ongoing event without paying any extra fees.
 
 ### Voting Event ```struct PollEvent```
 -   is associated with a voting event id ```uint pollId``` and can be viewed in public ```mapping(uint => PollEvent) public polls```;
 -	has a mechanism to end the voting with timed stop ```uint votingDuration```;
 -   has a mechanism to present results in real time or encrypted them before poll ends ```bool blind```.
+
 
 ### Poll Result ```struct PollResult```
 -   is associated with a voting event id ```uint pollId```, but can not be viewed publicly. ```mapping(uint => PollResult) private pollResults```;
