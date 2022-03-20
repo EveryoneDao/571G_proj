@@ -7,7 +7,7 @@
 
 pragma solidity >=0.8.0;
 
-
+import "hardhat/console.sol";
 // Version 1.1 with all desired functions and revised external/ public, storage/ memory
 
 contract Poll {
@@ -100,6 +100,7 @@ contract Poll {
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
+        console.log("contract creation time in solidity", block.timestamp);
         require(bytes(name).length > 0, "Poll name is empty");
         require(bytes(desc).length > 0, "Poll description is empty");
         require(dur > 0, "Poll duration is empty");
@@ -154,8 +155,11 @@ contract Poll {
                 }
             }
 
+            console.log("Timestamp needs to pass in sol", polls[pollId].startTime + polls[pollId].votingDuration);
+            console.log("current time in solidity - update", block.timestamp);
             // End vote in flight 
             if (polls[pollId].startTime + polls[pollId].votingDuration < block.timestamp) {
+                console.log("end!!!!!!!!!!!!!!!!!!");
                 polls[pollId].state = State.ENDED;
                 emit voteEnded(polls[pollId].result);
             }
@@ -203,6 +207,9 @@ contract Poll {
 
     modifier viewResultCheck(uint pollId)
     {
+        // For debugging print 
+        console.log("current time in solidity - check", block.timestamp);
+
         require(polls[pollId].pollId > 0, "Poll not created");
         if (polls[pollId].blind) {
             require(polls[pollId].state == State.ENDED, "This voting is blind, still in voting");
