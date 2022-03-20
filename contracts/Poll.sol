@@ -231,6 +231,20 @@ contract Poll {
         emit participantRegistered(_name);
     }
 
+    function _newPoll(string memory name, string memory desc, uint dur, bool blind, bool aboutDAO, Selection[] memory sel, string[] memory selDesc)
+        internal 
+    {
+        address[] memory voted;
+        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, msg.sender, name, desc, block.timestamp, dur, blind, aboutDAO, sel, selDesc, 0, voted);
+        polls[nextPollId] = newPoll;
+    }
+
+    function _newPollResult() internal
+    {
+        PollResult memory newPollResult;
+        pollResults[nextPollId] = newPollResult;
+    }
+
     function createPoll(string memory name, string memory desc, uint dur, bool blind, bool aboutDAO, Selection[] memory sel, string[] memory selDesc) 
         participantCheck()
         newPollCreateionCheck(name, desc, dur, sel, selDesc) 
@@ -238,12 +252,8 @@ contract Poll {
     {
         participants[msg.sender].pollIds.push(nextPollId);
 
-        address[] memory voted;
-        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, msg.sender, name, desc, block.timestamp, dur, blind, aboutDAO, sel, selDesc, 0, voted);
-        polls[nextPollId] = newPoll;
-
-        PollResult memory newPollResult;
-        pollResults[nextPollId] = newPollResult;
+        _newPoll(name, desc, dur, blind, aboutDAO, sel, selDesc);
+        _newPollResult();
 
         nextPollId += 1;
 
