@@ -1,7 +1,6 @@
 const {expect, assert} = require("chai");
 const BigNumber = require('big-number');
 const { ethers } = require("hardhat");
-//const { PollContract } = require("contracts/Poll.sol");
 
 describe("Poll", function() {
     let pollContract;
@@ -282,16 +281,52 @@ describe("Poll", function() {
         
         beforeEach(async function() {
             await deployedPoll.connect(pollCreator).registerParticipant("Ross", {value: "100000000000000000"});
-            await deployedPoll.connect(pollCreator).createPoll("Poll", "Test poll", 60, true, true, availableSelections);
             await deployedPoll.connect(participant1).registerParticipant("Monica", {value: "100000000000000000"});
+            await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
+            await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
+            await deployedPoll.connect(pollCreator).createPoll("Poll", "Test poll", pollDuration, true, true, availableSelections);
         });
 
-        it("1. Cannot view result of non-existent poll", async function() {
+        it("1. Cannot view result of non-existent poll.", async function() {
             await expect(deployedPoll.connect(participant1).viewResult(2)).to.be.revertedWith("Poll not created");
         });
 
-        it("2. Cannot view result if voting is still in progress", async function() {
-        
+        it("2. Cannot view result if voting is still in progress.", async function() {
+            let pollCreatedTime = Date.now();
+            
+            await deployedPoll.connect(participant1).vote(1, 1);
+            await deployedPoll.connect(participant2).vote(1, 2);
+            await deployedPoll.connect(participant3).vote(1, 2);
+            
+            expect(deployedPoll.connect(pollCreator).viewResult(1)).to.be.revertedWith("This voting is blind, result not revealed yet");
+
+            // Confirm poll is still in progress
+            let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
+            assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful results lookup but poll has ended");   
         });
+
+        it("3. Correct results if voting has ended and no one can vote anymore.", async function() {
+            let pollCreatedTime = Date.now();
+                
+            await deployedPoll.connect(participant1).vote(1, 1);
+            await deployedPoll.connect(participant2).vote(1, 2);
+            await deployedPoll.connect(participant3).vote(1, 2);
+
+            // Confirm poll is still in progress
+            let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
+            assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");   
+
+            await new Promise(r => setTimeout(r, pollDuration * 1000));
+
+            // Confirm poll has now ended
+            timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
+
+            assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to look up results after poll has ended but poll didn't end");
+
+            // **********This gets reverted
+            expect(await deployedPoll.connect(participant1).callStatic.viewResult(1)).to.equal(2);
+
+            await expect(deployedPoll.connect(participant1).vote(1, 2)).to.be.revertedWith("The poll has ended");
+        })
     });
 });
