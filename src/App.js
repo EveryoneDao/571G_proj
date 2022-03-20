@@ -1,11 +1,9 @@
 import HelloWorld from './HelloWorld'
 import Dashboard from './components/Dashboard'
-import EventCard from './components/EventCard'
 import PollBoard from './components/PollBoard'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
  
 import './App.css';
-
 
 function App() {
   return (
@@ -26,5 +24,4 @@ function App() {
     </div>
   );
 }
-// test commit for branch creation
 export default App;
