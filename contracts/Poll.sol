@@ -97,7 +97,6 @@ contract Poll {
         return participantName[_name];
     }
 
- 
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
@@ -206,7 +205,7 @@ contract Poll {
     {
         require(polls[pollId].pollId > 0, "Poll not created");
         if (polls[pollId].blind) {
-            require(polls[pollId].state == State.VOTING, "This voting is blind, still in voting");
+            require(polls[pollId].state == State.ENDED, "This voting is blind, still in voting");
             require(polls[pollId].startTime + polls[pollId].votingDuration < block.timestamp, "This voting is blind, result not revealed yet");
         }
 
