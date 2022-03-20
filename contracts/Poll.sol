@@ -7,7 +7,7 @@
 
 pragma solidity >=0.8.0;
 
-
+import "hardhat/console.sol";
 // Version 1.1 with all desired functions and revised external/ public, storage/ memory
 
 contract Poll {
@@ -30,6 +30,7 @@ contract Poll {
     struct PollEvent{
         State state;
         uint pollId;
+        address organizer;
         string name;
         string description;        
         uint startTime;
@@ -40,7 +41,8 @@ contract Poll {
         uint totalVote;
         address[] voted; // An array to store who has already voted 
         Selection[] votedChoices; // An array to store voter's choices 
-        Selection result; // Temporary result or final result depend on state
+        bool tie;
+        Selection[] result; // Temporary result or final result depend on state
     }
 
     uint public numberOfParticipant;
@@ -57,8 +59,8 @@ contract Poll {
     event participantRegistered(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
     event voteDone(address voter, bool voted);
-    event voteEnded(Selection result);
-    event resultViewed(Selection result, State state, bool blind); // state is used to determine whether the result is temporary
+    event voteEnded(bool tie, Selection[] result);
+    event resultViewed(bool tie, Selection[] result, State state, bool blind); // state is used to determine whether the result is temporary
     //event pollsViewed(PollEvent[] polls);
 
     modifier newParticipantCheck(string memory name)
@@ -84,6 +86,8 @@ contract Poll {
         emit participantRegistered(_name);
     }
 
+    // TODO: under construction
+    // Maybe use this as a private function?
     modifier participantLookUpCheck(string memory name)
     {
         require(bytes(name).length > 0, "Participant name is empty");
@@ -100,6 +104,7 @@ contract Poll {
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel) 
     {
+        console.log("contract creation time in solidity", block.timestamp);
         require(bytes(name).length > 0, "Poll name is empty");
         require(bytes(desc).length > 0, "Poll description is empty");
         require(dur > 0, "Poll duration is empty");
@@ -119,8 +124,8 @@ contract Poll {
 
         address[] memory voted;
         Selection[] memory votedChoices;
-        Selection result;
-        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, name, desc, block.timestamp, dur, blind, aboutDAO, sel, 0, voted, votedChoices, result);
+        Selection[] memory result;
+        PollEvent memory newPoll = PollEvent(State.VOTING, nextPollId, msg.sender, name, desc, block.timestamp, dur, blind, aboutDAO, sel, 0, voted, votedChoices, false, result);
         polls[nextPollId] = newPoll;
 
         nextPollId += 1;
@@ -146,18 +151,33 @@ contract Poll {
             }
 
             uint winnerVoteCount = 0;
-
             for (uint j = 0; j < polls[pollId].choseFrom.length; j++){
                 if (counts[j] > winnerVoteCount) {
-                    polls[pollId].result = polls[pollId].choseFrom[j];
                     winnerVoteCount = counts[j];
                 }
             }
 
+            Selection[] memory result;
+            polls[pollId].result = result;
+            for (uint j = 0; j < polls[pollId].choseFrom.length; j++){
+                if (counts[j] == winnerVoteCount) {
+                    polls[pollId].result.push(polls[pollId].choseFrom[j]);
+                }
+            }
+
+            if (polls[pollId].result.length == 1) {
+                polls[pollId].tie = false;
+            } else {
+                polls[pollId].tie = true;
+            }
+
+            console.log("Timestamp needs to pass in sol", polls[pollId].startTime + polls[pollId].votingDuration);
+            console.log("current time in solidity - update", block.timestamp);
             // End vote in flight 
             if (polls[pollId].startTime + polls[pollId].votingDuration < block.timestamp) {
+                console.log("end!!!!!!!!!!!!!!!!!!");
                 polls[pollId].state = State.ENDED;
-                emit voteEnded(polls[pollId].result);
+                emit voteEnded(polls[pollId].tie, polls[pollId].result);
             }
         }
 
@@ -203,6 +223,9 @@ contract Poll {
 
     modifier viewResultCheck(uint pollId)
     {
+        // For debugging print 
+        console.log("current time in solidity - check", block.timestamp);
+
         require(polls[pollId].pollId > 0, "Poll not created");
         if (polls[pollId].blind) {
             require(polls[pollId].state == State.ENDED, "This voting is blind, still in voting");
@@ -215,13 +238,13 @@ contract Poll {
     function viewResult(uint pollId) 
         updateResult(pollId) 
         viewResultCheck(pollId)
-        public returns (Selection)
+        public
     {
-        emit resultViewed(polls[pollId].result, polls[pollId].state, polls[pollId].blind);
-        return polls[pollId].result;
+        emit resultViewed(polls[pollId].tie, polls[pollId].result, polls[pollId].state, polls[pollId].blind);
     }
 
-    // We could also do only return poll name and descriptions.
+    // TODO: This function under construction 
+    // We could also do only emit poll name and descriptions.
     function viewAllPolls()
         public view returns (PollEvent[] memory)
     {
@@ -232,5 +255,7 @@ contract Poll {
 
         return pollEvents;
     }
-}
 
+    // TODO: Need to add functions for filters, under construction
+    // Poll type for views/ Poll created by me/ Poll blind (tentative?)
+}
