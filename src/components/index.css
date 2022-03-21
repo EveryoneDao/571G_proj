@@ -1,0 +1,14 @@
+.addButton {
+    border-radius: 16px;
+} 
+
+div.c {
+    padding-bottom: 25px;
+    font-size: 4vw;
+  }
+
+  div.a {
+    display: inline-block;
+    width: 60%;
+    height: 60%;
+  }
