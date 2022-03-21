@@ -2,6 +2,7 @@ const {expect, assert} = require("chai");
 const BigNumber = require('big-number');
 const { ethers } = require("hardhat");
 
+
 describe("Poll", function() {
     let pollContract;
     let deployedPoll;
@@ -123,6 +124,8 @@ describe("Poll", function() {
         })
 
         it("7. Successful creation if all requirements are met.", async function() {
+            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.be.revertedWith("Poll not created");
+
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
             await expect(deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
                 deployedPoll, 'pollCreated').withArgs(organizer1.address, "Poll", 10, true, true);
@@ -131,7 +134,6 @@ describe("Poll", function() {
             const pollGenerated = await deployedPoll.connect(organizer1).polls(1);
 
             // Test created poll attributes
-
             expect(pollGenerated.state).to.equal(0);
             expect(pollGenerated.pollId).to.equal(1);
             expect(pollGenerated.organizer).to.equal(await organizer1.address);
@@ -143,22 +145,101 @@ describe("Poll", function() {
             expect(pollGenerated.blind).to.equal(true);
             expect(pollGenerated.totalVote).to.equal(0);
 
-            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.emit(
-                deployedPoll, 'pollViewed').withArgs(1);
+            let createdPollIds = await deployedPoll.connect(organizer1).getParticipantCreatedPollIds();
+            assert.equal(createdPollIds[0] + "", 1);
+            expect(createdPollIds.length).to.equal(1);
 
-            // expect(pollGenerated.choseFrom).to.eql(availableSelections);
-            // expect(pollGenerated.voted).to.eql([]);
-            // expect(pollGenerated.votedChoices).to.eql([]);
+            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.emit(deployedPoll, "pollViewed");
+        });
+
+        it("8. Correct poll Ids when multiple polls are created by different organizers", async function() {
+            await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
+            await deployedPoll.connect(organizer2).registerParticipant("Phoebe", {value: "100000000000000000"});
+
+            await expect(deployedPoll.connect(organizer1).createPoll("Poll1", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
+                deployedPoll, 'pollCreated').withArgs(organizer1.address, "Poll1", 10, true, true);
+            
+            await expect(deployedPoll.connect(organizer2).createPoll("Poll2", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer2.address, "Poll2", 10, true, true);
+
+            await expect(deployedPoll.connect(organizer1).createPoll("Poll3", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer1.address, "Poll3", 10, true, true);
+
+            await expect(deployedPoll.connect(organizer2).createPoll("Poll4", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer2.address, "Poll4", 10, true, true);
+    
+            let organizer1CreatedPollIds = await deployedPoll.connect(organizer1).getParticipantCreatedPollIds();
+            expect(organizer1CreatedPollIds.length).to.equal(2);
+            assert.equal(organizer1CreatedPollIds[0] + "", 1);
+            assert.equal(organizer1CreatedPollIds[1] + "", 3);
+                       
+            let organizer2CreatedPollIds = await deployedPoll.connect(organizer2).getParticipantCreatedPollIds();
+            expect(organizer2CreatedPollIds.length).to.equal(2);
+            assert.equal(organizer2CreatedPollIds[0] + "", 2);
+            assert.equal(organizer2CreatedPollIds[1] + "", 4);
+        });
+
+        it("9. Correct poll Ids when filters are applied", async function() {
+            await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
+            await deployedPoll.connect(organizer2).registerParticipant("Phoebe", {value: "100000000000000000"});
+
+            await expect(deployedPoll.connect(organizer1).createPoll("Poll1", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
+                deployedPoll, 'pollCreated').withArgs(organizer1.address, "Poll1", 10, true, true);
+            
+            await expect(deployedPoll.connect(organizer2).createPoll("Poll2", "Test poll", 10, true, false, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer2.address, "Poll2", 10, true, false);
+
+            await expect(deployedPoll.connect(organizer1).createPoll("Poll3", "Test poll", 10, false, true, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer1.address, "Poll3", 10, false, true);
+
+            await expect(deployedPoll.connect(organizer2).createPoll("Poll4", "Test poll", 10, false, true, availableSelections, selectionsDescriptions)).to.emit(
+                    deployedPoll, 'pollCreated').withArgs(organizer2.address, "Poll4", 10, false, true);
+    
+            // All poll Ids created by organizer 1
+            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 0, 0)).to.emit(deployedPoll, "pollsViewed");
+            let filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(2);
+            assert.equal(filteredIds[0] + "", 1);
+            assert.equal(filteredIds[1] + "", 3);
+
+            // All poll Ids
+            await expect(deployedPoll.connect(organizer1).viewAllPolls(false, 0, 0)).to.emit(deployedPoll, "pollsViewed");
+            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(4);
+            
+            // All poll Ids created by organizer 1 that are only blind
+            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 1, 2)).to.emit(deployedPoll, "pollsViewed");
+            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(0);
+
+            // All poll Ids created by organizer 1 that are only about Dao
+            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 2, 1)).to.emit(deployedPoll, "pollsViewed");
+            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(1);
+            assert.equal(filteredIds[0] + "", 3);
+
+            // All poll Ids created by organizer 2 that are both blind and about Dao
+            await expect(deployedPoll.connect(organizer2).viewAllPolls(true, 1, 1)).to.emit(deployedPoll, "pollsViewed");
+            filteredIds = await deployedPoll.connect(organizer2).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(0);
+
+
+            // All poll Ids that are only blind
+            await expect(deployedPoll.connect(organizer1).viewAllPolls(false, 1, 2)).to.emit(deployedPoll, "pollsViewed");
+            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
+            expect(filteredIds.length).to.equal(1);
+            assert.equal(filteredIds[0] + "", 2);
         });
     });
 
-    xdescribe("Poll Voting: voting is not blind", function() {
+    describe("Poll Voting: voting is not blind", function() {
 
         beforeEach(async function() {
             
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
             await deployedPoll.connect(participant1).registerParticipant("Monica", {value: "100000000000000000"});
-            await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, false, true, availableSelections);
+
+            await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, false, true, availableSelections, selectionsDescriptions);
         });
 
         describe("Checking results before anyone votes", function() {
@@ -249,10 +330,8 @@ describe("Poll", function() {
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false);
 
 
-                await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
-                console.log("Actual Time", Date.now()/ 1000);
-
-                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
+                // await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
+                // await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -289,6 +368,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");   
 
                 await new Promise(r => setTimeout(r, pollDuration * 1000));
+                //await network.provider.send("evm_increaseTime", [pollDuration])
 
                 // Confirm poll has now ended
                 timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -300,14 +380,14 @@ describe("Poll", function() {
         });
     });
 
-    xdescribe("Poll Voting: voting is blind", function() {
+    describe("Poll Voting: voting is blind", function() {
         
         beforeEach(async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
             await deployedPoll.connect(participant1).registerParticipant("Monica", {value: "100000000000000000"});
             await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
             await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
-            await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, true, true, availableSelections);
+            await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, true, true, availableSelections, selectionsDescriptions);
         });
 
         it("1. Cannot view result of non-existent poll.", async function() {
