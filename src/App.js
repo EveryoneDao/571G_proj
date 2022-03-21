@@ -1,6 +1,7 @@
 import HelloWorld from './HelloWorld'
 import Dashboard from './components/Dashboard'
 import PollBoard from './components/PollBoard'
+import FirstPage from './components/FirstPage'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
  
 import './App.css';
@@ -15,6 +16,9 @@ function App() {
           </Route>
           <Route exact path="/Dashboard">
             <Dashboard />
+          </Route>
+          <Route exact path="/FirstPage">
+            <FirstPage />
           </Route>
           <Route exact path="/PollBoard">
             <PollBoard />
