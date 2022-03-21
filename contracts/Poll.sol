@@ -334,4 +334,12 @@ contract Poll {
         emit pollsViewed(participants[msg.sender].tempViewPollIds);
     }
 
+    // Helper functions for testing
+    function getParticipantCreatedPollIds() public view returns (uint[] memory) {
+        return participants[msg.sender].pollIds;
+    }
+
+    function getFilteredViewPollIds() public view returns (uint[] memory) {
+        return participants[msg.sender].tempViewPollIds;
+    }
 }
