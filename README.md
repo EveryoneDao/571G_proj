@@ -41,21 +41,21 @@ event participantRegistered(string name);
 event participantLoggedIn(string name);
 ```
 
-![image](wireframe/fig1placeholder.png)
+![image](wireframe/view1.png)
 
 - View 2: view existing polls with filters
 ```
 event pollsViewed(uint[] pollIds);
 ```
 
-![image](wireframe/fig1placeholder.png)
+![image](wireframe/view2.png)
 
 - View 3: create a new poll event
 ```
 event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
 ```
 
-![image](wireframe/fig1placeholder.png)
+![image](wireframe/view3.png)
 
 - View 4: view one poll and vote
 ```
@@ -63,14 +63,14 @@ event pollViewed(PollEvent poll);
 event voteDone(address voter, bool voted);
 ```
 
-![image](wireframe/fig1placeholder.png)
+![image](wireframe/view5.png)
 
 - View 5: view results
 ```
 event resultViewed(bool tie, Selection[] result, State state, bool blind);
 ```
 
-![image](wireframe/fig1placeholder.png)
+![image](wireframe/view6.png)
 
 - No control event, only determined by a poll's starting time and voting duration
 ```
