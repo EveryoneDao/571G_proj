@@ -81,6 +81,7 @@ event voteEnded(bool tie, Selection[] result);
 
 ### News
 - https://www.vice.com/en/article/bvn5am/andrew-yangs-web3-lobbying-group-wants-to-end-poverty-with-vote-buying
+- https://blog.coinbase.com/cryptos-emergence-as-a-geopolitical-force-30f29d62e562
 
 ### Ballot contract starter code:
 - https://github.com/jacksonng77/ballot/blob/master/ballot.sol
@@ -88,8 +89,8 @@ event voteEnded(bool tie, Selection[] result);
 
 ### Some famous DAO projects’ descriptions
 - Gitcoin: https://github.com/Dapp-Learning-DAO/Dapp-Learning/tree/main/dao/gitcoinDAO
-- Snapshot: https://github.com/Dapp-Learning-DAO/Dapp-Learning/tree/main/basic/40-snapshot
-- DAOhaus https://github.com/Dapp-Learning-DAO/Dapp-Learning/blob/main/dao/DAOhaus/About-DAOhaus.md
+- Snapshot: https://snapshot.org/#/
+- DAOhaus https://daohaus.club/
 - Aragon https://github.com/Dapp-Learning-DAO/Dapp-Learning/tree/main/dao/Aragon
 
 ### Web3
@@ -103,4 +104,6 @@ event voteEnded(bool tie, Selection[] result);
 
 
 ## Front-end Visualization
-![image](docs/fig2placeholder.png)
+![image](docs/fig1.png)
+![image](docs/fig2.png)
+![image](docs/fig2.png)

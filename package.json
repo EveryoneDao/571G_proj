@@ -61,16 +61,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "directories": {
-    "test": "test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/meganm38/571G_proj.git"
-  },
-  "bugs": {
-    "url": "https://github.com/meganm38/571G_proj/issues"
-  },
-  "homepage": "https://github.com/meganm38/571G_proj#readme"
+  }
 }
