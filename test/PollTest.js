@@ -1,6 +1,6 @@
 const {expect, assert} = require("chai");
 const BigNumber = require('big-number');
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
 
 
 describe("Poll", function() {
@@ -23,7 +23,7 @@ describe("Poll", function() {
         selectionsDescriptions = ["first choice", "second choice"];
     });
 
-    describe("Participant Registration", function() {
+    xdescribe("Participant Registration", function() {
         it("1. Unsuccessful registration if name is empty.", async function() {
             await expect(deployedPoll.connect(participant1).registerParticipant("",{value: "100000000000000000"})).to.be.revertedWith(
                 "Participant name is empty");
@@ -78,7 +78,7 @@ describe("Poll", function() {
         });
     });
 
-    describe("New Poll Creation", function() {
+    xdescribe("New Poll Creation", function() {
         it("1. Unsuccessful creation if poll name or discription is empty.", async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
 
@@ -242,7 +242,7 @@ describe("Poll", function() {
             await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, false, true, availableSelections, selectionsDescriptions);
         });
 
-        describe("Checking results before anyone votes", function() {
+        xdescribe("Checking results before anyone votes", function() {
             it("1. Cannot view result of non-existent poll", async function() {
                 await expect(deployedPoll.connect(participant1).viewResult(2)).to.be.revertedWith("Poll not created");
             });
@@ -253,15 +253,15 @@ describe("Poll", function() {
         });
 
         describe("Voting and checking results when poll is still in progress.", function() {
-            it("1. Cannot vote at a non-existent poll", async function() {
+            xit("1. Cannot vote at a non-existent poll", async function() {
                 await expect(deployedPoll.connect(participant1).vote(2, 1)).to.be.revertedWith("Poll not created");
             });
 
-            it("2. Unsuccessful voting if participant has not registered.", async function () {
+            xit("2. Unsuccessful voting if participant has not registered.", async function () {
                 await expect(deployedPoll.connect(participant2).vote(1, 1)).to.be.revertedWith("Participant not registered in the system");
             });
 
-            it("3. Successful voting at a poll if participant has registered.", async function() {
+            xit("3. Successful voting at a poll if participant has registered.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false);
@@ -271,7 +271,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");
             });
 
-            it("4. Correct voting result after one participant voted.", async function() {
+            xit("4. Correct voting result after one participant voted.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant1).vote(1, 1);
@@ -282,7 +282,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");            
             });
 
-            it("5. Correct voting result if mutiple voting options received equal number of votes.", async function() {
+            xit("5. Correct voting result if mutiple voting options received equal number of votes.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant1).vote(1, 1);
@@ -296,7 +296,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");            
             });
 
-            it("6. Correct voting result if one voting option recieved more votes than others.", async function() {
+            xit("6. Correct voting result if one voting option recieved more votes than others.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
@@ -310,28 +310,27 @@ describe("Poll", function() {
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");    
             });
-
+  
             it("7. Correct dynamic results with participants changing votes", async function() {
                 let pollCreatedTime = Date.now();
+                await network.provider.send("evm_setAutomine", [false]);
+                await network.provider.send("evm_setIntervalMining", [500]);
 
-                await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
-                await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
+                await Promise.all([
+                    deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"}), 
+                    deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"}),
+                    expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false),
+                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, false),
+                    expect(deployedPoll.connect(participant3).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, false),
+                    expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false),
+                    expect(deployedPoll.connect(participant1).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, true),
+                    expect(deployedPoll.connect(participant2).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true),
+                    expect(deployedPoll.connect(participant3).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, true),
+                    expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false),
 
-                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false);
-                await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, false);
-                await expect(deployedPoll.connect(participant3).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, false);
-
-                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
-
-                await expect(deployedPoll.connect(participant1).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, true);
-                await expect(deployedPoll.connect(participant2).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
-                await expect(deployedPoll.connect(participant3).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, true);
-
-                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false);
-
-
-                // await expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true);
-                // await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false);
+                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true),
+                    expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false)
+                ]);
 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
@@ -339,7 +338,7 @@ describe("Poll", function() {
             });
         });
 
-        describe("Voting and checking results after poll has ended", function() {
+        xdescribe("Voting and checking results after poll has ended", function() {
             it("1. Unsuccessful voting if poll has ended. No one voted.", async function() {
                 let pollCreatedTime = Date.now();
                 
@@ -380,7 +379,7 @@ describe("Poll", function() {
         });
     });
 
-    describe("Poll Voting: voting is blind", function() {
+    xdescribe("Poll Voting: voting is blind", function() {
         
         beforeEach(async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
