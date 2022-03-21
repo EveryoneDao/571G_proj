@@ -83,7 +83,7 @@ event voteEnded(bool tie, Selection[] result);
 - https://www.vice.com/en/article/bvn5am/andrew-yangs-web3-lobbying-group-wants-to-end-poverty-with-vote-buying
 - https://blog.coinbase.com/cryptos-emergence-as-a-geopolitical-force-30f29d62e562
 
-### Ballot contract starter code:
+### Ballot contract starter code
 - https://github.com/jacksonng77/ballot/blob/master/ballot.sol
 - https://docs.soliditylang.org/en/v0.8.13/solidity-by-example.html
 
@@ -106,4 +106,4 @@ event voteEnded(bool tie, Selection[] result);
 ## Front-end Visualization
 ![image](docs/fig1.png)
 ![image](docs/fig2.png)
-![image](docs/fig2.png)
+![image](docs/fig3.png)
