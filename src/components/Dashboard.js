@@ -68,8 +68,7 @@ export default function Dashboard() {
                         </Card>
                      </Grid>
                 ))}
-            </Grid>
-            
+            </Grid> 
         </div>
     )
 }

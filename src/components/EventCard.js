@@ -28,7 +28,7 @@ export default function EventCard() {
           adjective
         </Typography>
         <Typography variant="body2">
-          well meaning and kindlsy.
+          Event blabla
           <br />
           {'"a benevolent smile"'}
         </Typography>
