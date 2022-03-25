@@ -10,6 +10,8 @@ import {
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 import "./index.css";
 
 const useStyles = makeStyles(theme => ({
@@ -35,7 +37,6 @@ export default function PollBoard() {
     ]
     return (
         <div className={classes.root}>
-            
             <Grid
                 container
                 spacing={2}
@@ -43,20 +44,22 @@ export default function PollBoard() {
                 justify="flex-start"
                 alignItems="flex-start"
             >
-                <Grid item xs={12}>  <div class="c"> Poll Name </div>  </Grid>
-                <Grid item xs={12} position="center">  
-                <div class="a">
-                <Card >
-                    <CardHeader title={'Poll Description'} />
-                    <CardContent>
-                        <Typography variant="h5" gutterBottom> Poll Description </Typography>
-                    </CardContent>
-                    <CardActions> <Button size="small">Join</Button>  </CardActions>
-                </Card> 
-                </div>
-                
-                </Grid>
+                <Box sx={{ width: '100%' }}>
+                <Stack spacing = {2}>
+                <div id="one">one</div>
+                <div id="two">two</div>
+                </Stack>
+                </Box>
                 <Grid item xs={12}>  <div> Remaining # participants to vote </div>  </Grid>
+                <Grid container direction="row" alignItems="flex-start">
+                
+                <Grid item xs={12} sm={6} md={6}>
+                <div class="c"> <Button onClick={() =>{ alert("✔️ This works on every component!"); }}>View Results</Button> </div>  
+                </Grid>
+                <Grid item xs={12} sm={6} md={6}>
+                <div class="c"> <Button >Back</Button> </div>  
+                </Grid>
+                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <h1>{elem.choice}</h1>

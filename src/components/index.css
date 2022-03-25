@@ -28,3 +28,29 @@ div.c {
     font-weight: bold;
     text-decoration: none
   }
+
+#one {
+  float:left; 
+  text-align: center;
+  font-size: 5vw;
+  color: lightblue;
+  border:2px solid #ccc;
+}
+#two { 
+  background-color: white;
+  overflow:hidden;
+  margin:10px;
+  border:2px dashed #ccc;
+  min-height:170px;
+  font-size: 3vw;
+}
+
+@media screen and (max-width: 400px) {
+   #one { 
+    float: none;
+    margin-right:0;
+    width:auto;
+    border:0;
+    border-bottom:2px solid #000;    
+  }
+}
