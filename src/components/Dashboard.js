@@ -43,12 +43,7 @@ export default function Dashboard() {
                 alignItems="flex-start"
             >
                  <Grid item xs={12}>
-                 <div class="c">
-                <IconButton className={classes.largeIcon} aria-label="add" color="primary" onClick={() =>{ alert("✔️ This works on every component!"); }}>
-                    
-                    <AddCircleIcon fontSize="large" />
-                </IconButton>
-                </div>
+                 <a href="" class="btn btn-create">Create a <span>New Poll</span></a>
                      </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
@@ -63,7 +58,8 @@ export default function Dashboard() {
                                 </Typography>
                             </CardContent>
                             <CardActions> 
-                                <Button size="small">Join</Button> 
+                                <Button size="small">Participate</Button>
+                                <Button size="small">View Results</Button>  
                             </CardActions>
                         </Card>
                      </Grid>
