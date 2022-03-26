@@ -28,6 +28,20 @@ function Copyright() {
   );
 }
 
+function continueWithName(){
+
+}
+
+function aboutClick(){
+  console.log("clicked about")
+  location.href = "https://github.com/taichenl/571G_proj/blob/main/README.md";
+}
+
+function featureClick(){
+  console.log("feature click");
+}
+
+
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
@@ -75,8 +89,8 @@ export default function Voting_choice() {
         </Toolbar>
       </AppBar> */}
       <Typography variant="h6" color="inherit" align='right'>
-          <Button variant='contained'>About</Button>
-          <Button variant='contained' color="secondary">Feature</Button>
+          <Button variant='contained' onClick={aboutClick}>About</Button>
+          <Button variant='contained' color="secondary" onClick={featureClick}>Feature</Button>
       </Typography>
       <main>
         {/* Hero unit */}
@@ -89,21 +103,14 @@ export default function Voting_choice() {
               Create an event for your school or organization in seconds, your voters can vote as long as a gas fee is paid.
             </Typography>
             <div className={classes.heroButtons}>
-              <Grid container spacing={2} justifyContent="center">
+              <h1 align = "center"> <TextField id="filled-basic" label="What's your name?" variant="filled" /> </h1>
+            <Grid container spacing={2} justifyContent="center">
                 <Grid item>
-                  <Button variant="contained" color="primary">
-                    Start as an organizer
+                  <Button variant="contained" color="primary" onClick={continueWithName}>
+                    Continue
                   </Button>
                 </Grid>
               </Grid>
-              <h1 align = "center"> <TextField id="filled-basic" label="8 digit event ID" variant="filled" /> </h1>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Button variant="outlined" color="primary">
-                    Join an existing event
-                  </Button>
-                </Grid>
-            </Grid>
             </div>
           </Container>
         </div>

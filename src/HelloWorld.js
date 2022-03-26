@@ -42,10 +42,16 @@ const HelloWorld = () => {
     
   };
 
+  function inputUserName(){
+    console.log("clicked conutinue with name")
+  }
+
+  
   //the UI of our component
   return (
+
     <div id="container">
-      <img id="logo" src={alchemylogo}></img>
+      {/* <img id="logo" src={alchemylogo}></img> */}
       <button id="walletButton" onClick={connectWalletPressed}>
         {walletAddress.length > 0 ? (
           "Connected: " +
@@ -57,28 +63,26 @@ const HelloWorld = () => {
         )}
       </button>
 
-      <h2 style={{ paddingTop: "50px" }}>Current Message:</h2>
-      <p>{message}</p>
 
-      <h2 style={{ paddingTop: "18px" }}>New Message:</h2>
+      <h2 align = "center" style={{ paddingTop: "18px" }}>Hi, What's your name?</h2>
 
       <div>
         <input
           type="text"
-          placeholder="Update the message in your smart contract."
+          placeholder="Input your name"
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
         />
         <p id="status">{status}</p>
 
-        <button id="publish" onClick={onUpdatePressed}>
-          Update
-        </button>
-        <button id="changeRoute" onClick={onRouteChange}>
-          ChangeRoute
-        </button>
+        <h2 align = "center"><button  id = "InputName" onClick = {inputUserName}>Continue</button> </h2>
+      </div>
+
+      <div>
+        <button variant='contained' color="secondary" onClick={aboutClick}> About</button>
       </div>
     </div>
+    
   );
 };
 
