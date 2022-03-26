@@ -14,6 +14,25 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
 import { TextField } from '@material-ui/core';
+import { useEffect, useState } from "react";
+// import {
+// 	UBCTokenContract,
+// 	connectWallet,
+// 	transferToken,
+// 	loadTokenName,
+// 	loadTokenAccountBalance,
+// 	getCurrentWalletConnected,
+// } from "./interact.js";
+import {
+  helloWorldContract,
+  connectWallet,
+  updateMessage,
+  loadTokenName,
+  loadCurrentMessage,
+  loadTokenAccountBalance,
+  getCurrentWalletConnected,
+} from "../util/interact.js";
+import { FirstPage } from '@mui/icons-material';
 
 function Copyright() {
   return (
@@ -76,18 +95,90 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Voting_choice() {
   const classes = useStyles();
+  const [walletAddress, setWallet] = useState("");
+	const [status, setStatus] = useState("");
+
+	const [tokenName, setTokenName] = useState("No connection to the network."); //default tokenName
+	const [tokenBalance, settokenBalance] = useState(
+		"No connection to the network."
+	);
+
+	const [toAddress, setToAddress] = useState("");
+
+	//called only once
+	useEffect(() => {
+		async function fetchData() {
+			if (walletAddress !== "") {
+				const tokenBalance = await loadTokenAccountBalance(walletAddress);
+				settokenBalance(tokenBalance);
+			}
+			const tokenName = await loadTokenName();
+			setTokenName(tokenName);
+			const { address, status } = await getCurrentWalletConnected();
+			setWallet(address);
+			setStatus(status);
+			addWalletListener();
+			// addSmartContractListener();
+		}
+		fetchData();
+	}, [walletAddress, tokenBalance]);
+
+  // function addSmartContractListener() {
+	// 	UBCTokenContract.events.Transfer({}, (error, data) => {
+	// 		console.log(data);
+	// 		if (error) {
+	// 			setStatus("😥 " + error.message);
+	// 		} else {
+	// 			setToAddress("");
+	// 			setStatus("token transfer completed");
+	// 		}
+	// 	});
+	// }
+
+  const connectWalletPressed = async () => {
+    const walletResponse = await connectWallet();
+    setStatus(walletResponse.status);
+    setWallet(walletResponse.address);
+  };
+  
+  const onUpdatePressed = async () => {
+    const { status } = await transferToken(walletAddress, toAddress);
+    setStatus(status);
+  };
+
+
+	function addWalletListener() {
+		if (window.ethereum) {
+			window.ethereum.on("accountsChanged", (accounts) => {
+				if (accounts.length > 0) {
+					setWallet(accounts[0]);
+					setStatus(
+						"👆🏽 input the transfer to addresst in the text-field above."
+					);
+				} else {
+					setWallet("");
+					setStatus("🦊 Connect to Metamask using the top right button.");
+				}
+			});
+		} else {
+			setStatus(
+				<p>
+					{" "}
+					🦊{" "}
+					<a target="_blank" href={`https://metamask.io/download.html`}>
+						You must install Metamask, a virtual Ethereum wallet, in your
+						browser.
+					</a>
+				</p>
+			);
+		}
+	}
+
+
 
   return (
     <React.Fragment>
       <CssBaseline />
-      {/* <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" color="inherit">
-          <Button variant='contained'>About</Button>
-          <Button variant='contained' color="secondary">Feature</Button>
-          </Typography>
-        </Toolbar>
-      </AppBar> */}
       <Typography variant="h6" color="inherit" align='right'>
           <Button variant='contained' onClick={aboutClick}>About</Button>
           <Button variant='contained' color="secondary" onClick={featureClick}>Feature</Button>
@@ -96,6 +187,19 @@ export default function Voting_choice() {
         {/* Hero unit */}
         <div className={classes.heroContent}>
           <Container maxWidth="sm">
+              <button id="walletButton" onClick={connectWalletPressed}>
+              {walletAddress.length > 0 ? (
+                "Connected: " +
+                String(walletAddress).substring(0, 6) +
+                "..." +
+                String(walletAddress).substring(38)
+              ) : (
+                <span>Connect Wallet</span>
+              )}
+            </button>
+            <br></br>
+            <br></br>
+            <br></br>
             <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
               Secure Blockchain-based Voting and Elections Application
             </Typography>

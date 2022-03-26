@@ -78,9 +78,9 @@ const HelloWorld = () => {
         <h2 align = "center"><button  id = "InputName" onClick = {inputUserName}>Continue</button> </h2>
       </div>
 
-      <div>
+      {/* <div>
         <button variant='contained' color="secondary" onClick={aboutClick}> About</button>
-      </div>
+      </div> */}
     </div>
     
   );
