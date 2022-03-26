@@ -41,6 +41,13 @@ const Dashboard = () => {
         root: {
             flexGrow: 1,
             padding: theme.spacing(2)
+        },
+        cardEle:{
+            height:"100%",
+            margin: "1rem",
+        },
+        cardText:{
+            fontSize: "2vi"
         }
     }))
     const classes = useStyles()
@@ -57,26 +64,44 @@ const Dashboard = () => {
                 spacing={2}
                 direction="row"
                 justifyContent="flex-start"
-                alignItems="flex-start"
+                alignItems="stretch"
             >
                 <Grid item xs={12}>
                     <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
                 </Grid>
+                <Grid item xs={12} sm={6} md={3} maxHeight={100}>
+                        <Card className={classes.cardEle}>
+                            <CardHeader title={`Poll : 0`} subheader={`Participants Number : 0`} />
+                            <CardContent>
+                                <Typography className={classes.cardText} gutterBottom>
+                                    Just a template, please create a new poll
+                                </Typography>
+                            </CardContent>
+                            <CardActions position = "center">
+                                <Grid item xs={6}><Button size="small" >Participate</Button>
+                                </Grid>
+                                <Grid item xs={6}><Button size="small" >View Results</Button>
+                                </Grid>
+                            </CardActions>
+                        </Card>
+                </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
-                        <Card>
+                        <Card className={classes.cardEle}>
                             <CardHeader
                                 title={`Poll : ${elem.pollNumber}`}
                                 subheader={`Participants Number : ${elem.participants}`}
                             />
                             <CardContent>
-                                <Typography variant="h5" gutterBottom>
+                                <Typography className={classes.cardText}  gutterBottom>
                                     Hello World
                                 </Typography>
                             </CardContent>
-                            <CardActions>
-                                <Button size="small" >Participate</Button>
-                                <Button size="small">View Results</Button>
+                            <CardActions >
+                            <Grid item xs={6}><Button size="small" >Participate</Button>
+                                </Grid>
+                                <Grid item xs={6}><Button size="small" >View Results</Button>
+                                </Grid>
                             </CardActions>
                         </Card>
                     </Grid>
