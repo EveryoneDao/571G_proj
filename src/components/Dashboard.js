@@ -1,4 +1,5 @@
 import React from 'react'
+import { useEffect, useState } from "react";
 import { makeStyles } from '@material-ui/core/styles'
 import {
     Grid,
@@ -7,15 +8,23 @@ import {
     Typography,
     CardHeader
 } from '@material-ui/core/'
+import {
+    loadAllEvents
+} from "../util/interact.js"
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import "./index.css";
 
 const Dashboard = () => {
+    const [events, setEvent] = useState([]);
     //called only once
-    // useEffect(() => { //TODO: implement
-
-    // }, []);
+    useEffect(() => { //TODO: implement
+        async function fetchData(){
+            const events = await loadAllEvents();
+            setEvent(events);
+        }
+        fetchData();
+    }, []);
 
 
     // function addSmartContractListener() { //TODO: implement
@@ -47,7 +56,7 @@ const Dashboard = () => {
             margin: "1rem",
         },
         cardText:{
-            fontSize: "2vi"
+            fontSize: "2vi",
         }
     }))
     const classes = useStyles()
@@ -69,12 +78,12 @@ const Dashboard = () => {
                 <Grid item xs={12}>
                     <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3} maxHeight={100}>
+                <Grid item xs={12} sm={6} md={3}>
                         <Card className={classes.cardEle}>
                             <CardHeader title={`Poll : 0`} subheader={`Participants Number : 0`} />
                             <CardContent>
-                                <Typography className={classes.cardText} gutterBottom>
-                                    Just a template, please create a new poll
+                                <Typography className="cut-text" gutterBottom>
+                                Just a template, please create a new poll.
                                 </Typography>
                             </CardContent>
                             <CardActions position = "center">
@@ -93,7 +102,7 @@ const Dashboard = () => {
                                 subheader={`Participants Number : ${elem.participants}`}
                             />
                             <CardContent>
-                                <Typography className={classes.cardText}  gutterBottom>
+                                <Typography className="cut-text"  gutterBottom>
                                     Hello World
                                 </Typography>
                             </CardContent>

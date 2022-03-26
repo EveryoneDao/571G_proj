@@ -60,3 +60,11 @@ div.c {
   flex-direction: column;
   justify-content: space-between;
 }
+
+.cut-text { 
+  text-overflow: ellipsis;
+  overflow: hidden; 
+  width: 100%; 
+  height: 1.3em; 
+  white-space: nowrap;
+}
