@@ -9,6 +9,7 @@ import {
     CardHeader
 } from '@material-ui/core/'
 import {
+    pollContract,
     loadAllEvents
 } from "../util/interact.js"
 import Button from '@mui/material/Button';
@@ -16,21 +17,36 @@ import CardActions from '@mui/material/CardActions';
 import "./index.css";
 
 const Dashboard = () => {
-    const [events, setEvent] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [status, setStatus] = useState("");
     //called only once
     useEffect(() => { //TODO: implement
         async function fetchData(){
-            const events = await loadAllEvents();
-            setEvent(events);
+            addViewAllEventsListener();
+            const events = await loadAllEvents(false, 0, 0);
+            console.log("hey");
+            // console.log(events);
+            // setEvent(events);
         }
         fetchData();
     }, []);
 
-
-    // function addSmartContractListener() { //TODO: implement
-    //     // watch for contract's pollCreated event
-    //     // and update our UI when new event added 
-    // }
+    // watch for contract's pollCreated event
+    // and update our UI when new event added 
+    function addViewAllEventsListener() { 
+        console.log("addViewAllEventsListener");
+        pollContract.events.pollsViewed({},(error, data) => {
+            console.log("entered");
+            if(error){
+                console.log("error");
+                // setStatus("😥 " + error.message);
+            }else{
+                // setEvents(data.returnValues[0]);
+                console.log("what");
+                // setStatus("🎉 Events load successfully");
+            }
+        });
+    }
 
     // function addWalletListener() { //TODO: implement
     //     // if wallet account address changed change

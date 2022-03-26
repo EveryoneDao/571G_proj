@@ -1,6 +1,8 @@
 require('dotenv').config();
 const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+// console.log("sss")
+// console.log(alchemyKey)
 const web3 = createAlchemyWeb3(alchemyKey);
 
 const contractABI = require("../contract-abi.json");
@@ -18,24 +20,24 @@ export const loadCurrentEvent = async () => {
     
 };
 
-export const loadAllEvents = async () => { 
+export const loadAllEvents = async (byMe, isBlind, aboutDAO) => { 
     // return event ids
-    const eventIds = await pollContract.methods.numberOfParticipant().call(); 
-    return eventIds;
+    const data = pollContract.methods.viewAllPolls(byMe, isBlind, aboutDAO).encodeABI();
+    console.log(data);
 };
 
-export const connectWallet = async () => {
-  
-};
-
-export const getCurrentWalletConnected = async () => {
-  
-};
-
-// export const updateEventList = async (address, message) => {
+// export const connectWallet = async () => {
   
 // };
 
-// export const createNewEvent = async (address, message) => {
+// export const getCurrentWalletConnected = async () => {
   
 // };
+
+// // export const updateEventList = async (address, message) => {
+  
+// // };
+
+// // export const createNewEvent = async (address, message) => {
+  
+// // };
