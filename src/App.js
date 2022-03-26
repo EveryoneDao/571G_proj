@@ -10,9 +10,6 @@ function App() {
     <div className="App">
     <BrowserRouter>
         <Switch>
-          <Route exact path="/">
-            <HelloWorld />
-          </Route>
           <Route exact path="/Dashboard">
             <Dashboard />
           </Route>
