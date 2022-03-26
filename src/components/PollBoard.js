@@ -8,8 +8,6 @@ import {
     CardHeader
 } from '@material-ui/core/'
 import Button from '@mui/material/Button';
-import CardActions from '@mui/material/CardActions';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import "./index.css";
@@ -41,7 +39,7 @@ export default function PollBoard() {
                 container
                 spacing={2}
                 direction="row"
-                justify="flex-start"
+                justifyContent="flex-start"
                 alignItems="flex-start"
             >
                 <Box sx={{ width: '100%' }}>
@@ -54,10 +52,10 @@ export default function PollBoard() {
                 <Grid container direction="row" alignItems="flex-start">
                 
                 <Grid item xs={12} sm={6} md={6}>
-                <div class="c"> <Button onClick={() =>{ alert("✔️ This works on every component!"); }}>View Results</Button> </div>  
+                <div className="c"> <Button onClick={() =>{ alert("✔️ This works on every component!"); }}>View Results</Button> </div>  
                 </Grid>
                 <Grid item xs={12} sm={6} md={6}>
-                <div class="c"> <Button >Back</Button> </div>  
+                <div className="c"> <Button >Back</Button> </div>  
                 </Grid>
                  </Grid>
                 {data.map(elem => (
@@ -68,7 +66,7 @@ export default function PollBoard() {
                 ))}
             </Grid>
             <Grid item xs={12}>
-            <div class="c"> <Button variant="disabled">Remaining time to show the results</Button> </div>
+            <div className="c"> <Button variant="disabled">Remaining time to show the results</Button> </div>
             </Grid>
             
         </div>

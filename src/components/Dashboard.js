@@ -9,22 +9,40 @@ import {
 } from '@material-ui/core/'
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import IconButton from '@mui/material/IconButton';
 import "./index.css";
-const useStyles = makeStyles(theme => ({
-    largeIcon: {
-        '& svg': {
-            fontSize: 60
-          }
-    },
-    root: {
-        flexGrow: 1,
-        padding: theme.spacing(2)
-    }
-}))
 
-export default function Dashboard() {
+const Dashboard = () => {
+    //called only once
+    // useEffect(() => { //TODO: implement
+
+    // }, []);
+
+
+    // function addSmartContractListener() { //TODO: implement
+    //     // watch for contract's pollCreated event
+    //     // and update our UI when new event added 
+    // }
+
+    // function addWalletListener() { //TODO: implement
+    //     // if wallet account address changed change
+    //     // force back to the first page and repay the entry fee
+    // }
+
+    // const onViewResultsPressed = async () => { //TODO: implement
+
+    // };
+
+    const useStyles = makeStyles(theme => ({
+        largeIcon: {
+            '& svg': {
+                fontSize: 60
+            }
+        },
+        root: {
+            flexGrow: 1,
+            padding: theme.spacing(2)
+        }
+    }))
     const classes = useStyles()
     const data = [
         { pollNumber: 1, participants: 13000 },
@@ -34,17 +52,16 @@ export default function Dashboard() {
     ]
     return (
         <div className={classes.root}>
-            
             <Grid
                 container
                 spacing={2}
                 direction="row"
-                justify="flex-start"
+                justifyContent="flex-start"
                 alignItems="flex-start"
             >
-                 <Grid item xs={12}>
-                 <a href="" class="btn btn-create">Create a <span>New Poll</span></a>
-                     </Grid>
+                <Grid item xs={12}>
+                    <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
+                </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <Card>
@@ -57,14 +74,15 @@ export default function Dashboard() {
                                     Hello World
                                 </Typography>
                             </CardContent>
-                            <CardActions> 
-                                <Button size="small">Participate</Button>
-                                <Button size="small">View Results</Button>  
+                            <CardActions>
+                                <Button size="small" >Participate</Button>
+                                <Button size="small">View Results</Button>
                             </CardActions>
                         </Card>
-                     </Grid>
+                    </Grid>
                 ))}
-            </Grid> 
+            </Grid>
         </div>
-    )
-}
+    );
+};
+export default Dashboard;
