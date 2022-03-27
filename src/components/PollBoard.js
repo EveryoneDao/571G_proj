@@ -33,30 +33,30 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-export default function PollBoard(props) {
+// TODO: further potential update: display user's current choice as a text msg on this page in "status" state
+export default function PollBoard() {
     let loc = useLocation();
-
+    // for current page
     const [status, setStatus] = useState("Hello Please Vote");
-    const [selection, setSelection] = useState("");
-
     const [pollID, setPollID] = useState(0);
     const [name, setName] = useState(0);
     const [description, setPollDescription] = useState("Please select a poll from the dashboard");
     const [data, setData] = useState([]);
     const [walletAddress, setWalletAddress] = useState("");
 
+    // For pop up modal
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
 
-
-    useEffect(() => { //TODO: implement
+    useEffect(() => {
         async function fetchData() {
-            if(loc.state !== undefined){
+            if (loc.state !== undefined) {
                 setPollID(loc.state.id);
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
                 setData(loc.state.options);
                 setWalletAddress(loc.state.wallet);
+                setShowModal(false);
                 addSelectListener();
                 addViewResultListener();
             }
@@ -66,7 +66,17 @@ export default function PollBoard(props) {
         fetchData();
     }, []);
 
-    function addSelectListener() { //TODO: test
+    // TODO: Uncomment and test
+    // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
+    const onSelectPressed = async (optionIndex) => {
+        alert("Option " + optionIndex + " Selected");
+        // const { status } = await selectAnOption(walletAddress, pollID, selection);
+        // setStatus(status);
+    };
+
+    //TODO: test
+    // Expected behavior: 1. select message update(for further functionality)
+    function addSelectListener() {
         console.log("addViewAllEventsListener");
         pollContract.events.voteDone({}, (error, data) => {
             console.log("entered");
@@ -80,22 +90,18 @@ export default function PollBoard(props) {
         });
     }
 
-    const onSelectPressed = async (optionIndex) => { //TODO: test
-        alert("Hello World!" + optionIndex);
-        // const { status } = await selectAnOption(walletAddress, pollID, selection);
-        // setStatus(status);
-    };
-
+    // TODO: Uncomment and test
+    // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { //TODO: test
         setShowModal(true);
         // const { status } = await viewPollResult(walletAddress, pollID);
-        setStatus(status);
     };
 
+    // Expected behavior: when results is returned show it in the pop up window
+    // return value by the contract event:
+    // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addViewResultListener() {
         console.log("addResultViewListener");
-        // return poll results
-        // event resultViewed(bool tie, Selection[] result, State state, bool blind);
         pollContract.events.resultViewed({}, (error, data) => {
             console.log("entered addParticipateAnEventsListener");
             if (error) {
@@ -130,14 +136,14 @@ export default function PollBoard(props) {
     const classes = useStyles()
     return (
         <div className={classes.root}>
-            <div><ResultModal result={result} status={showModal}/></div>
+            <div><ResultModal result={result} status={showModal} /></div>
             <Grid
                 container
                 spacing={2}
                 direction="row"
                 justifyContent="flex-start"
                 alignItems="flex-start"
-            >
+            > 
                 <Box sx={{ width: '100%' }}>
                     <Stack spacing={2}>
                         <div id="one">{name}</div>
@@ -145,13 +151,15 @@ export default function PollBoard(props) {
                     </Stack>
                 </Box>
                 <Grid container direction="row" alignItems="flex-start">
-
                     <Grid item xs={12} sm={6} md={6}>
                         <div className="c"> <Button onClick={onViewResultsPressed}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <div className="c"> <Button ><Link to='/Dashboard' target='_blank'> Back </Link></Button> </div>
                     </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                    <div className="c"> <Button variant="disabled">{status}</Button> </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
@@ -162,10 +170,6 @@ export default function PollBoard(props) {
                     </Grid>
                 ))}
             </Grid>
-            <Grid item xs={12}>
-                <div className="c"> <Button variant="disabled">Remaining time to show the results</Button> </div>
-            </Grid>
-
         </div>
     )
 }

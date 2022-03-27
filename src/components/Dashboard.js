@@ -21,89 +21,67 @@ import "./index.css";
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
-    const [targetEvent, setTargetEvent] = useState();
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
 
     //called only once
     useEffect(() => { //TODO: implement
         async function fetchData() {
+            addViewAllEventsListener();
+            addResultViewListener();
+            addParticipateAnEventsListener();
             const events = await loadAllEvents();
             // TODO: just a place holder need to keep an eye on wallet address
             const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
             setWallet(address);
-            console.log("events retrived");
+            console.log("events retrieved");
             console.log(events);
             setEvents(events);
-            addViewAllEventsListener();
-            addResultViewListener();
-            // addParticipateAnEventsListener();
             // console.log(events);
-            // setEvent(events);
         }
         fetchData();
     }, []);
 
-    // Called when wallet address changed
-    // TODO: delete it if no edge case handling needed
-    // PRIORITY: level 3 (extra work todo)
-    useEffect(() => {
-        setWallet(props);
-    }, [props.walletAddress]);
-
-    // watch for contract's pollCreated event
-    // and update our UI when new event added 
-    // TODO: this one can be deleted as well since we will reload the UI when new event created
-    // PRIORITY: level 3 (extra work todo)
-    function addViewAllEventsListener() { //TODO Test
-        console.log("addViewAllEventsListener");
-        pollContract.events.pollsViewed({}, (error, data) => {
-            console.log("entered");
-            if (error) {
-                console.log("error");
-            } else {
-                console.log("Events load successfully");
-            }
-        });
-    }
-
+    //TODO: uncomment address and test
+    // Expected behavior: 1. Gas Fee
     // PRIORITY: level 1 (basic functionality -> must work)
     // Participate one event: in contract view one event
-    // not replying on the contract event to retrieve the poll detail
-    // but need the function here to require gas fee (could be discussed further)
-    const onParticipatePressed = async (pollID) => { //TODO: uncomment address and test
+    // we are not relying on the contract event to retrieve the poll detail
+    // but need the function here to ask for gas fee (could be discussed further)
+    const onParticipatePressed = async (pollID) => {
         console.log("onParticipatePressed");
         console.log(pollID);
         // uncomment this line when address is ready
         // const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
-    // TODO: Feel like this listener is useless ????
-    // function addParticipateAnEventsListener() {
-    //     console.log("addParticipateAnEventsListener");
-    //     // return a poll object polls[pollId]
-    //     pollContract.events.pollViewed({}, (error, data) => {
-    //         console.log("entered addParticipateAnEventsListener");
-    //         if (error) {
-    //             console.log("error");
-    //         } else {
-    //             // setEvents(data.returnValues[0]);
-    //             console.log("Participated successfully");
-    //         }
-    //     });
-    // }
+    // return a poll object polls[pollId]
+    // Should work as just to display the error message
+    function addParticipateAnEventsListener() {
+        console.log("addParticipateAnEventsListener");
+        pollContract.events.pollViewed({}, (error, data) => {
+            console.log("entered addParticipateAnEventsListener");
+            if (error) {
+                alert("Error message: " + error);
+            } else {
+                console.log("Participated successfully");
+            }
+        });
+    }
 
-    const onViewResultsPressed = async (pollID) => { //TODO: test
+    //TODO: uncomment and test
+    // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
+    const onViewResultsPressed = async (pollID) => {
         console.log(pollID);
         setShowModal(true);
         // const { status } = await viewResult(walletAddress, pollID);
-        // TODO：need to test not sure would work or not
     };
 
+    // Expected behavior: when results is returned show it in the pop up window
+    // return value by the contract event:
+    // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addResultViewListener() {
         console.log("addResultViewListener");
-        // return poll results
-        // event resultViewed(bool tie, Selection[] result, State state, bool blind);
         pollContract.events.resultViewed({}, (error, data) => {
             console.log("entered addParticipateAnEventsListener");
             if (error) {
@@ -134,6 +112,31 @@ const Dashboard = (props) => {
         });
     }
 
+    // TODO: delete it if no edge case handling needed
+    // PRIORITY: level 3 (extra work todo)
+    // Called when wallet address changed
+    useEffect(() => {
+        setWallet(props);
+    }, [props.walletAddress]);
+
+    // TODO: delete it if we don't need to sync it between users in real time
+    // PRIORITY: level 3 (extra work todo)
+    // watch for contract's pollCreated event
+    // and update our UI when new event added 
+    function addViewAllEventsListener() {
+        console.log("addViewAllEventsListener");
+        pollContract.events.pollsViewed({}, (error, data) => {
+            console.log("entered");
+            if (error) {
+                console.log("error");
+            } else {
+                // data handling here: potential option: change events state
+                // by performing the same action as in util/interact.js: loadAllEvents
+                console.log("Events load successfully");
+            }
+        });
+    }
+
     const useStyles = makeStyles(theme => ({
         largeIcon: {
             '& svg': {
@@ -152,11 +155,13 @@ const Dashboard = (props) => {
             fontSize: "2vi",
         }
     }))
+
     const classes = useStyles();
     const data = events;
+
     return (
         <div className={classes.root}>
-            <div><ResultModal result={result} status={showModal}/></div>
+            <div><ResultModal result={result} status={showModal} /></div>
             <Grid
                 container
                 spacing={2}
@@ -166,6 +171,9 @@ const Dashboard = (props) => {
             >
                 <Grid item xs={12}>
                     <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
+                    <div position="absolute" top="0">
+                    <a href="https://faucet.egorfine.com/" >Get more <span>testnet tokens</span></a>
+            </div>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <Card className={classes.cardEle}>
@@ -209,6 +217,7 @@ const Dashboard = (props) => {
                     </Grid>
                 ))}
             </Grid>
+            
         </div>
     );
 };
