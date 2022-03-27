@@ -34,17 +34,28 @@ const useStyles = makeStyles(theme => ({
 
 export default function PollBoard(props) {
     let loc = useLocation();
-    let pollID = loc.state.id;
-    let name = loc.state.name;
-    let description = loc.state.description;
-    const data = loc.state.options;
-    const walletAddress = loc.state.wallet;
-    console.log(walletAddress);
+
     const [status, setStatus] = useState("Hello Please Vote");
     const [selection, setSelection] = useState("");
 
+    const [pollID, setPollID] = useState(0);
+    const [name, setName] = useState(0);
+    const [description, setPollDescription] = useState("Please select a poll from the dashboard");
+    const [data, setData] = useState([]);
+    const [walletAddress, setWalletAddress] = useState("");
+
+
     useEffect(() => { //TODO: implement
         async function fetchData() {
+            if(loc.state !== undefined){
+                setPollID(loc.state.id);
+                setName(loc.state.name);
+                setPollDescription(loc.state.description);
+                setData(loc.state.options);
+                setWalletAddress(loc.state.wallet)
+            }
+            console.log(pollID);
+            console.log(walletAddress);
         }
         fetchData();
     }, []);
@@ -63,13 +74,15 @@ export default function PollBoard(props) {
         });
     }
 
-    const onSelectPressed = async () => { //TODO: test
-        const { status } = await selectAnOption(walletAddress, pollID, selection);
-        setStatus(status);
+    const onSelectPressed = async (optionIndex) => { //TODO: test
+        alert("Hello World!" + optionIndex);
+        // const { status } = await selectAnOption(walletAddress, pollID, selection);
+        // setStatus(status);
     };
 
     const onViewResultsPressed = async () => { //TODO: test
-        const { status } = await viewPollResult(walletAddress, pollID);
+        alert("View results pressed!");
+        // const { status } = await viewPollResult(walletAddress, pollID);
         setStatus(status);
     };
 
@@ -107,7 +120,7 @@ export default function PollBoard(props) {
                 <Grid container direction="row" alignItems="flex-start">
 
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button onClick={() => { alert("✔️ This works on every component!"); }}>View Results</Button> </div>
+                        <div className="c"> <Button onClick={onViewResultsPressed}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <div className="c"> <Button ><Link to='/Dashboard' target='_blank'> Back </Link></Button> </div>
@@ -116,7 +129,9 @@ export default function PollBoard(props) {
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <h1>{elem}</h1>
-                        <Button variant="outlined" onClick={onSelectPressed()}>Select</Button>
+                        <Button variant="outlined" onClick
+                            ={() => onSelectPressed(data.indexOf(elem))}
+                        >Select</Button>
                     </Grid>
                 ))}
             </Grid>
