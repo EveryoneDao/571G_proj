@@ -20,6 +20,9 @@ import "./index.css";
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
+    const [targetEvent, setTargetEvent] = useState();
+    const [targetResult, setTargetResult] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
 
     //called only once
     useEffect(() => { //TODO: implement
@@ -32,51 +35,99 @@ const Dashboard = (props) => {
             console.log(events);
             setEvents(events);
             addViewAllEventsListener();
+            // addParticipateAnEventsListener();
             // console.log(events);
             // setEvent(events);
         }
         fetchData();
     }, []);
 
+    // Called when wallet address changed
+    // TODO: delete it if no edge case handling needed
+    // PRIORITY: level 3 (extra work todo)
     useEffect(() => {
         setWallet(props);
     }, [props.walletAddress]);
 
     // watch for contract's pollCreated event
     // and update our UI when new event added 
+    // TODO: this one can be deleted as well since we will reload the UI when new event created
+    // PRIORITY: level 3 (extra work todo)
     function addViewAllEventsListener() { //TODO Test
         console.log("addViewAllEventsListener");
         pollContract.events.pollsViewed({}, (error, data) => {
             console.log("entered");
             if (error) {
                 console.log("error");
-                // setStatus("😥 " + error.message);
             } else {
-                // setEvents(data.returnValues[0]);
-                console.log("what");
-                // setStatus("🎉 Events load successfully");
+                console.log("Events load successfully");
             }
         });
     }
 
-    const onParticipatePressed = async () => { //TODO: implement
-        const { status } = await viewAnEvent(walletAddress, pollID);
-        // setStatus(status);
+    // PRIORITY: level 1 (basic functionality -> must work)
+    // Participate one event: in contract view one event
+    // not replying on the contract event to retrieve the poll detail
+    // but need the function here to require gas fee (could be discussed further)
+    const onParticipatePressed = async (pollID) => { //TODO: uncomment address and test
+        console.log("onParticipatePressed");
+        console.log(pollID);
+        // uncomment this line when address is ready
+        // const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
-    // watch for contract's pollCreated event
-    // and update our UI when new event added 
-    function addParticipateAnEventsListener() {
-        console.log("addParticipateAnEventsListener");
-        pollContract.events.pollViewed({}, (error, data) => {
+    // TODO: Feel like this listener is useless ????
+    // function addParticipateAnEventsListener() {
+    //     console.log("addParticipateAnEventsListener");
+    //     // return a poll object polls[pollId]
+    //     pollContract.events.pollViewed({}, (error, data) => {
+    //         console.log("entered addParticipateAnEventsListener");
+    //         if (error) {
+    //             console.log("error");
+    //         } else {
+    //             // setEvents(data.returnValues[0]);
+    //             console.log("Participated successfully");
+    //         }
+    //     });
+    // }
+
+    const onViewResultsPressed = async (pollID) => { //TODO: test
+        console.log(pollID);
+        // const { status } = await viewResult(walletAddress, pollID);
+
+        // TODO：need to test not sure would work or not
+        alert("Result is " + targetResult);
+    };
+
+    function addResultViewListener() {
+        console.log("addResultViewListener");
+        // return poll results
+        // event resultViewed(bool tie, Selection[] result, State state, bool blind);
+        pollContract.events.resultViewed({}, (error, data) => {
             console.log("entered addParticipateAnEventsListener");
             if (error) {
                 console.log("error");
-                // setStatus("😥 " + error.message);
             } else {
-                // setEvents(data.returnValues[0]);
-                console.log("what");
-                // setStatus("🎉 Events load successfully");
+                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H" ];
+                if (data[2] == 0) {
+                    setTargetResult("Voting in progress, please check back later");
+                } else {
+                    let res = data[1];
+                    if(data[0] == true){
+                        let resultMsg = "Tie Selection "
+                        for(let i = 0; i < data[1].length; i++){
+                            resultMsg += possibleSelection[res[i]];
+                        }
+                        setTargetResult(resultMsg);
+                    }else{
+                        if(res[0] == 0){
+                            setTargetResult("No one voted.");  
+                        }else{
+                            setTargetResult("Most participate voted: "+ possibleSelection[res[0]]);  
+                        }
+                    }
+                }
+                console.log("Results logged successfully");
             }
         });
     }
@@ -99,8 +150,8 @@ const Dashboard = (props) => {
             fontSize: "2vi",
         }
     }))
-    const classes = useStyles()
-    const data = events
+    const classes = useStyles();
+    const data = events;
     return (
         <div className={classes.root}>
             <Grid
@@ -144,9 +195,11 @@ const Dashboard = (props) => {
                             </CardContent>
                             <CardActions >
                                 <Grid item xs={6}>
-                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.participants, description: elem.description, name: elem.name, options: elem.options, wallet: walletAddress } }} >PARTICIPATE</Link>
+                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.id, description: elem.description, name: elem.name, options: elem.options, wallet: walletAddress } }} onClick
+                                        ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Link>
                                 </Grid>
-                                <Grid item xs={6}><Button size="small" >View Results</Button>
+                                <Grid item xs={6}><Button size="small" onClick
+                                    ={() => onViewResultsPressed(elem.id)}>View Results</Button>
                                 </Grid>
                             </CardActions>
                         </Card>

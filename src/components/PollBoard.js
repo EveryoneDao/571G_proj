@@ -73,6 +73,20 @@ export default function PollBoard(props) {
         setStatus(status);
     };
 
+    function addViewResultListener() { //TODO: test
+        console.log("addViewAllEventsListener");
+        pollContract.events.resultViewed({}, (error, data) => {
+            console.log("entered");
+            if (error) {
+                console.log("error");
+                setStatus("😥 " + error.message);
+            } else {
+                console.log("what");
+                setStatus("🎉 You have voted successfully");
+            }
+        });
+    }
+
 
     const classes = useStyles()
     return (
@@ -102,7 +116,7 @@ export default function PollBoard(props) {
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <h1>{elem}</h1>
-                        <Button variant="outlined">Select</Button>
+                        <Button variant="outlined" onClick={onUpdatePressed()}>Select</Button>
                     </Grid>
                 ))}
             </Grid>
