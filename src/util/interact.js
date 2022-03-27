@@ -12,25 +12,6 @@ export const pollContract = new web3.eth.Contract(
     contractAddress
 );
 
-
-/* 
-This function handles the logic of loading current events
-stored in the smart contract. It will make a read call 
-to the poll smart contract using the Alchemy Web3 API
-*/
-// export const loadCurrentEvent = async () => { 
-//     const a = await pollContract.function.fakeTest(3).encodeABI();
-//     console.log(a);
-//     return a;
-// };
-
-// export const loadAllEvents = async () => {
-//     const nextPossibleEventID = await pollContract.methods.numberOfParticipant().call();
-//     console.log(nextPossibleEventID);
-    
-//     return nextPossibleEventID;
-// };
-
 export const loadAllEvents = async () => {
     const nextPossibleEventID = await pollContract.methods.nextPollId().call();
     console.log(nextPossibleEventID);
@@ -72,24 +53,141 @@ export const loadAllEvents = async () => {
     return eventArr;
 };
 
-// export const loadSingleEvent = async(eventID) => {
-//     const a = await pollContract.methods.fakeTest(eventID).call();
-//     console.log(a);
-//     return a;
-// }
+export const selectAnOption = async(address, pollID, selectOption) => {
+//input error handling
+  if (!window.ethereum || address === null) {
+    return {
+      status:
+        "💡 Connect your Metamask wallet to update the message on the blockchain.",
+    };
+  }
 
-// export const connectWallet = async () => {
-  
-// };
+  if (option === undefined) {
+    return {
+      status: "❌ must make a valid selection.",
+    };
+  }
+  //set up transaction parameters
+  const transactionParameters = {
+    to: contractAddress, // Required except during contract publications.
+    from: address, // must match user's active address.
+    data: pollContract.methods.vote(pollID, selectOption).encodeABI(),
+  };
 
-// export const getCurrentWalletConnected = async () => {
-  
-// };
+  //sign the transaction
+  try {
+    const txHash = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [transactionParameters],
+    });
+    return {
+      status: (
+        <span>
+          ✅{" "}
+          <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
+            View the status of your transaction on Etherscan!
+          </a>
+          <br />
+          ℹ️ Once the transaction is verified by the network, you have successfully voted. 
+          Thank you for your participant.
+        </span>
+      ),
+    };
+  } catch (error) {
+    return {
+      status: "😥 " + error.message,
+    };
+  }
+}
 
-// // export const updateEventList = async (address, message) => {
-  
-// // };
+export const viewAnEvent= async(address, pollID) => {
+    //input error handling
+      if (!window.ethereum || address === null) {
+        return {
+          status:
+            "💡 Connect your Metamask wallet to update the message on the blockchain.",
+        };
+      }
+    
+      if (option === undefined) {
+        return {
+          status: "❌",
+        };
+      }
+      //set up transaction parameters
+      const transactionParameters = {
+        to: contractAddress, // Required except during contract publications.
+        from: address, // must match user's active address.
+        data: pollContract.methods.viewPoll(pollID).encodeABI(),
+      };
+    
+      //sign the transaction
+      try {
+        const txHash = await window.ethereum.request({
+          method: "eth_sendTransaction",
+          params: [transactionParameters],
+        });
+        return {
+          status: (
+            <span>
+              ✅{" "}
+              <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
+                View the status of your transaction on Etherscan!
+              </a>
+              <br />
+              ℹ️ Once the transaction is verified by the network, you can review the result of the poll.
+            </span>
+          ),
+        };
+      } catch (error) {
+        return {
+          status: "😥 " + error.message,
+        };
+      }
+    }
 
-// // export const createNewEvent = async (address, message) => {
-  
-// // };
+export const viewResult = async(address, pollID) => {
+    //input error handling
+      if (!window.ethereum || address === null) {
+        return {
+          status:
+            "💡 Connect your Metamask wallet to update the message on the blockchain.",
+        };
+      }
+    
+      if (option === undefined) {
+        return {
+          status: "❌",
+        };
+      }
+      //set up transaction parameters
+      const transactionParameters = {
+        to: contractAddress, // Required except during contract publications.
+        from: address, // must match user's active address.
+        data: pollContract.methods.viewResult(pollID).encodeABI(),
+      };
+    
+      //sign the transaction
+      try {
+        const txHash = await window.ethereum.request({
+          method: "eth_sendTransaction",
+          params: [transactionParameters],
+        });
+        return {
+          status: (
+            <span>
+              ✅{" "}
+              <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
+                View the status of your transaction on Etherscan!
+              </a>
+              <br />
+              ℹ️ Once the transaction is verified by the network, you can review the result of the poll.
+            </span>
+          ),
+        };
+      } catch (error) {
+        return {
+          status: "😥 " + error.message,
+        };
+      }
+    }

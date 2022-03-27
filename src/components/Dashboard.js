@@ -19,12 +19,15 @@ import "./index.css";
 
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
-    const [walletAddress, setWalletAddress] = useState(props);
-    
+    const [walletAddress, setWallet] = useState();
+
     //called only once
     useEffect(() => { //TODO: implement
-        async function fetchData(){            
+        async function fetchData() {
             const events = await loadAllEvents();
+            // TODO: just a place holder need to keep an eye on wallet address
+            const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
+            setWallet(address);
             console.log("events retrived");
             console.log(events);
             setEvents(events);
@@ -36,19 +39,19 @@ const Dashboard = (props) => {
     }, []);
 
     useEffect(() => {
-        setWalletAddress(props);
+        setWallet(props);
     }, [props.walletAddress]);
 
     // watch for contract's pollCreated event
     // and update our UI when new event added 
-    function addViewAllEventsListener() { 
+    function addViewAllEventsListener() { //TODO Test
         console.log("addViewAllEventsListener");
-        pollContract.events.pollsViewed({},(error, data) => {
+        pollContract.events.pollsViewed({}, (error, data) => {
             console.log("entered");
-            if(error){
+            if (error) {
                 console.log("error");
                 // setStatus("😥 " + error.message);
-            }else{
+            } else {
                 // setEvents(data.returnValues[0]);
                 console.log("what");
                 // setStatus("🎉 Events load successfully");
@@ -56,14 +59,27 @@ const Dashboard = (props) => {
         });
     }
 
-    // function addWalletListener() { //TODO: implement
-    //     // if wallet account address changed change
-    //     // force back to the first page and repay the entry fee
-    // }
+    const onParticipatePressed = async () => { //TODO: implement
+        const { status } = await viewAnEvent(walletAddress, pollID);
+        // setStatus(status);
+    };
 
-    // const onViewResultsPressed = async () => { //TODO: implement
-
-    // };
+    // watch for contract's pollCreated event
+    // and update our UI when new event added 
+    function addParticipateAnEventsListener() {
+        console.log("addParticipateAnEventsListener");
+        pollContract.events.pollViewed({}, (error, data) => {
+            console.log("entered addParticipateAnEventsListener");
+            if (error) {
+                console.log("error");
+                // setStatus("😥 " + error.message);
+            } else {
+                // setEvents(data.returnValues[0]);
+                console.log("what");
+                // setStatus("🎉 Events load successfully");
+            }
+        });
+    }
 
     const useStyles = makeStyles(theme => ({
         largeIcon: {
@@ -75,11 +91,11 @@ const Dashboard = (props) => {
             flexGrow: 1,
             padding: theme.spacing(2)
         },
-        cardEle:{
-            height:"100%",
+        cardEle: {
+            height: "100%",
             margin: "1rem",
         },
-        cardText:{
+        cardText: {
             fontSize: "2vi",
         }
     }))
@@ -98,21 +114,21 @@ const Dashboard = (props) => {
                     <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                        <Card className={classes.cardEle}>
-                            <CardHeader title={`Poll : 0`} subheader={`Participants: 0`} />
-                            <CardContent>
-                                <Typography className="cut-text" gutterBottom>
+                    <Card className={classes.cardEle}>
+                        <CardHeader title={`Poll : 0`} subheader={`Participants: 0`} />
+                        <CardContent>
+                            <Typography className="cut-text" gutterBottom>
                                 Just a template, please create a new poll.
-                                </Typography>
-                            </CardContent>
-                            <CardActions position = "center">
-                                <Grid item xs={6}>
-                                <Link to={{pathname: '/PollBoard',state: {id: 1, name: 'sabaoon', shirt: 'green'}}} >Test</Link>
-                                </Grid>
-                                <Grid item xs={6}><Button size="small" onClick={() =>{ alert("✔️ Please add a new event or join an existing event!"); }}>View Results</Button>
-                                </Grid>
-                            </CardActions>
-                        </Card>
+                            </Typography>
+                        </CardContent>
+                        <CardActions position="center">
+                            <Grid item xs={6}>
+                                <Link to={{ pathname: '/PollBoard', state: { id: 1, name: 'sabaoon', shirt: 'green' } }} >Test</Link>
+                            </Grid>
+                            <Grid item xs={6}><Button size="small" onClick={() => { alert("✔️ Please add a new event or join an existing event!"); }}>View Results</Button>
+                            </Grid>
+                        </CardActions>
+                    </Card>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
@@ -122,13 +138,13 @@ const Dashboard = (props) => {
                                 subheader={`Participants: ${elem.participants}`}
                             />
                             <CardContent>
-                                <Typography className="cut-text"  gutterBottom>
-                                {elem.description}
+                                <Typography className="cut-text" gutterBottom>
+                                    {elem.description}
                                 </Typography>
                             </CardContent>
                             <CardActions >
-                            <Grid item xs={6}>
-                                <Link to={{pathname: '/PollBoard',state: {id: elem.participants, description: elem.description, name: elem.name, options: elem.options}}} >PARTICIPATE</Link>
+                                <Grid item xs={6}>
+                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.participants, description: elem.description, name: elem.name, options: elem.options, wallet: walletAddress } }} >PARTICIPATE</Link>
                                 </Grid>
                                 <Grid item xs={6}><Button size="small" >View Results</Button>
                                 </Grid>
