@@ -15,13 +15,15 @@ import {
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import ResultModal from './ResultModal.js';
 import "./index.css";
 
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
     const [targetEvent, setTargetEvent] = useState();
-    const [targetResult, setTargetResult] = useState("");
+    const [result, setResult] = useState("");
+    const [showModal, setShowModal] = useState(false);
 
     //called only once
     useEffect(() => { //TODO: implement
@@ -34,6 +36,7 @@ const Dashboard = (props) => {
             console.log(events);
             setEvents(events);
             addViewAllEventsListener();
+            addResultViewListener();
             // addParticipateAnEventsListener();
             // console.log(events);
             // setEvent(events);
@@ -92,10 +95,9 @@ const Dashboard = (props) => {
 
     const onViewResultsPressed = async (pollID) => { //TODO: test
         console.log(pollID);
+        setShowModal(true);
         // const { status } = await viewResult(walletAddress, pollID);
-
         // TODO：need to test not sure would work or not
-        alert("Result is " + targetResult);
     };
 
     function addResultViewListener() {
@@ -109,23 +111,24 @@ const Dashboard = (props) => {
             } else {
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
                 if (data[2] == 0) {
-                    setTargetResult("Voting in progress, please check back later");
+                    setResult("Voting in progress, please check back later");
                 } else {
                     let res = data[1];
                     if (data[0] == true) {
-                        let resultMsg = "Tie Selection "
+                        let resultMsg = "Tie Between options: "
                         for (let i = 0; i < data[1].length; i++) {
-                            resultMsg += possibleSelection[res[i]];
+                            resultMsg += possibleSelection[res[i]] + ", ";
                         }
-                        setTargetResult(resultMsg);
+                        setResult(resultMsg);
                     } else {
                         if (res[0] == 0) {
-                            setTargetResult("No one voted.");
+                            setResult("No one voted.");
                         } else {
-                            setTargetResult("Most participate voted: " + possibleSelection[res[0]]);
+                            setResult("Most participate voted: " + possibleSelection[res[0]]);
                         }
                     }
                 }
+                setShowModal(true);
                 console.log("Results logged successfully");
             }
         });
@@ -153,6 +156,7 @@ const Dashboard = (props) => {
     const data = events;
     return (
         <div className={classes.root}>
+            <div><ResultModal result={result} status={showModal}/></div>
             <Grid
                 container
                 spacing={2}

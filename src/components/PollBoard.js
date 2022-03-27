@@ -18,6 +18,7 @@ import {
     pollContract,
     selectAnOption
 } from "../util/interact.js"
+import ResultModal from './ResultModal.js';
 
 const useStyles = makeStyles(theme => ({
     cardStyle: {
@@ -44,6 +45,9 @@ export default function PollBoard(props) {
     const [data, setData] = useState([]);
     const [walletAddress, setWalletAddress] = useState("");
 
+    const [result, setResult] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
 
     useEffect(() => { //TODO: implement
         async function fetchData() {
@@ -52,7 +56,9 @@ export default function PollBoard(props) {
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
                 setData(loc.state.options);
-                setWalletAddress(loc.state.wallet)
+                setWalletAddress(loc.state.wallet);
+                addSelectListener();
+                addViewResultListener();
             }
             console.log(pollID);
             console.log(walletAddress);
@@ -81,21 +87,41 @@ export default function PollBoard(props) {
     };
 
     const onViewResultsPressed = async () => { //TODO: test
-        alert("View results pressed!");
+        setShowModal(true);
         // const { status } = await viewPollResult(walletAddress, pollID);
         setStatus(status);
     };
 
-    function addViewResultListener() { //TODO: test
-        console.log("addViewAllEventsListener");
+    function addViewResultListener() {
+        console.log("addResultViewListener");
+        // return poll results
+        // event resultViewed(bool tie, Selection[] result, State state, bool blind);
         pollContract.events.resultViewed({}, (error, data) => {
-            console.log("entered");
+            console.log("entered addParticipateAnEventsListener");
             if (error) {
                 console.log("error");
-                setStatus("😥 " + error.message);
             } else {
-                console.log("what");
-                setStatus("🎉 You have voted successfully");
+                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
+                if (data[2] == 0) {
+                    setResult("Voting in progress, please check back later");
+                } else {
+                    let res = data[1];
+                    if (data[0] == true) {
+                        let resultMsg = "Tie Between options: "
+                        for (let i = 0; i < data[1].length; i++) {
+                            resultMsg += possibleSelection[res[i]] + ", ";
+                        }
+                        setResult(resultMsg);
+                    } else {
+                        if (res[0] == 0) {
+                            setResult("No one voted.");
+                        } else {
+                            setResult("Most participate voted: " + possibleSelection[res[0]]);
+                        }
+                    }
+                }
+                setShowModal(true);
+                console.log("Results logged successfully");
             }
         });
     }
@@ -104,6 +130,7 @@ export default function PollBoard(props) {
     const classes = useStyles()
     return (
         <div className={classes.root}>
+            <div><ResultModal result={result} status={showModal}/></div>
             <Grid
                 container
                 spacing={2}
