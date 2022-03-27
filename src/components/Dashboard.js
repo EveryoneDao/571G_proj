@@ -14,22 +14,30 @@ import {
 } from "../util/interact.js"
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
+import { Link } from 'react-router';
 import "./index.css";
 
-const Dashboard = () => {
+const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
-    const [status, setStatus] = useState("");
+    const [walletAddress, setWalletAddress] = useState(props);
+    
     //called only once
     useEffect(() => { //TODO: implement
-        async function fetchData(){
+        async function fetchData(){            
+            const events = await loadAllEvents();
+            console.log("events retrived");
+            console.log(events);
+            setEvents(events);
             addViewAllEventsListener();
-            const events = await loadAllEvents(false, 0, 0);
-            console.log("hey");
             // console.log(events);
             // setEvent(events);
         }
         fetchData();
     }, []);
+
+    useEffect(() => {
+        setWalletAddress(props);
+    }, [props.walletAddress]);
 
     // watch for contract's pollCreated event
     // and update our UI when new event added 
@@ -76,12 +84,7 @@ const Dashboard = () => {
         }
     }))
     const classes = useStyles()
-    const data = [
-        { pollNumber: 1, participants: 13000 },
-        { pollNumber: 2, participants: 16500 },
-        { pollNumber: 3, participants: 14250 },
-        { pollNumber: 4, participants: 19000 }
-    ]
+    const data = events
     return (
         <div className={classes.root}>
             <Grid
@@ -96,16 +99,16 @@ const Dashboard = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                         <Card className={classes.cardEle}>
-                            <CardHeader title={`Poll : 0`} subheader={`Participants Number : 0`} />
+                            <CardHeader title={`Poll : 0`} subheader={`Participants: 0`} />
                             <CardContent>
                                 <Typography className="cut-text" gutterBottom>
                                 Just a template, please create a new poll.
                                 </Typography>
                             </CardContent>
                             <CardActions position = "center">
-                                <Grid item xs={6}><Button size="small" >Participate</Button>
+                                <Grid item xs={6}><Button size="small" onClick={() =>{ alert("✔️ Please add a new event or join an existing event!"); }}>Participate</Button>
                                 </Grid>
-                                <Grid item xs={6}><Button size="small" >View Results</Button>
+                                <Grid item xs={6}><Button size="small" onClick={() =>{ alert("✔️ Please add a new event or join an existing event!"); }}>View Results</Button>
                                 </Grid>
                             </CardActions>
                         </Card>
@@ -114,12 +117,12 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <Card className={classes.cardEle}>
                             <CardHeader
-                                title={`Poll : ${elem.pollNumber}`}
-                                subheader={`Participants Number : ${elem.participants}`}
+                                title={`Poll : ${elem.name}`}
+                                subheader={`Participants: ${elem.participants}`}
                             />
                             <CardContent>
                                 <Typography className="cut-text"  gutterBottom>
-                                    Hello World
+                                {elem.description}
                                 </Typography>
                             </CardContent>
                             <CardActions >

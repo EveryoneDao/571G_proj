@@ -72,15 +72,19 @@ contract Poll {
     }
 
     uint public numberOfParticipant;
-    uint private nextPollId = 1;
+    uint public nextPollId;
     
     mapping(address => Participant) public participants;
     mapping(string => address) public participantName; 
     mapping(uint => PollEvent) public polls;
     mapping(uint => PollResult) private pollResults;
 
+    mapping(uint => uint) public fakeTest;
 	constructor() {
         numberOfParticipant = 0;
+        nextPollId = 1;
+        fakeTest[2] = 3;
+        fakeTest[3] = 4;
     }
 
     event participantRegistered(string name);
@@ -341,5 +345,10 @@ contract Poll {
 
     function getFilteredViewPollIds() public view returns (uint[] memory) {
         return participants[msg.sender].tempViewPollIds;
+    }
+
+    // Helper functions for web3
+    function getFakeTestMapping(uint id) public view returns(uint s){
+        return fakeTest[id];
     }
 }
