@@ -14,7 +14,7 @@ import {
 } from "../util/interact.js"
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
-import { Link } from 'react-router';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import "./index.css";
 
 const Dashboard = (props) => {
@@ -106,7 +106,8 @@ const Dashboard = (props) => {
                                 </Typography>
                             </CardContent>
                             <CardActions position = "center">
-                                <Grid item xs={6}><Button size="small" onClick={() =>{ alert("✔️ Please add a new event or join an existing event!"); }}>Participate</Button>
+                                <Grid item xs={6}>
+                                <Link to={{pathname: '/PollBoard',state: {id: 1, name: 'sabaoon', shirt: 'green'}}} >Test</Link>
                                 </Grid>
                                 <Grid item xs={6}><Button size="small" onClick={() =>{ alert("✔️ Please add a new event or join an existing event!"); }}>View Results</Button>
                                 </Grid>
@@ -126,7 +127,8 @@ const Dashboard = (props) => {
                                 </Typography>
                             </CardContent>
                             <CardActions >
-                            <Grid item xs={6}><Button size="small" >Participate</Button>
+                            <Grid item xs={6}>
+                                <Link to={{pathname: '/PollBoard',state: {id: elem.participants, description: elem.description, name: elem.name, options: elem.options}}} >PARTICIPATE</Link>
                                 </Grid>
                                 <Grid item xs={6}><Button size="small" >View Results</Button>
                                 </Grid>
