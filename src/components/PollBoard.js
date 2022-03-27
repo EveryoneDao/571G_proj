@@ -116,7 +116,7 @@ export default function PollBoard(props) {
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <h1>{elem}</h1>
-                        <Button variant="outlined" onClick={onUpdatePressed()}>Select</Button>
+                        <Button variant="outlined" onClick={onSelectPressed()}>Select</Button>
                     </Grid>
                 ))}
             </Grid>

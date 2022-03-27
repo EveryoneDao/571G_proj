@@ -22,7 +22,6 @@ const Dashboard = (props) => {
     const [walletAddress, setWallet] = useState();
     const [targetEvent, setTargetEvent] = useState();
     const [targetResult, setTargetResult] = useState("");
-    const [modalOpen, setModalOpen] = useState(false);
 
     //called only once
     useEffect(() => { //TODO: implement
@@ -108,22 +107,22 @@ const Dashboard = (props) => {
             if (error) {
                 console.log("error");
             } else {
-                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H" ];
+                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
                 if (data[2] == 0) {
                     setTargetResult("Voting in progress, please check back later");
                 } else {
                     let res = data[1];
-                    if(data[0] == true){
+                    if (data[0] == true) {
                         let resultMsg = "Tie Selection "
-                        for(let i = 0; i < data[1].length; i++){
+                        for (let i = 0; i < data[1].length; i++) {
                             resultMsg += possibleSelection[res[i]];
                         }
                         setTargetResult(resultMsg);
-                    }else{
-                        if(res[0] == 0){
-                            setTargetResult("No one voted.");  
-                        }else{
-                            setTargetResult("Most participate voted: "+ possibleSelection[res[0]]);  
+                    } else {
+                        if (res[0] == 0) {
+                            setTargetResult("No one voted.");
+                        } else {
+                            setTargetResult("Most participate voted: " + possibleSelection[res[0]]);
                         }
                     }
                 }
