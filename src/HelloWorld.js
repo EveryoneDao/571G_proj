@@ -44,6 +44,8 @@ const HelloWorld = () => {
 
   function inputUserName(){
     console.log("clicked conutinue with name")
+    var address = localStorage.getItem("walletAddress");
+    console.log(address);
   }
 
   

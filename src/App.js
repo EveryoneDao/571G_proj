@@ -2,6 +2,7 @@ import HelloWorld from './HelloWorld'
 import Dashboard from './components/Dashboard'
 import PollBoard from './components/PollBoard'
 import FirstPage from './components/FirstPage'
+import PollFeature from './components/PollFeature'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
  
 import './App.css';
@@ -22,6 +23,9 @@ function App() {
           </Route>
           <Route exact path="/PollBoard">
             <PollBoard />
+          </Route>
+          <Route exact path="/PollFeature">
+            <PollFeature />
           </Route>
         </Switch>
       </BrowserRouter>

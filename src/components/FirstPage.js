@@ -51,14 +51,7 @@ function continueWithName(){
 
 }
 
-function aboutClick(){
-  console.log("clicked about")
-  location.href = "https://github.com/taichenl/571G_proj/blob/main/README.md";
-}
 
-function featureClick(){
-  console.log("feature click");
-}
 
 
 const useStyles = makeStyles((theme) => ({
@@ -139,12 +132,30 @@ export default function Voting_choice() {
     const walletResponse = await connectWallet();
     setStatus(walletResponse.status);
     setWallet(walletResponse.address);
+    sendWalletAddress();
   };
+
+  function sendWalletAddress(){
+    localStorage.setItem("walletAddress", walletAddress);
+  };
+
   
   const onUpdatePressed = async () => {
     const { status } = await transferToken(walletAddress, toAddress);
     setStatus(status);
   };
+
+  function aboutClick(){
+    console.log("clicked about")
+    location.href = "https://github.com/taichenl/571G_proj/blob/main/README.md";
+    
+  }
+  
+  function featureClick(){
+    console.log("feature click");
+    console.log(walletAddress);
+    sendWalletAddress();
+  }
 
 
 	function addWalletListener() {
