@@ -50,7 +50,8 @@
     "big-number": "^2.0.0",
     "material-ui": "^0.20.2",
     "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "web3": "^1.7.1"
   },
   "browserslist": {
     "production": [

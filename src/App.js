@@ -1,6 +1,8 @@
 import Dashboard from './components/Dashboard'
 import PollBoard from './components/PollBoard'
 import ResultModal from './components/ResultModal'
+import FirstPage from './components/FirstPage'
+import PollFeature from './components/PollFeature'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
  
 import './App.css';
@@ -10,6 +12,12 @@ function App() {
     <div className="App">
     <BrowserRouter>
         <Switch>
+          <Route exact path = "/">
+            <FirstPage />
+          </Route>
+          <Route exact path = "/PollFeature">
+            <PollFeature />
+          </Route>
           <Route exact path="/Dashboard">
             <Dashboard />
           </Route>
