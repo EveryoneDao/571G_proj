@@ -17,10 +17,10 @@ export const loadAllEvents = async () => {
     if(nextPossibleEventID > 1){
         for(let i = 1; i < nextPossibleEventID; i++) {
             const curEvent = await pollContract.methods.polls(i).call();
-            let curEvent_description = event_i.description;
-            let curEvent_name = event_i.name;
-            let curEvent_totalVote = event_i.totalVote;
-            let curEvent_optionDesc = event_i.optionDesc;
+            let curEvent_description = curEvent.description;
+            let curEvent_name = curEvent.name;
+            let curEvent_totalVote = curEvent.totalVote;
+            let curEvent_optionDesc = curEvent.optionDesc;
             const event_i = {
                 id: i, 
                 name: curEvent_name, 

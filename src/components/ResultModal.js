@@ -20,7 +20,10 @@ const style = {
 export default function ResultModal(props) {
     const [open, setOpen] = React.useState(false);
     const [message, setMessage] = React.useState("");
-    const handleClose = () => setOpen(false);
+    const handleClose = () =>{
+        setOpen(false);
+        props.handleModalClose();
+    } 
 
     //called only once
     useEffect(() => { //TODO: implement

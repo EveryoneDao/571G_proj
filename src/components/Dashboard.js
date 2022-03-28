@@ -23,6 +23,7 @@ const Dashboard = (props) => {
     const [walletAddress, setWallet] = useState();
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [status, setStatus] = useState("");
 
     //called only once
     useEffect(() => { //TODO: implement
@@ -30,6 +31,7 @@ const Dashboard = (props) => {
             addViewAllEventsListener();
             addResultViewListener();
             addParticipateAnEventsListener();
+            
             const events = await loadAllEvents();
             // TODO: just a place holder need to keep an eye on wallet address
             const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
@@ -45,6 +47,7 @@ const Dashboard = (props) => {
     //TODO: uncomment address and test
     // Expected behavior: 1. Gas Fee
     // PRIORITY: level 1 (basic functionality -> must work)
+
     // Participate one event: in contract view one event
     // we are not relying on the contract event to retrieve the poll detail
     // but need the function here to ask for gas fee (could be discussed further)
@@ -156,12 +159,16 @@ const Dashboard = (props) => {
         }
     }))
 
+    const handleModalClose = () => {
+        setShowModal(false);
+    }
+
     const classes = useStyles();
     const data = events;
 
     return (
         <div className={classes.root}>
-            <div><ResultModal result={result} status={showModal} /></div>
+            <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose}/></div>
             <Grid
                 container
                 spacing={2}

@@ -15,14 +15,7 @@ import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
 import { TextField } from '@material-ui/core';
 import { useEffect, useState } from "react";
-// import {
-// 	UBCTokenContract,
-// 	connectWallet,
-// 	transferToken,
-// 	loadTokenName,
-// 	loadTokenAccountBalance,
-// 	getCurrentWalletConnected,
-// } from "./interact.js";
+
 import {
   helloWorldContract,
   connectWallet,
