@@ -48,7 +48,7 @@ function Copyright() {
 }
 
 function continueWithName(){
-  location.href = "http://localhost:3001/PollFeature";
+  location.href = "http://localhost:3000/PollFeature";
 }
 
 
