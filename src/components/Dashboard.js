@@ -10,7 +10,9 @@ import {
 } from '@material-ui/core/'
 import {
     pollContract,
-    loadAllEvents
+    loadAllEvents,
+    createFakeEvent,
+    getCurrentWalletConnected
 } from "../util/interact.js"
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
@@ -23,18 +25,20 @@ const Dashboard = (props) => {
     const [walletAddress, setWallet] = useState();
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
-    const [status, setStatus] = useState("");
+    const [status, setStatus] = useState("Show sttus here");
 
     //called only once
     useEffect(() => { //TODO: implement
-        async function fetchData() {
-            addViewAllEventsListener();
-            addResultViewListener();
-            addParticipateAnEventsListener();
-            
+        addViewAllEventsListener();
+        addResultViewListener();
+        addParticipateAnEventsListener();
+        addNewEventCreatedListener();
+        async function fetchData() {  
             const events = await loadAllEvents();
-            // TODO: just a place holder need to keep an eye on wallet address
-            const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
+            // // TODO: just a place holder need to keep an eye on wallet address
+            // const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
+            const { address, status } = await getCurrentWalletConnected();
+            console.log(address);
             setWallet(address);
             console.log("events retrieved");
             console.log(events);
@@ -140,6 +144,33 @@ const Dashboard = (props) => {
         });
     }
 
+    const onCreatePollPressed = async () => {
+        console.log("onCreatePollPressed");
+        console.log(walletAddress)
+        const { status2 } = await createFakeEvent(walletAddress);
+        setStatus(status2);
+        console.log("on create poll finished");
+        console.log(status2);
+        // uncomment this line when address is ready
+        // const { status } = await viewAnEvent(walletAddress, pollID);
+    };
+
+    // return a poll object polls[pollId]
+    // Should work as just to display the error message
+    function addNewEventCreatedListener() {
+        console.log("addNewEventCreatedListener");
+        pollContract.events.pollCreated({}, (error, data) => {
+            console.log("entered addNewEventCreatedListener");
+            if (error) {
+                console.log("created failed with error" + error);
+                alert("Error message: " + error);
+            } else {
+                console.log("created successfully");
+                console.log(data);
+            }
+        });
+    }
+
     const useStyles = makeStyles(theme => ({
         largeIcon: {
             '& svg': {
@@ -177,7 +208,7 @@ const Dashboard = (props) => {
                 alignItems="stretch"
             >
                 <Grid item xs={12}>
-                    <a href="/PollBoard" className="btn btn-create">Create a <span>New Poll</span></a>
+                    <a className="btn btn-create" onClick = {onCreatePollPressed}>Create a <span>New Poll</span></a>
                     <div position="absolute" top="0">
                     <a href="https://faucet.egorfine.com/" >Get more <span>testnet tokens</span></a>
             </div>
@@ -213,7 +244,7 @@ const Dashboard = (props) => {
                             </CardContent>
                             <CardActions >
                                 <Grid item xs={6}>
-                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.id, description: elem.description, name: elem.name, options: elem.options, wallet: walletAddress } }} onClick
+                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.id, description: elem.description, name: elem.name, options: elem.selections, wallet: walletAddress } }} onClick
                                         ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Link>
                                 </Grid>
                                 <Grid item xs={6}><Button size="small" onClick
