@@ -218,6 +218,8 @@ export const connectWallet = async () => {
     }
 };
 
+export const loadTokenName = async () => {};
+
 export const loadTokenAccountBalance = async () => { };
 
 export const getCurrentWalletConnected = async () => {
