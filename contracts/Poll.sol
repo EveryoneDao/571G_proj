@@ -51,7 +51,7 @@ contract Poll {
         State state;
         uint pollId;
         address organizer;
-        string name;
+        string name; 
         string description;        
         uint startTime;
         uint votingDuration; // In seconds 
@@ -112,8 +112,8 @@ contract Poll {
     modifier newParticipantCheck(string memory name)
     {
         require(participantName[name] == address(0x0), "Participant already registered");
-        require(msg.value >= registrationPrice, "Asset not enough to register");
-        require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
+        // require(msg.value >= registrationPrice, "Asset not enough to register");
+        // require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
 
         _;
     }

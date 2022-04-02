@@ -16,7 +16,8 @@ import { useLocation } from "react-router-dom";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import {
     pollContract,
-    selectAnOption
+    selectAnOption,
+    viewResult
 } from "../util/interact.js"
 import ResultModal from './ResultModal.js';
 
@@ -51,6 +52,8 @@ export default function PollBoard() {
     useEffect(() => {
         async function fetchData() {
             if (loc.state !== undefined) {
+                console.log("loc state is not undefined");
+                console.log(loc.state);
                 setPollID(loc.state.id);
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
@@ -59,11 +62,15 @@ export default function PollBoard() {
                 setShowModal(false);
                 addSelectListener();
                 addViewResultListener();
+            }else{
+                console.log("loc state undefined");
             }
-            console.log(pollID);
-            console.log(walletAddress);
         }
         fetchData();
+        console.log("setData");
+        console.log(data);
+        console.log(pollID);
+        console.log(walletAddress);
     }, []);
 
     // TODO: Uncomment and test
@@ -93,8 +100,7 @@ export default function PollBoard() {
     // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { //TODO: test
-        setShowModal(true);
-        // const { status } = await viewPollResult(walletAddress, pollID);
+        const { status } = await viewResult(walletAddress, pollID);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -132,11 +138,14 @@ export default function PollBoard() {
         });
     }
 
+    const handleModalClose = () => {
+        setShowModal(false);
+    }
 
     const classes = useStyles()
     return (
         <div className={classes.root}>
-            <div><ResultModal result={result} status={showModal} /></div>
+            <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
             <Grid
                 container
                 spacing={2}
@@ -159,7 +168,7 @@ export default function PollBoard() {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled">{status}</Button> </div>
+                    <div className="c"> <Button variant="disabled">Status Message Here</Button> </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>

@@ -32,7 +32,7 @@ div.c {
 #one {
   float:left; 
   text-align: center;
-  font-size: 5vw;
+  font-size: 3vw;
   color: lightblue;
   border:2px solid #ccc;
 }
@@ -42,7 +42,7 @@ div.c {
   margin:10px;
   border:2px dashed #ccc;
   min-height:170px;
-  font-size: 3vw;
+  font-size: 1.2vw;
 }
 
 @media screen and (max-width: 400px) {

@@ -15,7 +15,9 @@ import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
 import { TextField } from '@material-ui/core';
 import { useEffect, useState } from "react";
-
+import {
+  createParticipate
+} from "../util/interact.js"
 import {
   helloWorldContract,
   connectWallet,
@@ -39,13 +41,6 @@ function Copyright() {
     </Typography>
   );
 }
-
-function continueWithName(){
-  location.href = "http://localhost:3000/PollFeature";
-}
-
-
-
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -150,6 +145,11 @@ export default function Voting_choice() {
     sendWalletAddress();
   }
 
+  const continueWithName = async () =>{
+    const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
+    location.href = "http://localhost:3000/Dashboard";
+  }
+
 
 	function addWalletListener() {
 		if (window.ethereum) {
@@ -211,7 +211,7 @@ export default function Voting_choice() {
               Create an event for your school or organization in seconds, your voters can vote as long as a gas fee is paid.
             </Typography>
             <div className={classes.heroButtons}>
-              <h1 align = "center"> <TextField id="filled-basic" label="What's your name?" variant="filled" /> </h1>
+              <h1 align = "center"> <TextField id="nameInput" label="What's your name?" variant="filled" /> </h1>
             <Grid container spacing={2} justifyContent="center">
                 <Grid item>
                   <Button variant="contained" color="primary" onClick={continueWithName}>

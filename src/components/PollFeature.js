@@ -132,7 +132,7 @@ export default function Checkout() {
             )}
           </React.Fragment>
         </Paper>
-        <Copyright />
+        <Copyright /> 
       </main>
     </React.Fragment>
   );
