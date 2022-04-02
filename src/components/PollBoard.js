@@ -100,7 +100,6 @@ export default function PollBoard() {
     // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { //TODO: test
-        // setShowModal(true);
         const { status } = await viewResult(walletAddress, pollID);
     };
 
@@ -146,7 +145,7 @@ export default function PollBoard() {
     const classes = useStyles()
     return (
         <div className={classes.root}>
-            <div><ResultModal  result={result} status={showModal} handleModalClose={handleModalClose} /></div>
+            <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
             <Grid
                 container
                 spacing={2}

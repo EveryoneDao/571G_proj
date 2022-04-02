@@ -21,6 +21,7 @@ export const loadAllEvents = async () => {
             let curEvent_description = curEvent.description;
             let curEvent_name = curEvent.name;
             let curEvent_totalVote = curEvent.totalVote;
+            // TODO: options are not loaded correctly !!!! More investigation needed here
             let curEvent_optionDesc = curEvent.choseFrom;
             const event_i = {
                 id: i,
@@ -217,9 +218,7 @@ export const connectWallet = async () => {
     }
 };
 
-  export const loadTokenName = async () => {};
-
-  export const loadTokenAccountBalance = async () => {};
+export const loadTokenAccountBalance = async () => { };
 
 export const getCurrentWalletConnected = async () => {
     if (window.ethereum) {
@@ -263,8 +262,7 @@ export const getCurrentWalletConnected = async () => {
     }
 };
 
-
-export const createFakeEvent = async (address) => {
+export const createFakeEvent = async (address, pollName, pollDescription, duration, isBlind, isAboutDao, options, optionsDescription) => {
     //input error handling
     if (!window.ethereum || address === null) {
         return {
@@ -272,12 +270,11 @@ export const createFakeEvent = async (address) => {
                 "💡 Connect your Metamask wallet to update the message on the blockchain.",
         };
     }
-
     //set up transaction parameters
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
         from: address, // must match user's active address.
-        data: pollContract.methods.createPoll("Fake Chain Poll 1", "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today", 259200, false, false, [1, 2, 3], ["A", "B", "C"]).encodeABI(),
+        data: pollContract.methods.createPoll(pollName, pollDescription, duration, isBlind, isAboutDao, options, false, options, optionsDescription).encodeABI(),
     };
     //sign the transaction
     try {
@@ -320,7 +317,7 @@ export const createParticipate = async (address, userName) => {
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
         from: address, // must match user's active address.
-        data: pollContract.methods.registerParticipant(userName).encodeABI(), 
+        data: pollContract.methods.registerParticipant(userName).encodeABI(),
     };
     //sign the transaction
     try {
