@@ -80,12 +80,14 @@ export default function Checkout() {
   const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
-    setActiveStep(activeStep + 1);
+    console.log(localStorage.getItem("nameInput"));
+    console.log(document.getElementById("pollName").value);
+    console.log(document.getElementById("pollDuration").value);
+    console.log(document.getElementById("pollDescription").value);
+    console.log(document.getElementById("blindVote").checked);
+    console.log(document.getElementById("aboutDao").checked);
   };
 
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
 
   return (
     <React.Fragment>
