@@ -16,9 +16,6 @@ import Link from '@material-ui/core/Link';
 import { TextField } from '@material-ui/core';
 import { useEffect, useState } from "react";
 import {
-  createParticipate
-} from "../util/interact.js"
-import {
   helloWorldContract,
   connectWallet,
   updateMessage,
@@ -41,6 +38,9 @@ function Copyright() {
     </Typography>
   );
 }
+
+
+
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -116,6 +116,11 @@ export default function Voting_choice() {
 	// 	});
 	// }
 
+  function continueWithName(){
+    localStorage.setItem("nameInput", document.getElementById("nameInput").value);
+    location.href = "http://localhost:3000/PollFeature";
+  }
+
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet();
     setStatus(walletResponse.status);
@@ -143,11 +148,6 @@ export default function Voting_choice() {
     console.log("feature click");
     console.log(walletAddress);
     sendWalletAddress();
-  }
-
-  const continueWithName = async () =>{
-    const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
-    location.href = "http://localhost:3000/Dashboard";
   }
 
 
@@ -217,6 +217,13 @@ export default function Voting_choice() {
                   <Button variant="contained" color="primary" onClick={continueWithName}>
                     Continue
                   </Button>
+                  {/* <form>
+              <label>
+                Name:
+                <input type="text" name="name" />
+              </label>
+              <input type="submit" value="Submit" />
+            </form> */}
                 </Grid>
               </Grid>
             </div>

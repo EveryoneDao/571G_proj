@@ -34,9 +34,9 @@ export default function AddressForm() {
         <Grid item xs={12} sm={6}>
           <TextField
             required
-            id="firstName"
-            name="firstName"
-            label="First name"
+            id="pollName"
+            name="pollName"
+            label="Poll Name"
             fullWidth
             autoComplete="given-name"
           />
@@ -60,16 +60,18 @@ export default function AddressForm() {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-        <FormControlLabel
+        {/* <FormControlLabel
             control={<Checkbox color="secondary" name="blindVost" value="yes" />}
             label="Blind Vote"
-          />
+          /> */}
+          Blind Vote <input type = "checkbox" id = "blindVote"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
-        <FormControlLabel
+        {/* <FormControlLabel
             control={<Checkbox color="secondary" name="aboutDao" value="yes" />}
             label="About DAO or Not"
-          />
+          /> */}
+          About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
         <label>
