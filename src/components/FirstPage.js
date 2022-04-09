@@ -121,9 +121,16 @@ export default function Voting_choice() {
 	// }
 
   const continueWithName = async() => {
-    const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
-    console.log(res); // TODO: Add into pop up or warning when return something 
-  };
+    localStorage.setItem("nameInput", document.getElementById("nameInput").value);
+    const name = document.getElementById("nameInput").value;
+    if (name == ""){
+      alert("The name input field is empty. Please enter a valid name.")
+    }
+    else{
+      const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
+      console.log(res); // TODO: Add into pop up or warning when return somethin
+    }
+  }
 
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet();
