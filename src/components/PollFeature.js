@@ -86,6 +86,8 @@ export default function Checkout() {
     console.log(document.getElementById("pollDescription").value);
     console.log(document.getElementById("blindVote").checked);
     console.log(document.getElementById("aboutDao").checked);
+    console.log(localStorage.getItem("keyArray"));
+    console.log(localStorage.getItem("valueArray"));
   };
 
 

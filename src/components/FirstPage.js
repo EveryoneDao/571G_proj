@@ -122,6 +122,9 @@ export default function Voting_choice() {
     if (name == ""){
       alert("The name input field is empty. Please enter a valid name.")
     }
+    else if (walletAddress.length == 0){
+      alert("You need to connect to metamask to proceed. ")
+    }
     else{
       location.href = "http://localhost:3000/PollFeature";
     }

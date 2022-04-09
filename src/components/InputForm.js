@@ -5,6 +5,9 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { CardActions } from 'material-ui';
+import { DatePicker } from 'antd';
+import { Form, Input, Button, Space } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 export default function AddressForm() {
     function createNewElement() {
@@ -25,6 +28,29 @@ export default function AddressForm() {
             console.log(i);
         }
     }
+
+    const [form] = Form.useForm();
+    const keyArray = [];
+    const valueArray = [];
+
+    const onFinish = values => {
+      let s = values["choice"].length;
+      for (let i = 0; i < s; ++i){
+        // console.log(values["choice"][i].first);
+        keyArray.push(values["choice"][i].first);
+        // console.log(values["choice"][i].last);
+        valueArray.push(values["choice"][i].last);
+      }
+      alert("Choice Submitted");
+      localStorage.setItem("keyArray", keyArray);
+      localStorage.setItem("valueArray", valueArray);
+    };
+
+    const handleChange = () => {
+      form.setFieldsValue({ sights: [] });
+    };
+
+
   return (
     <React.Fragment>
       {/* <Typography variant="h6" gutterBottom>
@@ -60,25 +86,49 @@ export default function AddressForm() {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-        {/* <FormControlLabel
-            control={<Checkbox color="secondary" name="blindVost" value="yes" />}
-            label="Blind Vote"
-          /> */}
           Blind Vote <input type = "checkbox" id = "blindVote"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
-        {/* <FormControlLabel
-            control={<Checkbox color="secondary" name="aboutDao" value="yes" />}
-            label="About DAO or Not"
-          /> */}
           About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
-        <label>
-            Number of Choices:
-            <input type="text" id = "numberofChoice" pattern="[0-9]*"/>
-        </label>
-        <button onClick={displayChoice}> Submit </button>
+          <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
+            <Form.List name="choice">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'first']}
+                        rules={[{ required: true, message: 'Missing key value' }]}
+                      >
+                        <Input placeholder="Choice Key" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'last']}
+                        rules={[{ required: true, message: 'Missing key description' }]}
+                      >
+                        <Input placeholder="Description" />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
+                  ))}
+                  <Form.Item>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Add field
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
         </Grid>
       </Grid>
     </React.Fragment>
