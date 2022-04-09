@@ -45,7 +45,6 @@ const Dashboard = (props) => {
     //called only once
     useEffect(() => { //TODO: implement
         addResultViewListener();
-        addNewEventCreatedListener();
         viewFilterPollsListener();
         participateEventListener();
         async function fetchData() {
@@ -59,15 +58,12 @@ const Dashboard = (props) => {
 
     // Participate one event: in contract view one event
     const onParticipatePressed = async (pollID) => {
-        console.log("onParticipatePressed");
-        console.log(pollID);
         const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
     //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
-        console.log(pollID);
         const { status } = await viewResult(walletAddress, pollID);
     };
 
@@ -107,8 +103,6 @@ const Dashboard = (props) => {
     }
 
     const onCreatePollPressed = async () => {
-        console.log("onCreatePollPressed");
-        console.log(walletAddress)
         // TODO: create pull -> copy paste this part to the first page
         // This one is just a fake creation we need to grab information from the firstpage.js and then create
         const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
@@ -120,30 +114,11 @@ const Dashboard = (props) => {
         const optionDescription = ["A", "B", "C"];
         const { status2 } = await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
         setStatus(status2);
-        console.log("on create poll finished");
-        console.log(status2);
     };
 
-    // return a poll object polls[pollId]
-    // Should work as just to display the error message
-    function addNewEventCreatedListener() {
-        console.log("addNewEventCreatedListener");
-        pollContract.events.pollCreated({}, (error, data) => {
-            console.log("entered addNewEventCreatedListener");
-            if (error) {
-                console.log("created failed with error" + error);
-                alert("Error message: " + error);
-            } else {
-                console.log("created successfully");
-                console.log(data);
-            }
-        });
-    }
 
     function participateEventListener() {
-        console.log("participantEventListener");
         pollContract.events.pollViewed({}, (error, data) => {
-            console.log("entered participantEventListener");
             if (error) {
                 console.log("polls viewed failed with error" + error);
                 alert("Error message: " + error);
@@ -183,12 +158,9 @@ const Dashboard = (props) => {
 
     // TODO: Need Test
     const handleChange = async (event) => {
-        console.log("before" + filters);
         const {
             target: { value },
         } = event;
-        console.log("mid" + value);
-        console.log("mid type" + value.includes("About Dao"));
         let isByMe = value.includes("Created By Me")? true: false;
         let isAboutDao = value.includes("About Dao")? 1:0;
         isAboutDao = value.includes("Not About Dao")? 2: isAboutDao;
