@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useEffect, useState } from "react";
@@ -26,7 +25,7 @@ export default function ResultModal(props) {
     } 
 
     //called only once
-    useEffect(() => { //TODO: implement
+    useEffect(() => { 
         async function fetchData() {
             console.log(props);
             setOpen(props.status);

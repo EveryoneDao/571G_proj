@@ -76,12 +76,11 @@ const Dashboard = (props) => {
         });
     }
 
-    //TODO: uncomment and test
+    //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
         console.log(pollID);
-        setShowModal(true);
-        // const { status } = await viewResult(walletAddress, pollID);
+        const { status } = await viewResult(walletAddress, pollID);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -160,8 +159,6 @@ const Dashboard = (props) => {
         setStatus(status2);
         console.log("on create poll finished");
         console.log(status2);
-        // uncomment this line when address is ready
-        // const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
     // return a poll object polls[pollId]
