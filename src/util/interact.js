@@ -327,24 +327,10 @@ export const createParticipate = async (address, userName) => {
             method: "eth_sendTransaction",
             params: [transactionParameters],
         });
-        console.log("transaction happened");
-        return {
-            status: (
-                <span>
-                    ✅{" "}
-                    <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
-                        View the status of your transaction on Etherscan!
-                    </a>
-                    <br />
-                    ℹ️ Once the transaction is verified by the network, you have successfully created.
-                    Thank you for your participant.
-                </span>
-            ),
-        };
+        console.log("transaction successed");
+        return ; 
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message;
     }
 };
 

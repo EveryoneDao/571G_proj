@@ -102,20 +102,12 @@ const Dashboard = (props) => {
         });
     }
 
-    const onCreatePollPressed = async () => {
-        // TODO: create pull -> copy paste this part to the first page
-        // This one is just a fake creation we need to grab information from the firstpage.js and then create
-        const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
-        const pollName = "Fake Chain Poll 1";
-        const pollDuration = 259200;
-        const isBlind = false;
-        const isAboutDao = false;
-        const options = [1, 2, 3];
-        const optionDescription = ["A", "B", "C"];
-        const { status2 } = await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
-        setStatus(status2);
-    };
-
+    // TODO: delete it if no edge case handling needed
+    // PRIORITY: level 3 (extra work todo)
+    // Called when wallet address changed
+    useEffect(() => {
+        setWallet(props);
+    }, [props.walletAddress]);
 
     function participateEventListener() {
         pollContract.events.pollViewed({}, (error, data) => {

@@ -23,6 +23,8 @@ import {
   loadCurrentMessage,
   loadTokenAccountBalance,
   getCurrentWalletConnected,
+  createParticipate,
+  pollContract
 } from "../util/interact.js";
 import { FirstPage } from '@mui/icons-material';
 
@@ -40,7 +42,7 @@ function Copyright() {
 }
 
 
-
+let tmp;
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -99,6 +101,8 @@ export default function Voting_choice() {
 			setWallet(address);
 			setStatus(status);
 			addWalletListener();
+      addRegistrationListener();
+      addLoginListener();
 			// addSmartContractListener();
 		}
 		fetchData();
@@ -116,10 +120,10 @@ export default function Voting_choice() {
 	// 	});
 	// }
 
-  function continueWithName(){
-    localStorage.setItem("nameInput", document.getElementById("nameInput").value);
-    location.href = "http://localhost:3000/Dashboard";
-  }
+  const continueWithName = async() => {
+    const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
+    console.log(res); // TODO: Add into pop up or warning when return something 
+  };
 
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet();
@@ -131,13 +135,8 @@ export default function Voting_choice() {
   function sendWalletAddress(){
     localStorage.setItem("walletAddress", walletAddress);
   };
-
+   
   
-  const onUpdatePressed = async () => {
-    const { status } = await transferToken(walletAddress, toAddress);
-    setStatus(status);
-  };
-
   function aboutClick(){
     console.log("clicked about")
     location.href = "https://github.com/taichenl/571G_proj/blob/main/README.md";
@@ -177,6 +176,37 @@ export default function Voting_choice() {
 			);
 		}
 	}
+
+  function addRegistrationListener() {
+    //console.log("addParticipantRegisteredListener");
+    pollContract.events.participantRegistered({}, (error, data) => {
+        console.log("entered addParticipantRegisteredListener");
+        if (error) {
+            console.log("Registration failed with error" + error);
+            alert("Error message: " + error);
+        } else {
+            console.log("Registration successfully");
+            console.log(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
+            // location.href = "http://localhost:3000/Dashboard";
+        }
+    });
+  }
+
+
+  function addLoginListener() {
+    //console.log("addLogInListener");
+    pollContract.events.participantLoggedIn({}, (error, data) => {
+        console.log("entered addLogInListener");
+        if (error) {
+            console.log("Login failed with error" + error);
+            alert("Error message: " + error);
+        } else {
+            console.log("Login successfully");
+            console.log(data.returnValues.name + " Logined In"); // TODO: Add into pop up or warning 
+            // location.href = "http://localhost:3000/Dashboard";
+        }
+    });
+  }
 
 
 
