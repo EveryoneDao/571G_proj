@@ -32,7 +32,6 @@ const Dashboard = (props) => {
         addViewAllEventsListener();
         addResultViewListener();
         addParticipateAnEventsListener();
-        addNewEventCreatedListener();
         async function fetchData() {  
             const events = await loadAllEvents();
             // // TODO: just a place holder need to keep an eye on wallet address
@@ -143,22 +142,6 @@ const Dashboard = (props) => {
         });
     }
 
-
-    // return a poll object polls[pollId]
-    // Should work as just to display the error message
-    function addNewEventCreatedListener() {
-        console.log("addNewEventCreatedListener");
-        pollContract.events.pollCreated({}, (error, data) => {
-            console.log("entered addNewEventCreatedListener");
-            if (error) {
-                console.log("created failed with error" + error);
-                alert("Error message: " + error);
-            } else {
-                console.log("created successfully");
-                console.log(data);
-            }
-        });
-    }
 
     const useStyles = makeStyles(theme => ({
         largeIcon: {

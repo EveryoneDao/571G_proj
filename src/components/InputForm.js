@@ -7,9 +7,27 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { CardActions } from 'material-ui';
 import PollCreationModal from './PollCreationModal.js';
 import { useEffect, useState } from "react";
+import {
+  pollContract,
+  createFakeEvent,
+  getCurrentWalletConnected
+} from "../util/interact.js"
 
 export default function AddressForm() {
+
+    const [walletAddress, setWallet] = useState();
     const [showModal, setShowModal] = useState(false);
+    useEffect(() => { //TODO: implement
+      addNewEventCreatedListener();
+      async function fetchData() {  
+        // // TODO: just a place holder need to keep an eye on wallet address
+        // const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
+        const { address, status } = await getCurrentWalletConnected();
+        console.log(address);
+        setWallet(address);
+      }
+      fetchData();
+    }, []);
 
     function createNewElement() {
         // First create a DIV element.
@@ -33,7 +51,7 @@ export default function AddressForm() {
 
     const onCreatePollPressed = async () => {
       console.log("onCreatePollPressed");
-      console.log(walletAddress)
+      console.log(walletAddress);
       // TODO: create pull -> copy paste this part to the first page
       // This one is just a fake creation we need to grab information from the firstpage.js and then create
       const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
@@ -50,6 +68,22 @@ export default function AddressForm() {
       // uncomment this line when address is ready
       // const { status } = await viewAnEvent(walletAddress, pollID);
     };
+
+    // return a poll object polls[pollId]
+    // Should work as just to display the error message
+    function addNewEventCreatedListener() {
+      console.log("addNewEventCreatedListener");
+      pollContract.events.pollCreated({}, (error, data) => {
+          console.log("entered addNewEventCreatedListener");
+          if (error) {
+              console.log("created failed with error" + error);
+              alert("Error message: " + error);
+          } else {
+              console.log("created successfully");
+              console.log(data);
+          }
+      });
+    }
 
     const handleModalClose = () => {
       setShowModal(false);
