@@ -62,7 +62,7 @@ export const selectAnOption = async (address, pollID, selectOption) => {
         };
     }
 
-    if (option === undefined) {
+    if (selectOption === undefined) {
         return {
             status: "❌ must make a valid selection.",
         };
