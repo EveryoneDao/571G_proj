@@ -76,12 +76,11 @@ const Dashboard = (props) => {
         });
     }
 
-    //TODO: uncomment and test
+    //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
         console.log(pollID);
-        setShowModal(true);
-        // const { status } = await viewResult(walletAddress, pollID);
+        const { status } = await viewResult(walletAddress, pollID);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
