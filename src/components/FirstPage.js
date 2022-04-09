@@ -23,6 +23,7 @@ import {
   loadCurrentMessage,
   loadTokenAccountBalance,
   getCurrentWalletConnected,
+  createParticipate
 } from "../util/interact.js";
 import { FirstPage } from '@mui/icons-material';
 
@@ -116,10 +117,10 @@ export default function Voting_choice() {
 	// 	});
 	// }
 
-  function continueWithName(){
-    localStorage.setItem("nameInput", document.getElementById("nameInput").value);
+  const continueWithName = async() => {
+    const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
     location.href = "http://localhost:3000/Dashboard";
-  }
+  };
 
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet();

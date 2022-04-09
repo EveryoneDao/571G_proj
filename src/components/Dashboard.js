@@ -144,25 +144,6 @@ const Dashboard = (props) => {
         });
     }
 
-    const onCreatePollPressed = async () => {
-        console.log("onCreatePollPressed");
-        console.log(walletAddress)
-        // TODO: create pull -> copy paste this part to the first page
-        // This one is just a fake creation we need to grab information from the firstpage.js and then create
-        const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
-        const pollName = "Fake Chain Poll 1";
-        const pollDuration = 259200;
-        const isBlind = false;
-        const isAboutDao = false;
-        const options = [1, 2, 3];
-        const optionDescription = ["A", "B", "C"];
-        const { status2 } = await createFakeEvent(walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
-        setStatus(status2);
-        console.log("on create poll finished");
-        console.log(status2);
-        // uncomment this line when address is ready
-        // const { status } = await viewAnEvent(walletAddress, pollID);
-    };
 
     // return a poll object polls[pollId]
     // Should work as just to display the error message
