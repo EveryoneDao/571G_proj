@@ -5,8 +5,12 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { CardActions } from 'material-ui';
+import PollCreationModal from './PollCreationModal.js';
+import { useEffect, useState } from "react";
 
 export default function AddressForm() {
+    const [showModal, setShowModal] = useState(false);
+
     function createNewElement() {
         // First create a DIV element.
         var txtNewInputBox = document.createElement('div');
@@ -19,14 +23,20 @@ export default function AddressForm() {
     }
 
     function displayChoice(){
+        setShowModal(true);
         var num = document.getElementById("numberofChoice").value;
         console.log(num);
         for (let i = 0; i < num; ++i){
             console.log(i);
         }
     }
+
+    const handleModalClose = () => {
+      setShowModal(false);
+    } 
   return (
     <React.Fragment>
+      <div><PollCreationModal status={showModal} handleModalClose={handleModalClose}/></div>
       {/* <Typography variant="h6" gutterBottom>
         Shipping address
       </Typography> */}

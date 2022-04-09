@@ -118,7 +118,7 @@ export default function Voting_choice() {
 
   function continueWithName(){
     localStorage.setItem("nameInput", document.getElementById("nameInput").value);
-    location.href = "http://localhost:3000/PollFeature";
+    location.href = "http://localhost:3000/Dashboard";
   }
 
   const connectWalletPressed = async () => {

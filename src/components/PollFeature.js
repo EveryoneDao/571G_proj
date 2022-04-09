@@ -80,6 +80,7 @@ export default function Checkout() {
   const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
+    location.href = "http://localhost:3000/Dashboard";
     console.log(localStorage.getItem("nameInput"));
     console.log(document.getElementById("pollName").value);
     console.log(document.getElementById("pollDuration").value);
@@ -126,7 +127,7 @@ export default function Checkout() {
                     onClick={handleNext}
                     className={classes.button}
                     >
-                    {'Next'}
+                    {'Back'}
                   </Button>
                   )}
                 </div>
