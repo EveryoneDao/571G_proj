@@ -14,7 +14,8 @@ import {
     createFakeEvent,
     getCurrentWalletConnected,
     viewResult,
-    filterPolls
+    filterPolls,
+    viewAnEvent
 } from "../util/interact.js"
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
@@ -47,6 +48,7 @@ const Dashboard = (props) => {
         addParticipateAnEventsListener();
         addNewEventCreatedListener();
         viewFilterPollsListener();
+        participateEventListener();
         async function fetchData() {
             const events = await loadAllEvents();
             // // TODO: just a place holder need to keep an eye on wallet address
@@ -73,7 +75,7 @@ const Dashboard = (props) => {
         console.log("onParticipatePressed");
         console.log(pollID);
         // uncomment this line when address is ready
-        // const { status } = await viewAnEvent(walletAddress, pollID);
+        const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
     // return a poll object polls[pollId]
@@ -85,7 +87,8 @@ const Dashboard = (props) => {
             if (error) {
                 alert("Error message: " + error);
             } else {
-                console.log("Participated successfully");
+                console.log("Participated successfully" );
+                console.log(JSON.stringify(data));
             }
         });
     }
@@ -184,6 +187,20 @@ const Dashboard = (props) => {
         });
     }
 
+    function participateEventListener() {
+        console.log("participantEventListener");
+        pollContract.events.pollViewed({}, (error, data) => {
+            console.log("entered participantEventListener");
+            if (error) {
+                console.log("polls viewed failed with error" + error);
+                alert("Error message: " + error);
+            } else {
+                console.log("viewed filteredPolls successfully");
+                console.log(data);
+            }
+        });
+    }
+
     const useStyles = makeStyles(theme => ({
         largeIcon: {
             '& svg': {
@@ -207,6 +224,7 @@ const Dashboard = (props) => {
         setShowModal(false);
     }
 
+    // TODO: Need Test
     const handleChange = async (event) => {
         console.log("before" + filters);
         const {
@@ -231,6 +249,7 @@ const Dashboard = (props) => {
         await filterPolls(walletAddress, isByMe, isAboutDao, isBlind);
     };
 
+    // TODO：Need test
     function viewFilterPollsListener() {
         console.log("viewFilterPollsListener");
         pollContract.events.pollsViewed({}, (error, data) => {
