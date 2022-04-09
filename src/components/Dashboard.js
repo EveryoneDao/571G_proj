@@ -159,8 +159,6 @@ const Dashboard = (props) => {
         setStatus(status2);
         console.log("on create poll finished");
         console.log(status2);
-        // uncomment this line when address is ready
-        // const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
     // return a poll object polls[pollId]
