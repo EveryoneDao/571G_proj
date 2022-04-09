@@ -6,7 +6,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { CardActions } from 'material-ui';
 import { DatePicker } from 'antd';
-import { Form, Input, Button, Space } from 'antd';
+import { Form, Input, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 export default function AddressForm() {
@@ -92,8 +92,17 @@ export default function AddressForm() {
         </Grid>
         <Grid item xs={12} sm={6}>
           About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
+          <Select
+            // value={value.currency || currency}
+            // style={{ width: 80, margin: '0 8px' }}
+            // onChange={onCurrencyChange}
+          >
+            <Option value="rmb">RMB</Option>
+            <Option value="dollar">Dollar</Option>
+          </Select>
         </Grid>
-        <Grid item xs={12} sm={6}>
+        
+        <Grid item xs={12} sm={12}>
           <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
             <Form.List name="choice">
               {(fields, { add, remove }) => (
