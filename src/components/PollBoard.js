@@ -3,10 +3,6 @@ import { makeStyles } from '@material-ui/core/styles'
 import { useEffect, useState } from "react";
 import {
     Grid,
-    Card,
-    CardContent,
-    Typography,
-    CardHeader
 } from '@material-ui/core/'
 import Button from '@mui/material/Button';
 import Stack from "@mui/material/Stack";
@@ -17,17 +13,12 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import {
     pollContract,
     selectAnOption,
-    viewResult
+    viewResult,
+    getCurrentWalletConnected
 } from "../util/interact.js"
 import ResultModal from './ResultModal.js';
 
 const useStyles = makeStyles(theme => ({
-    cardStyle: {
-        display: 'block',
-        width: '30vw',
-        transitionDuration: '0.3s',
-        height: '17vw'
-    },
     root: {
         flexGrow: 1,
         padding: theme.spacing(2)
@@ -58,7 +49,8 @@ export default function PollBoard() {
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
                 setData(loc.state.options);
-                setWalletAddress(loc.state.wallet);
+                const { address, status } = await getCurrentWalletConnected();
+                setWalletAddress(address);
                 setShowModal(false);
                 addSelectListener();
                 addViewResultListener();
@@ -77,7 +69,7 @@ export default function PollBoard() {
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
         alert("Option " + optionIndex + " Selected");
-        // const { status } = await selectAnOption(walletAddress, pollID, selection);
+        const { status } = await selectAnOption(walletAddress, pollID, optionIndex);
         // setStatus(status);
     };
 
