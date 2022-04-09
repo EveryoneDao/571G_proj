@@ -30,8 +30,8 @@ export default function AddressForm() {
     }
 
     const [form] = Form.useForm();
-    const keyArray = [];
-    const valueArray = [];
+    var keyArray = [];
+    var valueArray = [];
 
     const onFinish = values => {
       let s = values["choice"].length;
@@ -44,6 +44,8 @@ export default function AddressForm() {
       alert("Choice Submitted");
       localStorage.setItem("keyArray", keyArray);
       localStorage.setItem("valueArray", valueArray);
+      keyArray = [];
+      valueArray = [];
     };
 
     const handleChange = () => {
