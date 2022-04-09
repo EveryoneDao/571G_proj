@@ -17,11 +17,9 @@ export default function AddressForm() {
 
     const [walletAddress, setWallet] = useState();
     const [showModal, setShowModal] = useState(false);
-    useEffect(() => { //TODO: implement
+    useEffect(() => { 
       addNewEventCreatedListener();
       async function fetchData() {  
-        // // TODO: just a place holder need to keep an eye on wallet address
-        // const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
         const { address, status } = await getCurrentWalletConnected();
         console.log(address);
         setWallet(address);
@@ -39,33 +37,28 @@ export default function AddressForm() {
         // Finally put it where it is supposed to appear.
         document.getElementById("newElementId").appendChild(txtNewInputBox);
     }
-
-    function displayChoice(){
-        setShowModal(true);
-        var num = document.getElementById("numberofChoice").value;
-        console.log(num);
-        for (let i = 0; i < num; ++i){
-            console.log(i);
-        }
-    }
-
-    const onCreatePollPressed = async () => {
+    const onCreatePollPressed = async() => {
       console.log("onCreatePollPressed");
       console.log(walletAddress);
-      // TODO: create pull -> copy paste this part to the first page
-      // This one is just a fake creation we need to grab information from the firstpage.js and then create
-      const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
-      const pollName = "Fake Chain Poll 1";
-      const pollDuration = 259200;
-      const isBlind = false;
-      const isAboutDao = false;
+      var num = document.getElementById("numberofChoice").value;
+      console.log(num);
+      for (let i = 0; i < num; ++i){
+          console.log(i);
+      }
+      // TODO: Change into real options instead of fake ones
+
+      const pollName = document.getElementById("pollName").value;
+      const pollDescription = document.getElementById("pollDescription").value;
+      const pollDuration = document.getElementById("pollDuration").value * 60;
+      const isBlind = document.getElementById("blindVote").checked;
+      const isAboutDao = document.getElementById("aboutDao").checked;
       const options = [1, 2, 3];
       const optionDescription = ["A", "B", "C"];
-      const { status2 } = await createFakeEvent(walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
-      setStatus(status2);
+      await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
+      // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
+      // setStatus(status2);
       console.log("on create poll finished");
-      console.log(status2);
-      // uncomment this line when address is ready
+      // console.log(status2);
       // const { status } = await viewAnEvent(walletAddress, pollID);
     };
 
@@ -79,8 +72,9 @@ export default function AddressForm() {
               console.log("created failed with error" + error);
               alert("Error message: " + error);
           } else {
+              setShowModal(true);
               console.log("created successfully");
-              console.log(data);
+              console.log(data.returnValues); // TODO: Print this into warning or modal 
           }
       });
     }
@@ -110,7 +104,7 @@ export default function AddressForm() {
             required
             id="pollDuration"
             name="pollDuration"
-            label="Poll Duration (in seconds)"
+            label="Poll Duration (in minutes)"
             fullWidth
           />
         </Grid>
@@ -142,7 +136,7 @@ export default function AddressForm() {
             Number of Choices:
             <input type="text" id = "numberofChoice" pattern="[0-9]*"/>
         </label>
-        <button onClick={displayChoice}> Submit </button>
+        <button onClick={() => onCreatePollPressed()}> Submit </button>
         </Grid>
       </Grid>
     </React.Fragment>

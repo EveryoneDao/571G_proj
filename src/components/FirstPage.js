@@ -128,7 +128,7 @@ export default function Voting_choice() {
     }
     else{
       const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
-      console.log(res); // TODO: Add into pop up or warning when return somethin
+      console.log(res);
     }
   }
 
@@ -193,8 +193,8 @@ export default function Voting_choice() {
             alert("Error message: " + error);
         } else {
             console.log("Registration successfully");
-            console.log(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
-            // location.href = "http://localhost:3000/Dashboard";
+            alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
+            location.href = "http://localhost:3000/Dashboard";
         }
     });
   }
@@ -209,8 +209,8 @@ export default function Voting_choice() {
             alert("Error message: " + error);
         } else {
             console.log("Login successfully");
-            console.log(data.returnValues.name + " Logined In"); // TODO: Add into pop up or warning 
-            // location.href = "http://localhost:3000/Dashboard";
+            alert(data.returnValues.name + " Logined In"); // TODO: Add into pop up or warning 
+            location.href = "http://localhost:3000/Dashboard";
         }
     });
   }
