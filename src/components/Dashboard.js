@@ -216,7 +216,9 @@ const Dashboard = (props) => {
         console.log("mid type" + value.includes("About Dao"));
         let isByMe = value.includes("Created By Me")? true: false;
         let isAboutDao = value.includes("About Dao")? 1:0;
+        isAboutDao = value.includes("Not About Dao")? 2: isAboutDao;
         let isBlind = value.includes("Blind Vote")? 1:0;
+        isBlind = value.includes("Non-Blind Vote")? 2:isBlind;
         if(value.includes("All")){
             isByMe = false;
             isAboutDao = 0;
@@ -257,7 +259,9 @@ const Dashboard = (props) => {
     const selections = [
         'All',
         'About Dao',
+        'Not About Dao',
         'Blind Vote',
+        'Non-Blind Vote',
         'Created By Me'
     ];
     const ITEM_HEIGHT = 48;
