@@ -9,6 +9,23 @@ import { DatePicker } from 'antd';
 import { Form, Input, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 20 },
+  },
+};
+const formItemLayoutWithOutLabel = {
+  wrapperCol: {
+    xs: { span: 24, offset: 0 },
+    sm: { span: 20, offset: 4 },
+  },
+};
+
 export default function AddressForm() {
     function createNewElement() {
         // First create a DIV element.
@@ -36,9 +53,7 @@ export default function AddressForm() {
     const onFinish = values => {
       let s = values["choice"].length;
       for (let i = 0; i < s; ++i){
-        // console.log(values["choice"][i].first);
         keyArray.push(values["choice"][i].first);
-        // console.log(values["choice"][i].last);
         valueArray.push(values["choice"][i].last);
       }
       alert("Choice Submitted");
@@ -55,9 +70,6 @@ export default function AddressForm() {
 
   return (
     <React.Fragment>
-      {/* <Typography variant="h6" gutterBottom>
-        Shipping address
-      </Typography> */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -92,14 +104,14 @@ export default function AddressForm() {
         </Grid>
         <Grid item xs={12} sm={6}>
           About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
-          <Select
+          {/* <Select
             // value={value.currency || currency}
             // style={{ width: 80, margin: '0 8px' }}
             // onChange={onCurrencyChange}
           >
             <Option value="rmb">RMB</Option>
             <Option value="dollar">Dollar</Option>
-          </Select>
+          </Select> */}
         </Grid>
         
         <Grid item xs={12} sm={12}>
