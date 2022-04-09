@@ -64,20 +64,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const steps = ['Shipping address', 'Payment details', 'Review your order'];
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <InputForm />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
 
 export default function Checkout() {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
     location.href = "http://localhost:3000/Dashboard";
@@ -106,19 +96,9 @@ export default function Checkout() {
             Create A New Event
           </Typography>
           <React.Fragment>
-            {activeStep === steps.length ? (
+            { (
               <React.Fragment>
-                <Typography variant="h5" gutterBottom>
-                  Thank you for your order.
-                </Typography>
-                <Typography variant="subtitle1">
-                  Your order number is #2001539. We have emailed your order confirmation, and will
-                  send you an update when your order has shipped.
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                {getStepContent(activeStep)}
+                <InputForm />
                 <div className={classes.buttons}>
                   {(
                     <Button
