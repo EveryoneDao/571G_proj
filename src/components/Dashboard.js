@@ -29,10 +29,10 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
-
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { useTheme } from '@mui/material/styles';
 
+import { useHistory } from "react-router-dom";
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
@@ -40,58 +40,29 @@ const Dashboard = (props) => {
     const [showModal, setShowModal] = useState(false);
     const [status, setStatus] = useState("Show status here");
     const [filters, setFilters] = React.useState([]);
+    const history = useHistory();
 
     //called only once
     useEffect(() => { //TODO: implement
-        addViewAllEventsListener();
         addResultViewListener();
-        addParticipateAnEventsListener();
         addNewEventCreatedListener();
         viewFilterPollsListener();
         participateEventListener();
         async function fetchData() {
             const events = await loadAllEvents();
-            // // TODO: just a place holder need to keep an eye on wallet address
-            // const address = "0x5fA0932eFBeDdDeFE15D7b9165AE361033DFaE04";
             const { address, status } = await getCurrentWalletConnected();
-            console.log(address);
             setWallet(address);
-            console.log("events retrieved");
-            console.log(events);
             setEvents(events);
-            // console.log(events);
         }
         fetchData();
     }, []);
 
-    //TODO: uncomment address and test
-    // Expected behavior: 1. Gas Fee
-    // PRIORITY: level 1 (basic functionality -> must work)
-
     // Participate one event: in contract view one event
-    // we are not relying on the contract event to retrieve the poll detail
-    // but need the function here to ask for gas fee (could be discussed further)
     const onParticipatePressed = async (pollID) => {
         console.log("onParticipatePressed");
         console.log(pollID);
-        // uncomment this line when address is ready
         const { status } = await viewAnEvent(walletAddress, pollID);
     };
-
-    // return a poll object polls[pollId]
-    // Should work as just to display the error message
-    function addParticipateAnEventsListener() {
-        console.log("addParticipateAnEventsListener");
-        pollContract.events.pollViewed({}, (error, data) => {
-            console.log("entered addParticipateAnEventsListener");
-            if (error) {
-                alert("Error message: " + error);
-            } else {
-                console.log("Participated successfully" );
-                console.log(JSON.stringify(data));
-            }
-        });
-    }
 
     //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
@@ -131,24 +102,6 @@ const Dashboard = (props) => {
                 }
                 setShowModal(true);
                 console.log("Results logged successfully");
-            }
-        });
-    }
-
-    // TODO: delete it if we don't need to sync it between users in real time
-    // PRIORITY: level 3 (extra work todo)
-    // watch for contract's pollCreated event
-    // and update our UI when new event added 
-    function addViewAllEventsListener() {
-        console.log("addViewAllEventsListener");
-        pollContract.events.pollsViewed({}, (error, data) => {
-            console.log("entered");
-            if (error) {
-                console.log("error");
-            } else {
-                // data handling here: potential option: change events state
-                // by performing the same action as in util/interact.js: loadAllEvents
-                console.log("Events load successfully");
             }
         });
     }
@@ -195,8 +148,12 @@ const Dashboard = (props) => {
                 console.log("polls viewed failed with error" + error);
                 alert("Error message: " + error);
             } else {
-                console.log("viewed filteredPolls successfully");
-                console.log(data);
+                let pollName = data.returnValues.poll[3];
+                let pollDescription = data.returnValues.poll[4];
+                let pollId = data.returnValues.poll[1];
+                let choseFrom = data.returnValues.poll[9];
+                let optionsDescription = data.returnValues.poll[10];
+                history.push({pathname: '/PollBoard', state: { id: pollId, description: pollDescription, name: pollName, options: optionsDescription, wallet: walletAddress }});
             }
         });
     }
@@ -371,8 +328,8 @@ const Dashboard = (props) => {
                             </CardContent>
                             <CardActions >
                                 <Grid item xs={6}>
-                                    <Link to={{ pathname: '/PollBoard', state: { id: elem.id, description: elem.description, name: elem.name, options: elem.selections, wallet: walletAddress } }} onClick
-                                        ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Link>
+                                    <Button size="small" onClick
+                                        ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Button>
                                 </Grid>
                                 <Grid item xs={6}><Button size="small" onClick
                                     ={() => onViewResultsPressed(elem.id)}>View Results</Button>
