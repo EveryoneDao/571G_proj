@@ -219,7 +219,7 @@ const Dashboard = (props) => {
                 <Grid item xs={12}>
                     <Link className="btn btn-create" to={{ pathname: '/PollFeature'}}>Create a <span>New Poll</span></Link>
                     <div position="absolute" top="0">
-                    <a href="https://faucet.egorfine.com/" >Get more <span>testnet tokens</span></a>
+                    <a href="https://faucet.egorfine.com/"  target='_blank' >Get more <span>testnet tokens</span></a>
             </div>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>

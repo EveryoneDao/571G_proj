@@ -100,7 +100,9 @@ export default function PollBoard() {
     // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { //TODO: test
+        console.log(pollID);
         const { status } = await viewResult(walletAddress, pollID);
+        setShowModal(true);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -164,7 +166,7 @@ export default function PollBoard() {
                         <div className="c"> <Button onClick={onViewResultsPressed}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button ><Link to='/Dashboard' target='_blank'> Back </Link></Button> </div>
+                        <div className="c"> <Button ><Link to='/Dashboard'> Back </Link></Button> </div>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
