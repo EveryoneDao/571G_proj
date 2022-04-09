@@ -118,7 +118,13 @@ export default function Voting_choice() {
 
   function continueWithName(){
     localStorage.setItem("nameInput", document.getElementById("nameInput").value);
-    location.href = "http://localhost:3000/PollFeature";
+    const name = document.getElementById("nameInput").value;
+    if (name == ""){
+      alert("The name input field is empty. Please enter a valid name.")
+    }
+    else{
+      location.href = "http://localhost:3000/PollFeature";
+    }
   }
 
   const connectWalletPressed = async () => {
