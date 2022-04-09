@@ -42,11 +42,13 @@
     "web-vitals": "^1.0.1"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
     "@material-ui/core": "^4.12.3",
     "@mui/icons-material": "^5.5.1",
     "@mui/material": "^5.5.1",
+    "antd": "^4.19.5",
     "big-number": "^2.0.0",
     "material-ui": "^0.20.2",
     "react-router": "^5.2.0",
