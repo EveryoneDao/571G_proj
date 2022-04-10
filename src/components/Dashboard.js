@@ -49,10 +49,10 @@ const Dashboard = (props) => {
     //called only once
     useEffect(() => { //TODO: implement
         addResultViewListener();
-        participateEventListener();
+        // participateEventListener(); // TODO: change into view
         async function fetchData() {
-            const events = await loadAllEvents();
             const { address, status } = await getCurrentWalletConnected();
+            const events = await loadAllEvents(address);
             setWallet(address);
             setEvents(events);
             setInitialAllEvents(events);
@@ -62,8 +62,26 @@ const Dashboard = (props) => {
 
     // Participate one event: in contract view one event
     const onParticipatePressed = async (pollID) => {
-        const { status } = await viewAnEvent(walletAddress, pollID);
-        setLoading(true);
+        const thisPoll = await viewAnEvent(walletAddress, pollID);
+        console.log(thisPoll);
+
+        let pollName = thisPoll.name;
+        let pollDescription = thisPoll.description;
+        let choseFrom = thisPoll.choseFrom;
+        let optionsDescription = thisPoll.optionDesc;
+        console.log("optionsDescription " + optionsDescription);
+        console.log("choseFrom " + choseFrom);
+        let optionsDisplay = [];
+        const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
+        const testStr = "this is a very long string just be here to test selection display";
+        pollDescription += " Selection Descriptions are :";
+        for (let i = 0; i < choseFrom.length; i++) {
+            optionsDisplay.push(possibleSelection[choseFrom[i]] + ": " + optionsDescription[i]);
+            let concatString = " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i];
+            pollDescription += concatString;
+        }
+        console.log("options " + optionsDisplay);
+        history.push({ pathname: '/PollBoard', state: { id: pollID, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
     };
 
     //TODO: test
@@ -117,34 +135,6 @@ const Dashboard = (props) => {
         setWallet(props);
     }, [props.walletAddress]);
 
-    function participateEventListener() {
-        pollContract.events.pollViewed({}, (error, data) => {
-            setLoading(false);
-            if (error) {
-                console.log("polls viewed failed with error" + error);
-                alert("Error message: " + error);
-            } else {
-                let pollName = data.returnValues.poll[3];
-                let pollDescription = data.returnValues.poll[4] + " heyh yeh";
-                let pollId = data.returnValues.poll[1];
-                let choseFrom = data.returnValues.poll[9];
-                let optionsDescription = data.returnValues.poll[10];
-                console.log("optionsDescription " + optionsDescription);
-                console.log("choseFrom " + choseFrom);
-                let optionsDisplay = [];
-                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                const testStr = "this is a very long string just be here to test selection display";
-                pollDescription += " Selection Descriptions are :";
-                for (let i = 0; i < choseFrom.length; i++) {
-                    optionsDisplay.push(possibleSelection[choseFrom[i]] + ": " + optionsDescription[i]);
-                    let concatString = " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i];
-                    pollDescription += concatString;
-                }
-                console.log("options " + optionsDisplay);
-                history.push({ pathname: '/PollBoard', state: { id: pollId, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
-            }
-        });
-    }
 
     const useStyles = makeStyles(theme => ({
         largeIcon: {
