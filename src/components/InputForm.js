@@ -58,14 +58,32 @@ export default function AddressForm() {
         // Finally put it where it is supposed to appear.
         document.getElementById("newElementId").appendChild(txtNewInputBox);
     }
-    const onCreatePollPressed = async() => {
+
+    var options;
+    var optionDescription;
+
+    const onFinish = values => {
+      let s = values["choice"].length;
+      for (let i = 0; i < s; ++i){
+        keyArray.push(values["choice"][i].first);
+        valueArray.push(values["choice"][i].last);
+      }
+      alert("Choice Submitted");
+      localStorage.setItem("keyArray", keyArray);
+      localStorage.setItem("valueArray", valueArray);
+      let s1 = keyArray.length;
+      console.log(s1);
+      options = keyArray;
+      optionDescription = valueArray;
+      keyArray = [];
+      valueArray = [];
+      onCreatePollPressed();
+    };
+
+
+    const onCreatePollPressed = async() => { 
       console.log("onCreatePollPressed");
       console.log(walletAddress);
-      var num = document.getElementById("numberofChoice").value;
-      console.log(num);
-      for (let i = 0; i < num; ++i){
-          console.log(i);
-      }
       // TODO: Change into real options instead of fake ones
 
       const pollName = document.getElementById("pollName").value;
@@ -73,12 +91,12 @@ export default function AddressForm() {
       const pollDuration = document.getElementById("pollDuration").value * 60;
       const isBlind = document.getElementById("blindVote").checked;
       const isAboutDao = document.getElementById("aboutDao").checked;
-      const options = [1, 2, 3];
-      const optionDescription = ["A", "B", "C"];
+      console.log(options.length);
       await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
       // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
       // setStatus(status2);
       console.log("on create poll finished");
+      location.href = "http://localhost:3000/PollFeature";
       // console.log(status2);
       // const { status } = await viewAnEvent(walletAddress, pollID);
     };
@@ -104,18 +122,6 @@ export default function AddressForm() {
     var keyArray = [];
     var valueArray = [];
 
-    const onFinish = values => {
-      let s = values["choice"].length;
-      for (let i = 0; i < s; ++i){
-        keyArray.push(values["choice"][i].first);
-        valueArray.push(values["choice"][i].last);
-      }
-      alert("Choice Submitted");
-      localStorage.setItem("keyArray", keyArray);
-      localStorage.setItem("valueArray", valueArray);
-      keyArray = [];
-      valueArray = [];
-    };
 
     const handleChange = () => {
       form.setFieldsValue({ sights: [] });
@@ -212,13 +218,9 @@ export default function AddressForm() {
             </Form.Item>
           </Form>
           </Grid>
-        <Grid item xs={12} sm={6}>
-        <label>
-            Number of Choices:
-            <input type="text" id = "numberofChoice" pattern="[0-9]*"/>
-        </label>
+        {/* <Grid item xs={12} sm={12}>
         <button onClick={() => onCreatePollPressed()}> Submit2 </button>
-        </Grid>
+        </Grid> */}
       </Grid>
     </React.Fragment>
   );
