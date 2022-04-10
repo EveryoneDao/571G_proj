@@ -34,6 +34,7 @@ import {
   createFakeEvent,
   getCurrentWalletConnected
 } from "../util/interact.js"
+import { AlternateEmail } from '@mui/icons-material';
 
 export default function AddressForm() {
 
@@ -62,21 +63,28 @@ export default function AddressForm() {
         document.getElementById("newElementId").appendChild(txtNewInputBox);
     }
 
-    var options;
+    var options = [];
     var optionDescription;
 
     const onFinish = values => {
+      if (values["choice"] == null || values["choice"].length <2){
+        alert("Please provide more than 2 choices. ")
+        return;
+      }
       let s = values["choice"].length;
       for (let i = 0; i < s; ++i){
-        keyArray.push(values["choice"][i].first);
+        // keyArray.push(values["choice"][i].first);
         valueArray.push(values["choice"][i].last);
       }
       alert("Choice Submitted");
-      localStorage.setItem("keyArray", keyArray);
+      // localStorage.setItem("keyArray", keyArray);
       localStorage.setItem("valueArray", valueArray);
-      let s1 = keyArray.length;
+      let s1 = valueArray.length;
       console.log(s1);
-      options = keyArray;
+      // options = keyArray;
+      for (let i = 0; i < valueArray.length; ++i){
+        options.push(i + 1);
+      }
       optionDescription = valueArray;
       keyArray = [];
       valueArray = [];
@@ -132,7 +140,9 @@ export default function AddressForm() {
     const handleModalClose = () => {
       setShowModal(false);
     } 
-
+    
+    var count = 0;
+    var des;
   return (
     <React.Fragment>
       <div><PollCreationModal status={showModal} handleModalClose={handleModalClose}/></div>
@@ -170,36 +180,22 @@ export default function AddressForm() {
         </Grid>
         <Grid item xs={12} sm={6}>
           About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
-          {/* <Select
-            // value={value.currency || currency}
-            // style={{ width: 80, margin: '0 8px' }}
-            // onChange={onCurrencyChange}
-          >
-            <Option value="rmb">RMB</Option>
-            <Option value="dollar">Dollar</Option>
-          </Select> */}
         </Grid>
-        
-        <Grid item xs={12} sm={12}>
-          <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
+
+        <Grid item xs={12}>
+          <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off">
             <Form.List name="choice">
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }) => (
-                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'first']}
-                        rules={[{ required: true, message: 'Missing key value' }]}
-                      >
-                        <Input placeholder="Choice Key" />
-                      </Form.Item>
+                    des = "Option " + count,
+                    <Space key={key} style={{ display: 'flex', marginBottom: 8}} >
                       <Form.Item
                         {...restField}
                         name={[name, 'last']}
                         rules={[{ required: true, message: 'Missing key description' }]}
                       >
-                        <Input placeholder="Description" />
+                        <Input placeholder= {"Choice Decription"}/>
                       </Form.Item>
                       <MinusCircleOutlined onClick={() => remove(name)} />
                     </Space>
