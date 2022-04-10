@@ -85,8 +85,8 @@ export default function Checkout() {
       <CssBaseline />
       <AppBar position="absolute" color="default" className={classes.appBar}>
         <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            **Name of Our project
+          <Typography variant="h6" color="inherit" noWrap align = "center">
+            Everyone DAO
           </Typography>
         </Toolbar>
       </AppBar>
