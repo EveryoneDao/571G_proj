@@ -31,6 +31,7 @@ import Select from '@mui/material/Select';
 
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { useTheme } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useHistory } from "react-router-dom";
 const Dashboard = (props) => {
@@ -42,6 +43,7 @@ const Dashboard = (props) => {
     const [status, setStatus] = useState("Show status here");
     const [filters, setFilters] = React.useState([]);
     const history = useHistory();
+    const [loading, setLoading] = React.useState(false);
 
 
     //called only once
@@ -61,12 +63,14 @@ const Dashboard = (props) => {
     // Participate one event: in contract view one event
     const onParticipatePressed = async (pollID) => {
         const { status } = await viewAnEvent(walletAddress, pollID);
+        setLoading(true);
     };
 
     //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
         const { status } = await viewResult(walletAddress, pollID);
+        setLoading(true);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -74,27 +78,28 @@ const Dashboard = (props) => {
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addResultViewListener() {
         pollContract.events.resultViewed({}, (error, data) => {
+            setLoading(false);
             if (error) {
                 console.log("error");
             } else {
                 console.log("result data is: " + JSON.stringify(data.returnValues));
                 const votingState = data.returnValues.state;
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if(votingState == 0){
+                if (votingState == 0) {
                     setResult("Voting in progress, please check back later");
-                }else{
+                } else {
                     const votingResult = data.returnValues.result;
                     const isTie = data.returnValues.tie;
-                    if(isTie){
+                    if (isTie) {
                         let resultMsg = "Tie Between options: "
                         for (let i = 0; i < votingResult.length; i++) {
                             resultMsg += possibleSelection[votingResult[i]] + ", ";
                         }
                         setResult(resultMsg);
-                    }else{
-                        if(votingResult.length == 0){
+                    } else {
+                        if (votingResult.length == 0) {
                             setResult("No one voted.");
-                        }else{
+                        } else {
                             setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
                         }
                     }
@@ -114,6 +119,7 @@ const Dashboard = (props) => {
 
     function participateEventListener() {
         pollContract.events.pollViewed({}, (error, data) => {
+            setLoading(false);
             if (error) {
                 console.log("polls viewed failed with error" + error);
                 alert("Error message: " + error);
@@ -130,8 +136,8 @@ const Dashboard = (props) => {
                 const testStr = "this is a very long string just be here to test selection display";
                 pollDescription += " Selection Descriptions are :";
                 for (let i = 0; i < choseFrom.length; i++) {
-                    optionsDisplay.push(possibleSelection[choseFrom[i]] + " :" + optionsDescription[i]);
-                    let concatString =  " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i]; 
+                    optionsDisplay.push(possibleSelection[choseFrom[i]] + ": " + optionsDescription[i]);
+                    let concatString = " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i];
                     pollDescription += concatString;
                 }
                 console.log("options " + optionsDisplay);
@@ -369,7 +375,9 @@ const Dashboard = (props) => {
                 ))}
 
             </Grid>
-
+            <div>
+                {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
+            </div>
         </div>
     );
 };

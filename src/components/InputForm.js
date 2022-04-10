@@ -8,6 +8,7 @@ import { CardActions } from 'material-ui';
 import { DatePicker } from 'antd';
 import { Form, Input, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const formItemLayout = {
   labelCol: {
@@ -38,6 +39,8 @@ export default function AddressForm() {
 
     const [walletAddress, setWallet] = useState();
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = React.useState(false);
+
     useEffect(() => { 
       addNewEventCreatedListener();
       async function fetchData() {  
@@ -97,15 +100,14 @@ export default function AddressForm() {
       // setStatus(status2);
       console.log("on create poll finished");
       location.href = "http://localhost:3000/PollFeature";
-      // console.log(status2);
-      // const { status } = await viewAnEvent(walletAddress, pollID);
+      setLoading(true);
     };
 
     // return a poll object polls[pollId]
     // Should work as just to display the error message
     function addNewEventCreatedListener() {
-      console.log("addNewEventCreatedListener");
       pollContract.events.pollCreated({}, (error, data) => {
+        setLoading(false);
           console.log("entered addNewEventCreatedListener");
           if (error) {
               console.log("created failed with error" + error);
@@ -126,7 +128,6 @@ export default function AddressForm() {
     const handleChange = () => {
       form.setFieldsValue({ sights: [] });
     };
-
 
     const handleModalClose = () => {
       setShowModal(false);
@@ -217,10 +218,12 @@ export default function AddressForm() {
               </Button>
             </Form.Item>
           </Form>
+          { loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
           </Grid>
         {/* <Grid item xs={12} sm={12}>
         <button onClick={() => onCreatePollPressed()}> Submit2 </button>
         </Grid> */}
+        
       </Grid>
     </React.Fragment>
   );
