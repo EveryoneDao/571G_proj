@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useEffect, useState } from "react";
@@ -16,7 +17,8 @@ const style = {
     p: 4,
 };
 
-export default function ResultModal(props) {
+
+export default function PollCreationModal(props) {
     const [open, setOpen] = React.useState(false);
     const [message, setMessage] = React.useState("");
     const handleClose = () =>{
@@ -25,7 +27,7 @@ export default function ResultModal(props) {
     } 
 
     //called only once
-    useEffect(() => { 
+    useEffect(() => { //TODO: implement
         async function fetchData() {
             console.log(props);
             setOpen(props.status);
@@ -44,7 +46,7 @@ export default function ResultModal(props) {
             >
                 <Box sx={style}>
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Voting Result is
+                        Poll Created Successfully
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                         {message}

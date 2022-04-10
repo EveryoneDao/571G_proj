@@ -4,9 +4,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
@@ -64,22 +61,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const steps = ['Shipping address', 'Payment details', 'Review your order'];
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <InputForm />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
 
 export default function Checkout() {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
+    location.href = "http://localhost:3000/Dashboard";
     console.log(localStorage.getItem("nameInput"));
     console.log(document.getElementById("pollName").value);
     console.log(document.getElementById("pollDuration").value);
@@ -107,19 +95,9 @@ export default function Checkout() {
             Create A New Event
           </Typography>
           <React.Fragment>
-            {activeStep === steps.length ? (
+            { (
               <React.Fragment>
-                <Typography variant="h5" gutterBottom>
-                  Thank you for your order.
-                </Typography>
-                <Typography variant="subtitle1">
-                  Your order number is #2001539. We have emailed your order confirmation, and will
-                  send you an update when your order has shipped.
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                {getStepContent(activeStep)}
+                <InputForm />
                 <div className={classes.buttons}>
                   {(
                     <Button
@@ -128,7 +106,7 @@ export default function Checkout() {
                     onClick={handleNext}
                     className={classes.button}
                     >
-                    {'Next'}
+                    {'Back'}
                   </Button>
                   )}
                 </div>

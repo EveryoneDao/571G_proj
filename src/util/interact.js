@@ -62,7 +62,7 @@ export const selectAnOption = async (address, pollID, selectOption) => {
         };
     }
 
-    if (option === undefined) {
+    if (selectOption === undefined) {
         return {
             status: "❌ must make a valid selection.",
         };
@@ -276,7 +276,7 @@ export const createFakeEvent = async (address, pollName, pollDescription, durati
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
         from: address, // must match user's active address.
-        data: pollContract.methods.createPoll(pollName, pollDescription, duration, isBlind, isAboutDao, options, false, options, optionsDescription).encodeABI(),
+        data: pollContract.methods.createPoll(pollName, pollDescription, duration, isBlind, isAboutDao, options, optionsDescription).encodeABI(),
     };
     //sign the transaction
     try {
@@ -327,6 +327,35 @@ export const createParticipate = async (address, userName) => {
             method: "eth_sendTransaction",
             params: [transactionParameters],
         });
+        console.log("transaction successed");
+        return ; 
+    } catch (error) {
+        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message;
+    }
+};
+
+
+export const filterPolls = async (address, isByMe, isAboutDao, isBlind) => {
+    //input error handling
+    if (!window.ethereum || address === null) {
+        return {
+            status:
+                "💡 Connect your Metamask wallet to update the message on the blockchain.",
+        };
+    }
+
+    //set up transaction parameters
+    const transactionParameters = {
+        to: contractAddress, // Required except during contract publications.
+        from: address, // must match user's active address.
+        data: pollContract.methods.viewAllPolls(isByMe, isBlind, isAboutDao).encodeABI(),
+    };
+    //sign the transaction
+    try {
+        const txHash = await window.ethereum.request({
+            method: "eth_sendTransaction",
+            params: [transactionParameters],
+        });
         console.log("transaction happened");
         return {
             status: (
@@ -347,4 +376,3 @@ export const createParticipate = async (address, userName) => {
         };
     }
 };
-
