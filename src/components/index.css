@@ -14,7 +14,7 @@ div.c {
   }
 
   .btn-create {
-    background: #00CED1;
+    background: #778899;
     text-align: center;
     width: 150px;
     height: 150px;
@@ -34,15 +34,30 @@ div.c {
   text-align: center;
   font-size: 3vw;
   color: lightblue;
-  border:2px solid #ccc;
 }
+@media screen and (max-width: 400px){
+  #one {
+    float: none;
+    margin-right: 0;
+    width: auto;
+    height: 30%;
+    min-height: 120px;
+    border: 0;
+    border-bottom: 2px solid #000;
+}
+}
+
 #two { 
   background-color: white;
   overflow:hidden;
   margin:10px;
   border:2px dashed #ccc;
-  min-height:170px;
+  min-height:180px;
   font-size: 1.2vw;
+  width: 80%;
+  height: 80%;
+  padding: 2vw 0;
+  margin-left: 10%;
 }
 
 @media screen and (max-width: 400px) {
@@ -72,4 +87,13 @@ div.c {
 .linkToFaucet{
   font-size: 30px !important;
   color:#778899;
+}
+
+.cut-text-poll { 
+  text-overflow: ellipsis;
+  overflow: hidden; 
+  padding-left: 20%;
+  width: 70%; 
+  height: 1.3em; 
+  white-space: nowrap;
 }

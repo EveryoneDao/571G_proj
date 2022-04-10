@@ -35,6 +35,7 @@ import { useTheme } from '@mui/material/styles';
 import { useHistory } from "react-router-dom";
 const Dashboard = (props) => {
     const [events, setEvents] = useState([]);
+    const [initialAllEvents, setInitialAllEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
@@ -42,16 +43,17 @@ const Dashboard = (props) => {
     const [filters, setFilters] = React.useState([]);
     const history = useHistory();
 
+
     //called only once
     useEffect(() => { //TODO: implement
         addResultViewListener();
-        viewFilterPollsListener();
         participateEventListener();
         async function fetchData() {
             const events = await loadAllEvents();
             const { address, status } = await getCurrentWalletConnected();
             setWallet(address);
             setEvents(events);
+            setInitialAllEvents(events);
         }
         fetchData();
     }, []);
@@ -71,28 +73,29 @@ const Dashboard = (props) => {
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addResultViewListener() {
-        console.log("addResultViewListener");
         pollContract.events.resultViewed({}, (error, data) => {
-            console.log("entered addParticipateAnEventsListener");
             if (error) {
                 console.log("error");
             } else {
+                console.log("result data is: " + JSON.stringify(data.returnValues));
+                const votingState = data.returnValues.state;
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if (data[2] == 0) {
+                if(votingState == 0){
                     setResult("Voting in progress, please check back later");
-                } else {
-                    let res = data[1];
-                    if (data[0] == true) {
+                }else{
+                    const votingResult = data.returnValues.result;
+                    const isTie = data.returnValues.tie;
+                    if(isTie){
                         let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < data[1].length; i++) {
-                            resultMsg += possibleSelection[res[i]] + ", ";
+                        for (let i = 0; i < votingResult.length; i++) {
+                            resultMsg += possibleSelection[votingResult[i]] + ", ";
                         }
                         setResult(resultMsg);
-                    } else {
-                        if (res[0] == 0) {
+                    }else{
+                        if(votingResult.length == 0){
                             setResult("No one voted.");
-                        } else {
-                            setResult("Most participate voted: " + possibleSelection[res[0]]);
+                        }else{
+                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
                         }
                     }
                 }
@@ -116,11 +119,23 @@ const Dashboard = (props) => {
                 alert("Error message: " + error);
             } else {
                 let pollName = data.returnValues.poll[3];
-                let pollDescription = data.returnValues.poll[4];
+                let pollDescription = data.returnValues.poll[4] + " heyh yeh";
                 let pollId = data.returnValues.poll[1];
                 let choseFrom = data.returnValues.poll[9];
                 let optionsDescription = data.returnValues.poll[10];
-                history.push({pathname: '/PollBoard', state: { id: pollId, description: pollDescription, name: pollName, options: optionsDescription, wallet: walletAddress }});
+                console.log("optionsDescription " + optionsDescription);
+                console.log("choseFrom " + choseFrom);
+                let optionsDisplay = [];
+                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
+                const testStr = "this is a very long string just be here to test selection display";
+                pollDescription += " Selection Descriptions are :";
+                for (let i = 0; i < choseFrom.length; i++) {
+                    optionsDisplay.push(possibleSelection[choseFrom[i]] + " :" + optionsDescription[i]);
+                    let concatString =  " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i]; 
+                    pollDescription += concatString;
+                }
+                console.log("options " + optionsDisplay);
+                history.push({ pathname: '/PollBoard', state: { id: pollId, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
             }
         });
     }
@@ -148,51 +163,100 @@ const Dashboard = (props) => {
         setShowModal(false);
     }
 
+    // 'All', 'About Dao', 'Not About Dao', 'Blind Vote', 'Non-Blind Vote', 'Created By Me', 'Not Created By Me',
     // TODO: Need Test
     const handleChange = async (event) => {
-        const {
+        let {
             target: { value },
         } = event;
-        let isByMe = value.includes("Created By Me")? true: false;
-        let isAboutDao = value.includes("About Dao")? 1:0;
-        isAboutDao = value.includes("Not About Dao")? 2: isAboutDao;
-        let isBlind = value.includes("Blind Vote")? 1:0;
-        isBlind = value.includes("Non-Blind Vote")? 2:isBlind;
-        if(value.includes("All")){
-            isByMe = false;
-            isAboutDao = 0;
-            isBlind = 0;
+        console.log("on filter change " + JSON.stringify(initialAllEvents));
+        const filterToDisplay = value;
+        if (value.includes("All") || value.length == 0) {
+            setEvents(initialAllEvents);
+            setFilters([]);
+            return;
         }
+
+        let isByMe = value.includes("Created By Me") ? true : false;
+        let isAboutDao = 0;
+        let isBlind = 0;
+
+        value = preprocessFilters(value);
+        if (value.length == 0) {
+            setEvents(initialAllEvents);
+            setFilters(
+                // On autofill we get a stringified value.
+                typeof filterToDisplay === 'string' ? filterToDisplay.split(',') : filterToDisplay,
+            );
+            return;
+        }
+        // Default 0, true: 1, false: 2
+        isAboutDao = value.includes("About Dao") ? 1 : 0;
+        isAboutDao = value.includes("Not About Dao") ? 2 : isAboutDao;
+
+        isBlind = value.includes("Blind Vote") ? 1 : 0;
+        isBlind = value.includes("Non-Blind Vote") ? 2 : isBlind;
+
+        isByMe = value.includes("Created By Me") ? 1 : 0;
+        isByMe = value.includes("Not Created By Me") ? 2 : isByMe;
+
         setFilters(
             // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
+            typeof filterToDisplay === 'string' ? filterToDisplay.split(',') : filterToDisplay,
         );
-        await filterPolls(walletAddress, isByMe, isAboutDao, isBlind);
+        pollsLocalFilter(walletAddress, isByMe, isAboutDao, isBlind);
     };
 
-    // TODO：Need test
-    function viewFilterPollsListener() {
-        console.log("viewFilterPollsListener");
-        pollContract.events.pollsViewed({}, (error, data) => {
-            console.log("entered viewAllPollsListener");
-            if (error) {
-                console.log("polls viewed failed with error" + error);
-                alert("Error message: " + error);
-            } else {
-                console.log("viewed filteredPolls successfully");
-                console.log(data);
+    function preprocessFilters(value) {
+        // Preprocess walletResponse
+        if (value.includes("About Dao") && value.includes("Not About Dao")) {
+            value = value.filter(function (string) { return (string != "About Dao" && string != "Not About Dao"); });
+        };
+
+        if (value.includes("Blind Vote") && value.includes("Non-Blind Vote")) {
+            value = value.filter(function (string) { return (string != "Blind Vote" && string != "Non-Blind Vote"); });
+        };
+
+        if (value.includes("Created By Me") && value.includes("Not Created By Me")) {
+            value = value.filter(function (string) { return (string != "Created By Me" && string != "Not Created By Me"); });
+        };
+        return value;
+    }
+
+    function satisfyFilterConstrain(event, aboutDAO, isBlind, isByMe, address) {
+        if (isBlind == 1 && !event.isBlind) return false;
+        if (isBlind == 2 && event.isBlind) return false;
+
+        if (aboutDAO == 1 && !event.isAboutDao) return false;
+        if (aboutDAO == 2 && event.isAboutDao) return false;
+
+        // want create by me but not
+        if (isByMe == 1 && event.creator != address) return false;
+        // want not create by me but yes
+        if (isByMe == 2 && event.creator == address) return false;
+        return true;
+    };
+
+    function pollsLocalFilter(address, isByMe, isAboutDao, isBlind) {
+        console.log("is about DAO " + isAboutDao)
+        let filterResults = [];
+        for (let i = 0; i < events.length; i++) {
+            if (satisfyFilterConstrain(events[i], isAboutDao, isBlind, isByMe, address)) {
+                filterResults.push(events[i]);
             }
-        });
+        }
+        setEvents(filterResults);
+        return filterResults;
     }
 
     function getStyles(selection, filters, theme) {
         return {
-          fontWeight:
-          filters.indexOf(selection) === -1
-              ? theme.typography.fontWeightRegular
-              : theme.typography.fontWeightMedium,
+            fontWeight:
+                filters.indexOf(selection) === -1
+                    ? theme.typography.fontWeightRegular
+                    : theme.typography.fontWeightMedium,
         };
-      }
+    }
 
     const classes = useStyles();
     const data = events;
@@ -202,7 +266,8 @@ const Dashboard = (props) => {
         'Not About Dao',
         'Blind Vote',
         'Non-Blind Vote',
-        'Created By Me'
+        'Created By Me',
+        'Not Created By Me',
     ];
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -214,7 +279,7 @@ const Dashboard = (props) => {
             },
         },
     };
-    
+
     const theme = useTheme();
 
     return (
