@@ -44,7 +44,6 @@ contract Poll {
         address participantAddr;
         string voterName;
         uint[] pollIds; // Created polls
-        uint[] tempViewPollIds; // For views 
     }
 
     struct PollEvent{
@@ -79,22 +78,17 @@ contract Poll {
     mapping(uint => PollEvent) public polls;
     mapping(uint => PollResult) private pollResults;
 
-    mapping(uint => uint) public fakeTest;
 	constructor() {
         numberOfParticipant = 0;
         nextPollId = 1;
-        fakeTest[2] = 3;
-        fakeTest[3] = 4;
     }
 
     event participantRegistered(string name);
     event participantLoggedIn(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
     event voteDone(address voter, bool voted);
-    event voteEnded(bool tie, Selection[] result);
+    event blindResultViewedFailed(uint remainingSeconds);
     event resultViewed(bool tie, Selection[] result, State state, bool blind); // state is used to determine whether the result is temporary
-    event pollViewed(PollEvent poll);
-    event pollsViewed(uint[] pollIds);
 
     modifier existingParticipantCheck(address addr, string memory name)
     {
@@ -184,7 +178,6 @@ contract Poll {
                 // console.log("end!!!!!!!!!!!!!!!!!!");
                 polls[pollId].state = State.ENDED;
                 pollResults[pollId].state = State.ENDED;
-                emit voteEnded(pollResults[pollId].tie, pollResults[pollId].result);
             }
         }
 
@@ -207,17 +200,6 @@ contract Poll {
         _;
     }
 
-    modifier viewResultCheck(uint pollId)
-    {
-        //console.log("current time in solidity - check", block.timestamp);
-        if (polls[pollId].blind) {
-            require(polls[pollId].state == State.ENDED, "This voting is blind, still in voting");
-            require(polls[pollId].startTime + polls[pollId].votingDuration < block.timestamp, "This voting is blind, result not revealed yet");
-        }
-
-        _;
-    }
-
     // Do this when connecting to wallet and input a name 
     function registerParticipant(string memory _name) 
         existingParticipantCheck(msg.sender, _name)
@@ -225,8 +207,7 @@ contract Poll {
         external payable 
     {
         uint[] memory pollIds;
-        uint[] memory tempViewPollIds;
-        Participant memory newParticipant = Participant(msg.sender, _name, pollIds, tempViewPollIds);
+        Participant memory newParticipant = Participant(msg.sender, _name, pollIds);
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
@@ -290,65 +271,39 @@ contract Poll {
     function viewResult(uint pollId) 
         pollCheck(pollId)
         updateResult(pollId) 
-        viewResultCheck(pollId)
         external
     {
-        emit resultViewed(pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind);
+        //console.log("current time in solidity - check", block.timestamp);
+        if (polls[pollId].blind && polls[pollId].state != State.ENDED &&
+            polls[pollId].startTime + polls[pollId].votingDuration >= block.timestamp) {
+            emit blindResultViewedFailed(polls[pollId].startTime + polls[pollId].votingDuration - block.timestamp);
+        } else {
+            emit resultViewed(pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind);
+        }
     }
 
     function viewPoll(uint pollId) 
-        pollCheck(pollId)
-        updateResult(pollId) 
-        external
-    {   
-        emit pollViewed(polls[pollId]);
-    }
-
-    function filterPoll(uint pollId, FILTER isBlind, FILTER aboutDAO) 
-        pollCheck(pollId)
-        updateResult(pollId) 
-        internal returns (uint)
-    {   
-        if (isBlind == FILTER.IN && !polls[pollId].blind ) return 0;
-        if (isBlind == FILTER.OUT && polls[pollId].blind ) return 0;
-        if (aboutDAO == FILTER.IN && !polls[pollId].aboutDAO ) return 0;
-        if (aboutDAO == FILTER.OUT && polls[pollId].aboutDAO ) return 0;
-        return pollId;
-    }
-
-    function viewAllPolls(bool byMe, FILTER isBlind, FILTER aboutDAO)
         participantCheck()
-        external 
+        pollCheck(pollId)
+        external view
+        returns (PollEvent memory)
+    {   
+        return polls[pollId];
+    }
+
+    function viewPolls()
+        participantCheck()
+        external view
+        returns (uint)
     {
-        uint[] memory tempViewPollIds;
-        participants[msg.sender].tempViewPollIds = tempViewPollIds;
-        if (byMe) {
-            for (uint i = 0; i < participants[msg.sender].pollIds.length; i++) {
-                if (filterPoll(participants[msg.sender].pollIds[i], isBlind, aboutDAO) != 0) {
-                    participants[msg.sender].tempViewPollIds.push(participants[msg.sender].pollIds[i]);
-                }
-            }
-        } else {
-            for (uint i = 1; i < nextPollId; i++) {
-                if (filterPoll(i, isBlind, aboutDAO) != 0) {
-                    participants[msg.sender].tempViewPollIds.push(i);
-                }
-            }
-        }
-        emit pollsViewed(participants[msg.sender].tempViewPollIds);
+        return nextPollId;
     }
 
-    // Helper functions for testing
-    function getParticipantCreatedPollIds() public view returns (uint[] memory) {
+    function getParticipantCreatedPollIds() 
+        participantCheck()
+        public view 
+        returns (uint[] memory) 
+    {
         return participants[msg.sender].pollIds;
-    }
-
-    function getFilteredViewPollIds() public view returns (uint[] memory) {
-        return participants[msg.sender].tempViewPollIds;
-    }
-
-    // Helper functions for web3
-    function getFakeTestMapping(uint id) public view returns(uint s){
-        return fakeTest[id];
     }
 }
