@@ -101,3 +101,22 @@ div.c {
   font-size: 1rem !important;
   padding-left: 1%;
 }
+
+.backLink{
+  color:#696969;
+  padding-top:2%;
+  position: absolute;
+  left: 44%;
+}
+
+.MuiCardHeader-title{
+  font-size:1rem !important;
+}
+
+.MuiTypography-body1{
+  font-size:0.7rem !important;
+}
+
+#cardButton{
+  font-size:0.57rem !important;
+}
