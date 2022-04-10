@@ -69,8 +69,9 @@ export default function PollBoard() {
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
         alert("Option " + optionIndex + " Selected");
-        const { status } = await selectAnOption(walletAddress, pollID, optionIndex);
-        // setStatus(status);
+        let selection = optionIndex + 1;
+        const { status } = await selectAnOption(walletAddress, pollID, selection);
+        setStatus("You have selected optionIndex Please wait");
     };
 
     //TODO: test
@@ -94,35 +95,35 @@ export default function PollBoard() {
     const onViewResultsPressed = async () => { //TODO: test
         console.log(pollID);
         const { status } = await viewResult(walletAddress, pollID);
-        setShowModal(true);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addViewResultListener() {
-        console.log("addResultViewListener");
         pollContract.events.resultViewed({}, (error, data) => {
-            console.log("entered addParticipateAnEventsListener");
             if (error) {
                 console.log("error");
             } else {
+                console.log("result data is: " + JSON.stringify(data.returnValues));
+                const votingState = data.returnValues.state;
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if (data[2] == 0) {
+                if(votingState == 0){
                     setResult("Voting in progress, please check back later");
-                } else {
-                    let res = data[1];
-                    if (data[0] == true) {
+                }else{
+                    const votingResult = data.returnValues.result;
+                    const isTie = data.returnValues.tie;
+                    if(isTie){
                         let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < data[1].length; i++) {
-                            resultMsg += possibleSelection[res[i]] + ", ";
+                        for (let i = 0; i < votingResult.length; i++) {
+                            resultMsg += possibleSelection[votingResult[i]] + ", ";
                         }
                         setResult(resultMsg);
-                    } else {
-                        if (res[0] == 0) {
+                    }else{
+                        if(votingResult.length == 0){
                             setResult("No one voted.");
-                        } else {
-                            setResult("Most participate voted: " + possibleSelection[res[0]]);
+                        }else{
+                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
                         }
                     }
                 }

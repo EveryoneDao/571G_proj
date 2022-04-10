@@ -73,28 +73,29 @@ const Dashboard = (props) => {
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addResultViewListener() {
-        console.log("addResultViewListener");
         pollContract.events.resultViewed({}, (error, data) => {
-            console.log("entered addParticipateAnEventsListener");
             if (error) {
                 console.log("error");
             } else {
+                console.log("result data is: " + JSON.stringify(data.returnValues));
+                const votingState = data.returnValues.state;
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if (data[2] == 0) {
+                if(votingState == 0){
                     setResult("Voting in progress, please check back later");
-                } else {
-                    let res = data[1];
-                    if (data[0] == true) {
+                }else{
+                    const votingResult = data.returnValues.result;
+                    const isTie = data.returnValues.tie;
+                    if(isTie){
                         let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < data[1].length; i++) {
-                            resultMsg += possibleSelection[res[i]] + ", ";
+                        for (let i = 0; i < votingResult.length; i++) {
+                            resultMsg += possibleSelection[votingResult[i]] + ", ";
                         }
                         setResult(resultMsg);
-                    } else {
-                        if (res[0] == 0) {
+                    }else{
+                        if(votingResult.length == 0){
                             setResult("No one voted.");
-                        } else {
-                            setResult("Most participate voted: " + possibleSelection[res[0]]);
+                        }else{
+                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
                         }
                     }
                 }
@@ -127,9 +128,10 @@ const Dashboard = (props) => {
                 let optionsDisplay = [];
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
                 const testStr = "this is a very long string just be here to test selection display";
+                pollDescription += " Selection Descriptions are :";
                 for (let i = 0; i < choseFrom.length; i++) {
                     optionsDisplay.push(possibleSelection[choseFrom[i]] + " :" + optionsDescription[i]);
-                    let concatString =  " " + choseFrom[i] + ". " + optionsDescription[i]; 
+                    let concatString =  " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i]; 
                     pollDescription += concatString;
                 }
                 console.log("options " + optionsDisplay);
