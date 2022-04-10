@@ -48,7 +48,7 @@ export default function PollBoard() {
                 setPollID(loc.state.id);
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
-                setData(loc.state.options);
+                setData(loc.state.ops);
                 const { address, status } = await getCurrentWalletConnected();
                 setWalletAddress(address);
                 setShowModal(false);
@@ -59,10 +59,10 @@ export default function PollBoard() {
             }
         }
         fetchData();
-        console.log("setData");
-        console.log(data);
-        console.log(pollID);
-        console.log(walletAddress);
+        // console.log("setData");
+        // console.log(data);
+        // console.log(pollID);
+        // console.log(walletAddress);
     }, []);
 
     // TODO: Uncomment and test
@@ -140,36 +140,37 @@ export default function PollBoard() {
     return (
         <div className={classes.root}>
             <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
+            <Box sx={{ width: '100%', height: '100%'}}>
+                    <Stack spacing={2} height = "40vh" >
+                        <div id="one">{name}</div>
+                        <span id="two">{description}</span>
+                    </Stack>
+                </Box>
             <Grid
                 container
                 spacing={2}
                 direction="row"
                 justifyContent="flex-start"
                 alignItems="flex-start"
+                height= "80vh"
             > 
-                <Box sx={{ width: '100%' }}>
-                    <Stack spacing={2}>
-                        <div id="one">{name}</div>
-                        <div id="two">{description}</div>
-                    </Stack>
-                </Box>
                 <Grid container direction="row" alignItems="flex-start">
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button onClick={onViewResultsPressed}>View Results</Button> </div>
+                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw' }}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button ><Link to='/Dashboard'> Back </Link></Button> </div>
+                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw' }}> Back </Link></Button> </div>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled">Status Message Here</Button> </div>
+                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>Status Message Here</Button> </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
-                        <h1>{elem}</h1>
+                        <h1 className = "cut-text-poll ">{elem}</h1>
                         <Button variant="outlined" onClick
                             ={() => onSelectPressed(data.indexOf(elem))}
-                        >Select</Button>
+                            style={{ fontSize: '1rem' }}>Select</Button>
                     </Grid>
                 ))}
             </Grid>

@@ -11,24 +11,22 @@ export const pollContract = new web3.eth.Contract(
 );
 
 export const loadAllEvents = async () => {
+    // next possible id
     const nextPossibleEventID = await pollContract.methods.nextPollId().call();
-    console.log("loadAllEvents");
     let eventArr = [];
+    // 1 -> next possible - 1
     if (nextPossibleEventID > 1) {
         for (let i = 1; i < nextPossibleEventID; i++) {
+            // find mapping
             const curEvent = await pollContract.methods.polls(i).call();
-            console.log(curEvent);
-            let curEvent_description = curEvent.description;
-            let curEvent_name = curEvent.name;
-            let curEvent_totalVote = curEvent.totalVote;
-            // TODO: options are not loaded correctly !!!! More investigation needed here
-            let curEvent_optionDesc = curEvent.choseFrom;
             const event_i = {
                 id: i,
-                name: curEvent_name,
-                description: curEvent_description,
-                participants: curEvent_totalVote,
-                selections: ["A", "B", "C"]
+                name: curEvent.name,
+                description: curEvent.description,
+                participants: curEvent.totalVote,
+                creator: curEvent.organizer,
+                isBlind: curEvent.blind, 
+                isAboutDao: curEvent.aboutDAO
             }
             eventArr.push(event_i);
         }
