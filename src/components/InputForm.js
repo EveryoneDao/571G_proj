@@ -182,6 +182,12 @@ export default function AddressForm() {
         <Grid item xs={12} sm={12}>
           <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
             <Form.List name="choice">
+              <Form.Item
+                  // name={[name, 'first']}
+                  rules={[{ required: true, message: 'Missing key value' }]}
+                >
+                  <Input placeholder="Choice Key" />
+              </Form.Item>
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }) => (
