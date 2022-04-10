@@ -17,6 +17,7 @@ import {
     getCurrentWalletConnected
 } from "../util/interact.js"
 import ResultModal from './ResultModal.js';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,6 +40,7 @@ export default function PollBoard() {
     // For pop up modal
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = React.useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -72,14 +74,14 @@ export default function PollBoard() {
         let selection = optionIndex + 1;
         const { status } = await selectAnOption(walletAddress, pollID, selection);
         setStatus("You have selected optionIndex Please wait");
+        setLoading(true);
     };
 
     //TODO: test
     // Expected behavior: 1. select message update(for further functionality)
     function addSelectListener() {
-        console.log("addViewAllEventsListener");
         pollContract.events.voteDone({}, (error, data) => {
-            console.log("entered");
+            setLoading(false);
             if (error) {
                 console.log("error");
                 setStatus("😥 " + error.message);
@@ -95,6 +97,7 @@ export default function PollBoard() {
     const onViewResultsPressed = async () => { //TODO: test
         console.log(pollID);
         const { status } = await viewResult(walletAddress, pollID);
+        setLoading(true);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -102,6 +105,7 @@ export default function PollBoard() {
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addViewResultListener() {
         pollContract.events.resultViewed({}, (error, data) => {
+            setLoading(false);
             if (error) {
                 console.log("error");
             } else {
@@ -157,14 +161,17 @@ export default function PollBoard() {
             > 
                 <Grid container direction="row" alignItems="flex-start">
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw' }}>View Results</Button> </div>
+                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw', color:'#778899' }}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw' }}> Back </Link></Button> </div>
+                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw', color:'#778899'}}> Back </Link></Button> </div>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
                     <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>Status Message Here</Button> </div>
+                    <div>
+                {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
+            </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
