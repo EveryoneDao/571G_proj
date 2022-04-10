@@ -67,6 +67,7 @@ export default function Checkout() {
   const classes = useStyles();
 
   const handleNext = () => {
+    //TODO
     location.href = "http://localhost:3000/Dashboard";
     console.log(localStorage.getItem("nameInput"));
     console.log(document.getElementById("pollName").value);
@@ -74,6 +75,8 @@ export default function Checkout() {
     console.log(document.getElementById("pollDescription").value);
     console.log(document.getElementById("blindVote").checked);
     console.log(document.getElementById("aboutDao").checked);
+    console.log(localStorage.getItem("keyArray"));
+    console.log(localStorage.getItem("valueArray"));
   };
 
 

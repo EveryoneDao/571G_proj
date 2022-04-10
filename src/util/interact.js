@@ -276,7 +276,7 @@ export const createFakeEvent = async (address, pollName, pollDescription, durati
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
         from: address, // must match user's active address.
-        data: pollContract.methods.createPoll(pollName, pollDescription, duration, isBlind, isAboutDao, options, false, options, optionsDescription).encodeABI(),
+        data: pollContract.methods.createPoll(pollName, pollDescription, duration, isBlind, isAboutDao, options, optionsDescription).encodeABI(),
     };
     //sign the transaction
     try {

@@ -5,11 +5,48 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { CardActions } from 'material-ui';
+import { DatePicker } from 'antd';
+import { Form, Input, Select, Button, Space } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 20 },
+  },
+};
+const formItemLayoutWithOutLabel = {
+  wrapperCol: {
+    xs: { span: 24, offset: 0 },
+    sm: { span: 20, offset: 4 },
+  },
+};
+
 import PollCreationModal from './PollCreationModal.js';
 import { useEffect, useState } from "react";
+import {
+  pollContract,
+  createFakeEvent,
+  getCurrentWalletConnected
+} from "../util/interact.js"
 
 export default function AddressForm() {
+
+    const [walletAddress, setWallet] = useState();
     const [showModal, setShowModal] = useState(false);
+    useEffect(() => { 
+      addNewEventCreatedListener();
+      async function fetchData() {  
+        const { address, status } = await getCurrentWalletConnected();
+        console.log(address);
+        setWallet(address);
+      }
+      fetchData();
+    }, []);
 
     function createNewElement() {
         // First create a DIV element.
@@ -22,44 +59,82 @@ export default function AddressForm() {
         document.getElementById("newElementId").appendChild(txtNewInputBox);
     }
 
-    function displayChoice(){
-        setShowModal(true);
-        var num = document.getElementById("numberofChoice").value;
-        console.log(num);
-        for (let i = 0; i < num; ++i){
-            console.log(i);
-        }
-    }
+    var options;
+    var optionDescription;
 
-    const onCreatePollPressed = async () => {
+    const onFinish = values => {
+      let s = values["choice"].length;
+      for (let i = 0; i < s; ++i){
+        keyArray.push(values["choice"][i].first);
+        valueArray.push(values["choice"][i].last);
+      }
+      alert("Choice Submitted");
+      localStorage.setItem("keyArray", keyArray);
+      localStorage.setItem("valueArray", valueArray);
+      let s1 = keyArray.length;
+      console.log(s1);
+      options = keyArray;
+      optionDescription = valueArray;
+      keyArray = [];
+      valueArray = [];
+      onCreatePollPressed();
+    };
+
+
+    const onCreatePollPressed = async() => { 
       console.log("onCreatePollPressed");
-      console.log(walletAddress)
-      // TODO: create pull -> copy paste this part to the first page
-      // This one is just a fake creation we need to grab information from the firstpage.js and then create
-      const pollDescription = "on chain fake event select A if you are happy to day, select B if you feel mad today, select C if you feel sad today";
-      const pollName = "Fake Chain Poll 1";
-      const pollDuration = 259200;
-      const isBlind = false;
-      const isAboutDao = false;
-      const options = [1, 2, 3];
-      const optionDescription = ["A", "B", "C"];
-      const { status2 } = await createFakeEvent(walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
-      setStatus(status2);
+      console.log(walletAddress);
+      // TODO: Change into real options instead of fake ones
+
+      const pollName = document.getElementById("pollName").value;
+      const pollDescription = document.getElementById("pollDescription").value;
+      const pollDuration = document.getElementById("pollDuration").value * 60;
+      const isBlind = document.getElementById("blindVote").checked;
+      const isAboutDao = document.getElementById("aboutDao").checked;
+      console.log(options.length);
+      await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
+      // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
+      // setStatus(status2);
       console.log("on create poll finished");
-      console.log(status2);
-      // uncomment this line when address is ready
+      location.href = "http://localhost:3000/PollFeature";
+      // console.log(status2);
       // const { status } = await viewAnEvent(walletAddress, pollID);
     };
+
+    // return a poll object polls[pollId]
+    // Should work as just to display the error message
+    function addNewEventCreatedListener() {
+      console.log("addNewEventCreatedListener");
+      pollContract.events.pollCreated({}, (error, data) => {
+          console.log("entered addNewEventCreatedListener");
+          if (error) {
+              console.log("created failed with error" + error);
+              alert("Error message: " + error);
+          } else {
+              setShowModal(true);
+              console.log("created successfully");
+              console.log(data.returnValues); // TODO: Print this into warning or modal 
+          }
+      });
+    }
+
+    const [form] = Form.useForm();
+    var keyArray = [];
+    var valueArray = [];
+
+
+    const handleChange = () => {
+      form.setFieldsValue({ sights: [] });
+    };
+
 
     const handleModalClose = () => {
       setShowModal(false);
     } 
+
   return (
     <React.Fragment>
       <div><PollCreationModal status={showModal} handleModalClose={handleModalClose}/></div>
-      {/* <Typography variant="h6" gutterBottom>
-        Shipping address
-      </Typography> */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -76,7 +151,7 @@ export default function AddressForm() {
             required
             id="pollDuration"
             name="pollDuration"
-            label="Poll Duration (in seconds)"
+            label="Poll Duration (in minutes)"
             fullWidth
           />
         </Grid>
@@ -90,26 +165,62 @@ export default function AddressForm() {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-        {/* <FormControlLabel
-            control={<Checkbox color="secondary" name="blindVost" value="yes" />}
-            label="Blind Vote"
-          /> */}
           Blind Vote <input type = "checkbox" id = "blindVote"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
-        {/* <FormControlLabel
-            control={<Checkbox color="secondary" name="aboutDao" value="yes" />}
-            label="About DAO or Not"
-          /> */}
           About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
+          {/* <Select
+            // value={value.currency || currency}
+            // style={{ width: 80, margin: '0 8px' }}
+            // onChange={onCurrencyChange}
+          >
+            <Option value="rmb">RMB</Option>
+            <Option value="dollar">Dollar</Option>
+          </Select> */}
         </Grid>
-        <Grid item xs={12} sm={6}>
-        <label>
-            Number of Choices:
-            <input type="text" id = "numberofChoice" pattern="[0-9]*"/>
-        </label>
-        <button onClick={displayChoice}> Submit </button>
-        </Grid>
+        
+        <Grid item xs={12} sm={12}>
+          <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
+            <Form.List name="choice">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'first']}
+                        rules={[{ required: true, message: 'Missing key value' }]}
+                      >
+                        <Input placeholder="Choice Key" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'last']}
+                        rules={[{ required: true, message: 'Missing key description' }]}
+                      >
+                        <Input placeholder="Description" />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
+                  ))}
+                  <Form.Item>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Add field
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+          </Grid>
+        {/* <Grid item xs={12} sm={12}>
+        <button onClick={() => onCreatePollPressed()}> Submit2 </button>
+        </Grid> */}
       </Grid>
     </React.Fragment>
   );
