@@ -76,7 +76,7 @@ export default function AddressForm() {
         // keyArray.push(values["choice"][i].first);
         valueArray.push(values["choice"][i].last);
       }
-      alert("Choice Submitted");
+      //alert("Choice Submitted");
       // localStorage.setItem("keyArray", keyArray);
       localStorage.setItem("valueArray", valueArray);
       let s1 = valueArray.length;
