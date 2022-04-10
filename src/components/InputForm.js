@@ -76,7 +76,6 @@ export default function AddressForm() {
         // keyArray.push(values["choice"][i].first);
         valueArray.push(values["choice"][i].last);
       }
-      //alert("Choice Submitted");
       // localStorage.setItem("keyArray", keyArray);
       localStorage.setItem("valueArray", valueArray);
       let s1 = valueArray.length;
@@ -101,8 +100,18 @@ export default function AddressForm() {
       const pollDuration = document.getElementById("pollDuration").value * 60;
       const isBlind = document.getElementById("blindVote").checked;
       const isAboutDao = document.getElementById("aboutDao").checked;
+
+      if (pollName.length == 0){
+        alert("Please enter the poll name to proceed. ")
+        return;
+      }
+      if (pollDescription.length == 0){
+        alert("Please provide your event description. ")
+        return;
+      }
       console.log(options.length);
       await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
+      alert("Event Submitted");
       // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
       // setStatus(status2);
       console.log("on create poll finished");
@@ -159,6 +168,7 @@ export default function AddressForm() {
         <Grid item xs={12} sm={6}>
           <TextField
             required
+            type = "number"
             id="pollDuration"
             name="pollDuration"
             label="Poll Duration (in minutes)"
@@ -201,7 +211,7 @@ export default function AddressForm() {
                   ))}
                   <Form.Item>
                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                      Add field
+                      Add a Selection
                     </Button>
                   </Form.Item>
                 </>
