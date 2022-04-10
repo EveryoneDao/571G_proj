@@ -17,6 +17,7 @@ import {
     getCurrentWalletConnected
 } from "../util/interact.js"
 import ResultModal from './ResultModal.js';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,6 +40,7 @@ export default function PollBoard() {
     // For pop up modal
     const [result, setResult] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = React.useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -48,7 +50,7 @@ export default function PollBoard() {
                 setPollID(loc.state.id);
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
-                setData(loc.state.options);
+                setData(loc.state.ops);
                 const { address, status } = await getCurrentWalletConnected();
                 setWalletAddress(address);
                 setShowModal(false);
@@ -59,26 +61,27 @@ export default function PollBoard() {
             }
         }
         fetchData();
-        console.log("setData");
-        console.log(data);
-        console.log(pollID);
-        console.log(walletAddress);
+        // console.log("setData");
+        // console.log(data);
+        // console.log(pollID);
+        // console.log(walletAddress);
     }, []);
 
     // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
         alert("Option " + optionIndex + " Selected");
-        const { status } = await selectAnOption(walletAddress, pollID, optionIndex);
-        // setStatus(status);
+        let selection = optionIndex + 1;
+        const { status } = await selectAnOption(walletAddress, pollID, selection);
+        setStatus("You have selected optionIndex Please wait");
+        setLoading(true);
     };
 
     //TODO: test
     // Expected behavior: 1. select message update(for further functionality)
     function addSelectListener() {
-        console.log("addViewAllEventsListener");
         pollContract.events.voteDone({}, (error, data) => {
-            console.log("entered");
+            setLoading(false);
             if (error) {
                 console.log("error");
                 setStatus("😥 " + error.message);
@@ -94,35 +97,37 @@ export default function PollBoard() {
     const onViewResultsPressed = async () => { //TODO: test
         console.log(pollID);
         const { status } = await viewResult(walletAddress, pollID);
-        setShowModal(true);
+        setLoading(true);
     };
 
     // Expected behavior: when results is returned show it in the pop up window
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addViewResultListener() {
-        console.log("addResultViewListener");
         pollContract.events.resultViewed({}, (error, data) => {
-            console.log("entered addParticipateAnEventsListener");
+            setLoading(false);
             if (error) {
                 console.log("error");
             } else {
+                console.log("result data is: " + JSON.stringify(data.returnValues));
+                const votingState = data.returnValues.state;
                 const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if (data[2] == 0) {
+                if(votingState == 0){
                     setResult("Voting in progress, please check back later");
-                } else {
-                    let res = data[1];
-                    if (data[0] == true) {
+                }else{
+                    const votingResult = data.returnValues.result;
+                    const isTie = data.returnValues.tie;
+                    if(isTie){
                         let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < data[1].length; i++) {
-                            resultMsg += possibleSelection[res[i]] + ", ";
+                        for (let i = 0; i < votingResult.length; i++) {
+                            resultMsg += possibleSelection[votingResult[i]] + ", ";
                         }
                         setResult(resultMsg);
-                    } else {
-                        if (res[0] == 0) {
+                    }else{
+                        if(votingResult.length == 0){
                             setResult("No one voted.");
-                        } else {
-                            setResult("Most participate voted: " + possibleSelection[res[0]]);
+                        }else{
+                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
                         }
                     }
                 }
@@ -140,36 +145,40 @@ export default function PollBoard() {
     return (
         <div className={classes.root}>
             <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
+            <Box sx={{ width: '100%', height: '100%'}}>
+                    <Stack spacing={2} height = "40vh" >
+                        <div id="one">{name}</div>
+                        <span id="two">{description}</span>
+                    </Stack>
+                </Box>
             <Grid
                 container
                 spacing={2}
                 direction="row"
                 justifyContent="flex-start"
                 alignItems="flex-start"
+                height= "80vh"
             > 
-                <Box sx={{ width: '100%' }}>
-                    <Stack spacing={2}>
-                        <div id="one">{name}</div>
-                        <div id="two">{description}</div>
-                    </Stack>
-                </Box>
                 <Grid container direction="row" alignItems="flex-start">
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button onClick={onViewResultsPressed}>View Results</Button> </div>
+                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw', color:'#778899' }}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button ><Link to='/Dashboard'> Back </Link></Button> </div>
+                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw', color:'#778899'}}> Back </Link></Button> </div>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled">Status Message Here</Button> </div>
+                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>Status Message Here</Button> </div>
+                    <div>
+                {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
+            </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
-                        <h1>{elem}</h1>
+                        <h1 className = "cut-text-poll ">{elem}</h1>
                         <Button variant="outlined" onClick
                             ={() => onSelectPressed(data.indexOf(elem))}
-                        >Select</Button>
+                            style={{ fontSize: '1rem' }}>Select</Button>
                     </Grid>
                 ))}
             </Grid>
