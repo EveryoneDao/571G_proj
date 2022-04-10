@@ -68,7 +68,7 @@ export default function AddressForm() {
 
     const onFinish = values => {
       if (values["choice"] == null || values["choice"].length <2){
-        alert("Please provide more than 2 choices. ")
+        alert("Please provide at least 2 choices. ")
         return;
       }
       let s = values["choice"].length;
@@ -111,11 +111,7 @@ export default function AddressForm() {
       }
       console.log(options.length);
       await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
-      alert("Event Submitted");
-      // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
-      // setStatus(status2);
-      console.log("on create poll finished");
-      //location.href = "http://localhost:3000/PollFeature";
+      alert("Event creation request Submitted");
       setLoading(true);
     };
 
@@ -188,7 +184,7 @@ export default function AddressForm() {
           Blind Vote <input type = "checkbox" id = "blindVote"/> 
         </Grid>
         <Grid item xs={12} sm={6}>
-          About DAO or Not<input type = "checkbox" id = "aboutDao"/> 
+          Check if this poll is about DAO<input type = "checkbox" id = "aboutDao"/> 
         </Grid>
 
         <Grid item xs={12}>

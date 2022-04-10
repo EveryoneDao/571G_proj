@@ -295,6 +295,10 @@ const Dashboard = (props) => {
                     <div position="absolute" top="0" >
                         <a href="https://faucet.egorfine.com/" target='_blank' className="linkToFaucet" >Get more <span >testnet tokens</span></a>
                     </div>
+                    <div position="absolute">
+                    <a href='/' className="backLink" >Back <span >To the Welcome Page</span></a>
+                    </div>
+                   
                     <div className="dropDown">
                         <Box sx={{ minWidth: 130, maxWidth: 200, ml: "80%", borderColor: 'primary.main' }} >
                             <FormControl sx={{ m: 1, width: 300 }}>
@@ -332,9 +336,9 @@ const Dashboard = (props) => {
                         </CardContent>
                         <CardActions position="center">
                             <Grid item xs={6}>
-                                <Link to={{ pathname: '/PollBoard', state: { id: 1, name: 'sabaoon', shirt: 'green' } }} >Test</Link>
+                                <Link to={{ pathname: '/'}} >Test</Link>
                             </Grid>
-                            <Grid item xs={6}><Button size="small" onClick={() => { alert("✔️ Please add a new event or join an existing event!"); }}>View Results</Button>
+                            <Grid item xs={6}><Button id="cardButton" size="small" onClick={() => { alert("Welcome! Please Like our github repo at: \n \n https://github.com/taichenl/571G_proj!"); }}>View Results</Button>
                             </Grid>
                         </CardActions>
                     </Card>
@@ -343,8 +347,8 @@ const Dashboard = (props) => {
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <Card className={classes.cardEle}>
                             <CardHeader
-                                title={`Poll : ${elem.name}`}
-                                subheader={`Participants: ${elem.participants}`}
+                                title={`${elem.name}`}
+                                subheader={`Participants: ${elem.participants}  `}
                             />
                             <CardContent>
                                 <Typography className="cut-text" gutterBottom>
@@ -353,10 +357,10 @@ const Dashboard = (props) => {
                             </CardContent>
                             <CardActions >
                                 <Grid item xs={6}>
-                                    <Button size="small" onClick
+                                    <Button id="cardButton" size="small" font-size= "0.7rem" onClick
                                         ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Button>
                                 </Grid>
-                                <Grid item xs={6}><Button size="small" onClick
+                                <Grid  item xs={6}><Button id="cardButton" size="small" font-size= "0.7rem"onClick
                                     ={() => onViewResultsPressed(elem.id)}>View Results</Button>
                                 </Grid>
                             </CardActions>

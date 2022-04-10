@@ -46,7 +46,7 @@ export default function PollCreationModal(props) {
             >
                 <Box sx={style}>
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Poll Created Successfully
+                        Poll Created Successfully, Click "Back" to see it on the Dashboard.
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                         {message}

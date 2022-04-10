@@ -166,7 +166,8 @@ export default function Voting_choice() {
         console.log("Registration successfully");
         alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
         setLoading(false);
-        location.href = "http://localhost:3000/Dashboard";
+        //pathname: '/PollFeature' 
+        location.href = "/Dashboard";
       }
     });
   }
@@ -181,7 +182,7 @@ export default function Voting_choice() {
       } else {
         console.log("Login successfully");
         alert(data.returnValues.name + " Logined In"); // TODO: Add into pop up or warning 
-        location.href = "http://localhost:3000/Dashboard";
+        location.href = "/Dashboard";
       }
     });
   }
