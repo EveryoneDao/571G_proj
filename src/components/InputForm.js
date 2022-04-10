@@ -33,6 +33,7 @@ import {
   createFakeEvent,
   getCurrentWalletConnected
 } from "../util/interact.js"
+import { AlternateEmail } from '@mui/icons-material';
 
 export default function AddressForm() {
 
@@ -63,6 +64,10 @@ export default function AddressForm() {
     var optionDescription;
 
     const onFinish = values => {
+      if (values["choice"] == null || values["choice"].length <2){
+        alert("Please provide more than 2 choices. ")
+        return;
+      }
       let s = values["choice"].length;
       for (let i = 0; i < s; ++i){
         keyArray.push(values["choice"][i].first);
@@ -182,12 +187,6 @@ export default function AddressForm() {
         <Grid item xs={12} sm={12}>
           <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off" align = "center">
             <Form.List name="choice">
-              <Form.Item
-                  // name={[name, 'first']}
-                  rules={[{ required: true, message: 'Missing key value' }]}
-                >
-                  <Input placeholder="Choice Key" />
-              </Form.Item>
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }) => (
