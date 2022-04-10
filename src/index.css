@@ -98,3 +98,24 @@ h2{
 a {
   color:#254cdd
 }
+
+#logo{ 
+	position:fixed; 
+	top:0; 
+	left:0; 
+} 
+
+#logo{ 
+	position:fixed; 
+	top:80%; 
+	left:90%; 
+  height: 9vw; 
+  width: 9vw;
+  padding-right: 3%;
+  padding-top: 1%;
+} 
+
+#root{
+  height: 100%;
+  width: 70%;
+}

@@ -4,8 +4,9 @@ import ResultModal from './components/ResultModal'
 import FirstPage from './components/FirstPage'
 import PollFeature from './components/PollFeature'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
- 
+import image from './images/logo.png'   
 import './App.css';
+import './index.css';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           </Route>
         </Switch>
       </BrowserRouter>
+      <div id = "logo"><img src={image} /></div>
     </div>
   );
 }
