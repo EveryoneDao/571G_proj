@@ -44,6 +44,7 @@ contract Poll {
         address participantAddr;
         string voterName;
         uint[] pollIds; // Created polls
+        uint[] votedPollIds; // Voted polls
     }
 
     struct PollEvent{
@@ -86,7 +87,7 @@ contract Poll {
     event participantRegistered(string name);
     event participantLoggedIn(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
-    event voteDone(address voter, bool voted);
+    event voteDone(Selection choice, bool voted);
     event blindResultViewedFailed(uint remainingSeconds);
     event resultViewed(bool tie, Selection[] result, State state, bool blind); // state is used to determine whether the result is temporary
 
@@ -207,7 +208,8 @@ contract Poll {
         external payable 
     {
         uint[] memory pollIds;
-        Participant memory newParticipant = Participant(msg.sender, _name, pollIds);
+        uint[] memory votedPollIds;
+        Participant memory newParticipant = Participant(msg.sender, _name, pollIds, votedPollIds);
         participants[msg.sender] = newParticipant;
         participantName[_name] = msg.sender;
 
@@ -253,10 +255,14 @@ contract Poll {
         external
     {
         bool voted = false; // Reflects first vote or change of mind vote
+
         uint i = 0;
         for (; i < polls[pollId].voted.length; i++) {
-            if (polls[pollId].voted[i] == msg.sender) { voted = true; break; }
-        }
+            if (polls[pollId].voted[i] == msg.sender) { 
+                voted = true; 
+                break; 
+            }
+        }      
 
         if (voted) {
             pollResults[pollId].votedChoices[i] = choice;
@@ -265,7 +271,7 @@ contract Poll {
             polls[pollId].voted.push(msg.sender);
             pollResults[pollId].votedChoices.push(choice);
         }
-        emit voteDone(msg.sender, voted); 
+        emit voteDone(choice, voted); 
     }
 
     function viewResult(uint pollId) 
@@ -297,6 +303,27 @@ contract Poll {
         returns (uint)
     {
         return nextPollId;
+    }
+
+    function checkVotedChoice(uint pollId)
+        participantCheck()
+        pollCheck(pollId)
+        external view 
+        returns (bool, Selection)
+    {        
+        bool voted = false; // Reflects first vote or change of mind vote
+        Selection mySelection = Selection.DEFAULT;
+
+        uint i = 0;
+        for (; i < polls[pollId].voted.length; i++) {
+            if (polls[pollId].voted[i] == msg.sender) { 
+                voted = true; 
+                mySelection = pollResults[pollId].votedChoices[i];
+                break; 
+            }
+        }           
+
+        return (voted, mySelection);                  
     }
 
     function getParticipantCreatedPollIds() 

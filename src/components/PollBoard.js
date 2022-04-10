@@ -14,7 +14,8 @@ import {
     pollContract,
     selectAnOption,
     viewResult,
-    getCurrentWalletConnected
+    getCurrentWalletConnected,
+    checkPrevVote
 } from "../util/interact.js"
 import ResultModal from './ResultModal.js';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,11 +27,11 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-// TODO: further potential update: display user's current choice as a text msg on this page in "status" state
 export default function PollBoard() {
+    const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
     let loc = useLocation();
     // for current page
-    const [status, setStatus] = useState("Hello Please Vote");
+    const [msg, setMsg] = useState("Hello Please Vote");
     const [pollID, setPollID] = useState(0);
     const [name, setName] = useState(0);
     const [description, setPollDescription] = useState("Please select a poll from the dashboard");
@@ -56,6 +57,11 @@ export default function PollBoard() {
                 setShowModal(false);
                 addSelectListener();
                 addViewResultListener();
+                console.log(address, pollID);
+                const prevVote = await checkPrevVote(address, loc.state.id);
+                if (prevVote[0]) {
+                    setMsg("You have previously vote " + possibleSelection[prevVote[1]] + ", feel free to change your mind.");
+                }
             }else{
                 console.log("loc state undefined");
             }
@@ -67,27 +73,29 @@ export default function PollBoard() {
         // console.log(walletAddress);
     }, []);
 
-    // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
-        alert("Option " + optionIndex + " Selected");
+        //alert("Option " + optionIndex + " Selected");
         let selection = optionIndex + 1;
         const { status } = await selectAnOption(walletAddress, pollID, selection);
-        setStatus("You have selected optionIndex Please wait");
+        setMsg("You have selected " + possibleSelection[selection] + ", Please wait.");
         setLoading(true);
     };
 
-    //TODO: test
     // Expected behavior: 1. select message update(for further functionality)
     function addSelectListener() {
         pollContract.events.voteDone({}, (error, data) => {
             setLoading(false);
             if (error) {
                 console.log("error");
-                setStatus("😥 " + error.message);
+                setMsg("😥 " + error.message);
             } else {
+                const isRevote = data.returnValues.changed;
+                const choice = data.returnValues.choice;
+                console.log(data);
                 console.log("what");
-                setStatus("🎉 You have voted successfully");
+                if (isRevote) {setMsg("🎉 You have re-vote " + possibleSelection[choice] + " successfully");} 
+                else {setMsg("🎉 You have vote " + possibleSelection[choice] + " successfully");}
             }
         });
     }
@@ -111,7 +119,6 @@ export default function PollBoard() {
             } else {
                 console.log("result data is: " + JSON.stringify(data.returnValues));
                 const votingState = data.returnValues.state;
-                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
                 if(votingState == 0){
                     setResult("Voting in progress, please check back later");
                 }else{
@@ -168,7 +175,7 @@ export default function PollBoard() {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>Status Message Here</Button> </div>
+                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>{msg}</Button> </div>
                     <div>
                 {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
             </div>

@@ -5,7 +5,7 @@ const web3 = createAlchemyWeb3(alchemyKey);
 
 const contractABI = require("../contract-abi.json");
 //const contractAddress = process.env.CONTRACT_ADDRESS; // TODO
-const contractAddress = "0x4E17EDeAda1Bf74d827d6e80EB45b6aB433bA270";
+const contractAddress = "0xDfeB0F818b2a26Cd0F5337746C9ac9D97e1D26B3";
 console.log(contractAddress);
 
 export const pollContract = new web3.eth.Contract(
@@ -54,6 +54,33 @@ export const loadAllEvents = async (address) => {
     return eventArr;
 };
 
+
+export const viewAnEvent = async (address, pollID) => {
+
+    //sign the transaction
+    try {
+        const curEvent = await pollContract.methods.viewPoll(pollID).call({ from: address });
+        return curEvent;
+    } catch (error) {
+        return {
+            status: "😥 " + error.message,
+        };
+    }
+}
+
+export const checkPrevVote = async (address, pollID) => {
+
+    //sign the transaction
+    try {
+        const prevChoice = await pollContract.methods.checkVotedChoice(pollID).call({ from: address });
+        return prevChoice;
+    } catch (error) {
+        return {
+            status: "😥 " + error.message,
+        };
+    }
+}
+
 export const selectAnOption = async (address, pollID, selectOption) => {
     //input error handling
     if (!window.ethereum || address === null) {
@@ -94,19 +121,6 @@ export const selectAnOption = async (address, pollID, selectOption) => {
                 </span>
             ),
         };
-    } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
-    }
-}
-
-export const viewAnEvent = async (address, pollID) => {
-
-    //sign the transaction
-    try {
-        const curEvent = await pollContract.methods.viewPoll(pollID).call({ from: address });
-        return curEvent;
     } catch (error) {
         return {
             status: "😥 " + error.message,
@@ -305,44 +319,3 @@ export const createParticipate = async (address, userName) => {
 };
 
 
-export const filterPolls = async (address, isByMe, isAboutDao, isBlind) => {
-    //input error handling
-    if (!window.ethereum || address === null) {
-        return {
-            status:
-                "💡 Connect your Metamask wallet to update the message on the blockchain.",
-        };
-    }
-
-    //set up transaction parameters
-    const transactionParameters = {
-        to: contractAddress, // Required except during contract publications.
-        from: address, // must match user's active address.
-        data: pollContract.methods.viewAllPolls(isByMe, isBlind, isAboutDao).encodeABI(),
-    };
-    //sign the transaction
-    try {
-        const txHash = await window.ethereum.request({
-            method: "eth_sendTransaction",
-            params: [transactionParameters],
-        });
-        console.log("transaction happened");
-        return {
-            status: (
-                <span>
-                    ✅{" "}
-                    <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
-                        View the status of your transaction on Etherscan!
-                    </a>
-                    <br />
-                    ℹ️ Once the transaction is verified by the network, you have successfully created.
-                    Thank you for your participant.
-                </span>
-            ),
-        };
-    } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
-    }
-};
