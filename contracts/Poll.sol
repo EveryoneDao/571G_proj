@@ -71,7 +71,7 @@ contract Poll {
     }
 
     uint public numberOfParticipant;
-    uint public nextPollId;
+    uint private nextPollId;
     
     mapping(address => Participant) public participants;
     mapping(string => address) public participantName; 

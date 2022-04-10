@@ -94,7 +94,6 @@ export default function AddressForm() {
     const onCreatePollPressed = async() => { 
       console.log("onCreatePollPressed");
       console.log(walletAddress);
-      // TODO: Change into real options instead of fake ones
 
       const pollName = document.getElementById("pollName").value;
       const pollDescription = document.getElementById("pollDescription").value;
@@ -116,7 +115,7 @@ export default function AddressForm() {
       // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
       // setStatus(status2);
       console.log("on create poll finished");
-      location.href = "http://localhost:3000/PollFeature";
+      //location.href = "http://localhost:3000/PollFeature";
       setLoading(true);
     };
 

@@ -14,8 +14,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import {
   connectWallet,
-  loadTokenName,
-  loadTokenAccountBalance,
   getCurrentWalletConnected,
   createParticipate,
   pollContract
@@ -71,11 +69,7 @@ export default function Voting_choice() {
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
 
-  const [tokenName, setTokenName] = useState("No connection to the network.");
-  const [loading, setLoading] = React.useState(false);
-  const [tokenBalance, settokenBalance] = useState(
-    "No connection to the network."
-  );
+  const [loading, setLoading] = useState(false);
 
   const [toAddress, setToAddress] = useState("");
 
@@ -83,11 +77,7 @@ export default function Voting_choice() {
   useEffect(() => {
     async function fetchData() {
       if (walletAddress !== "") {
-        const tokenBalance = await loadTokenAccountBalance(walletAddress);
-        settokenBalance(tokenBalance);
       }
-      const tokenName = await loadTokenName();
-      setTokenName(tokenName);
       const { address, status } = await getCurrentWalletConnected();
       setWallet(address);
       setStatus(status);
@@ -97,7 +87,7 @@ export default function Voting_choice() {
       // addSmartContractListener();
     }
     fetchData();
-  }, [walletAddress, tokenBalance]);
+  }, [walletAddress]);
 
   const continueWithName = async () => {
     localStorage.setItem("nameInput", document.getElementById("nameInput").value);
