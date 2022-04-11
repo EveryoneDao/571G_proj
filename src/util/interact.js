@@ -62,9 +62,7 @@ export const viewAnEvent = async (address, pollID) => {
         const curEvent = await pollContract.methods.viewPoll(pollID).call({ from: address });
         return curEvent;
     } catch (error) {
-        return {
-            status: "😥 " + error.message + " rejected",
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -75,9 +73,7 @@ export const checkPrevVote = async (address, pollID) => {
         const prevChoice = await pollContract.methods.checkVotedChoice(pollID).call({ from: address });
         return prevChoice;
     } catch (error) {
-        return {
-            status: "😥 " + error.message + " rejected",
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -122,9 +118,7 @@ export const selectAnOption = async (address, pollID, selectOption) => {
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message + " rejected",
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -163,9 +157,7 @@ export const viewResult = async (address, pollID) => {
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message + " rejected",
-        };
+        return error.message + " rejected";
     }
 }
 
@@ -224,10 +216,7 @@ export const getCurrentWalletConnected = async () => {
                 };
             }
         } catch (err) {
-            return {
-                address: "",
-                status: "😥 " + err.message+ " rejected",
-            };
+            return "😥 " + error.message + " rejected";
         }
     } else {
         return {
@@ -283,9 +272,7 @@ export const createFakeEvent = async (address, pollName, pollDescription, durati
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message + " rejected",
-        };
+        return "😥 " + error.message + " rejected";
     }
 };
 

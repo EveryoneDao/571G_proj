@@ -67,19 +67,18 @@ export default function PollBoard() {
             }
         }
         fetchData();
-        // console.log("setData");
-        // console.log(data);
-        // console.log(pollID);
-        // console.log(walletAddress);
     }, []);
 
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
         //alert("Option " + optionIndex + " Selected");
         let selection = optionIndex + 1;
-        const { status } = await selectAnOption(walletAddress, pollID, selection);
+        const res = await selectAnOption(walletAddress, pollID, selection);
         setMsg("You have selected " + possibleSelection[selection] + ", Please wait.");
         setLoading(true);
+        if(typeof(res) === "string" && res.includes("rejected")){
+            setLoading(false);
+        }
     };
 
     // Expected behavior: 1. select message update(for further functionality)
@@ -104,8 +103,11 @@ export default function PollBoard() {
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { //TODO: test
         console.log(pollID);
-        const { status } = await viewResult(walletAddress, pollID);
+        const res  = await viewResult(walletAddress, pollID);
         setLoading(true);
+        if(typeof(res) === "string" && res.includes("rejected")){
+            setLoading(false);
+        }
     };
 
     // Expected behavior: when results is returned show it in the pop up window

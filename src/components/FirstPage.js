@@ -101,7 +101,7 @@ export default function Voting_choice() {
     else {
       const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
       setLoading(true);
-      if(res.includes("rejected")){
+      if(typeof(res) === "string" && res.includes("rejected")){
         setLoading(false);
       }
       console.log("failed " + res);

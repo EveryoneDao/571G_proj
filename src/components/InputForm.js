@@ -109,11 +109,10 @@ export default function AddressForm() {
         alert("Please provide your event description. ")
         return;
       }
-      console.log(options.length);
-      await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
+      const res = await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
       //alert("Event creation request Submitted");
       setLoading(true);
-      if(res.includes("rejected")){
+      if(typeof(res) === "string" && res.includes("rejected")){
         setLoading(false);
       }
     };
