@@ -107,8 +107,8 @@ contract Poll {
     modifier newParticipantCheck(string memory name)
     {
         require(participantName[name] == address(0x0), "Participant already registered");
-        // require(msg.value >= registrationPrice, "Asset not enough to register");
-        // require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
+        require(msg.value >= registrationPrice, "Asset not enough to register");
+        require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
 
         _;
     }
@@ -135,7 +135,7 @@ contract Poll {
     }
 
     modifier pollCheck(uint pollId) {
-        require(polls[pollId].pollId > 0, "Poll not created");
+        require(pollId < nextPollId && polls[pollId].pollId > 0, "Poll not created");
         _;
     }
 
