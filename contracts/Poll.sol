@@ -87,9 +87,9 @@ contract Poll {
     event participantRegistered(string name);
     event participantLoggedIn(string name);
     event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
-    event voteDone(Selection choice, bool voted);
-    event blindResultViewedFailed(uint remainingSeconds);
-    event resultViewed(bool tie, Selection[] result, State state, bool blind); // state is used to determine whether the result is temporary
+    event voteDone(Selection choice, bool voted, address sender);
+    event blindResultViewedFailed(uint remainingSeconds, address sender);
+    event resultViewed(bool tie, Selection[] result, State state, bool blind, address sender); // state is used to determine whether the result is temporary
 
     modifier existingParticipantCheck(address addr, string memory name)
     {
@@ -107,8 +107,8 @@ contract Poll {
     modifier newParticipantCheck(string memory name)
     {
         require(participantName[name] == address(0x0), "Participant already registered");
-        require(msg.value >= registrationPrice, "Asset not enough to register");
-        require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
+        // require(msg.value >= registrationPrice, "Asset not enough to register");
+        // require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
 
         _;
     }
@@ -205,7 +205,7 @@ contract Poll {
     function registerParticipant(string memory _name) 
         existingParticipantCheck(msg.sender, _name)
         newParticipantCheck(_name) 
-        external payable 
+        external 
     {
         uint[] memory pollIds;
         uint[] memory votedPollIds;
@@ -271,7 +271,7 @@ contract Poll {
             polls[pollId].voted.push(msg.sender);
             pollResults[pollId].votedChoices.push(choice);
         }
-        emit voteDone(choice, voted); 
+        emit voteDone(choice, voted, msg.sender); 
     }
 
     function viewResult(uint pollId) 
@@ -282,9 +282,9 @@ contract Poll {
         //console.log("current time in solidity - check", block.timestamp);
         if (polls[pollId].blind && polls[pollId].state != State.ENDED &&
             polls[pollId].startTime + polls[pollId].votingDuration >= block.timestamp) {
-            emit blindResultViewedFailed(polls[pollId].startTime + polls[pollId].votingDuration - block.timestamp);
+            emit blindResultViewedFailed(polls[pollId].startTime + polls[pollId].votingDuration - block.timestamp, msg.sender);
         } else {
-            emit resultViewed(pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind);
+            emit resultViewed(pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind, msg.sender);
         }
     }
 

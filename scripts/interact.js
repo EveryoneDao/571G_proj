@@ -21,7 +21,7 @@ async function main() {
     console.log("The numberOfParticipant is: " + numberOfParticipant);
 
     console.log("A new participant log in ...");
-    const tx = await pollContract.registerParticipant("Monica", {value: "100000000000000000"});
+    const tx = await pollContract.registerParticipant("Monica");
     await tx.wait();
 
     const newNumberOfParticipant = await pollContract.numberOfParticipant();
