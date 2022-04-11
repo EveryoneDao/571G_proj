@@ -1,5 +1,5 @@
 require('dotenv').config();
-const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
+const alchemyKey = "wss://eth-ropsten.alchemyapi.io/v2/98oOO43rn4ZlHCWKkeICXuRafJaR_45P";
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 
@@ -303,5 +303,4 @@ export const createParticipate = async (address, userName) => {
         return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message + " rejected";
     }
 };
-
 
