@@ -34,7 +34,10 @@ import { useTheme } from '@mui/material/styles';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useHistory } from "react-router-dom";
+
+let tmp;
 const Dashboard = (props) => {
+    const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
     const [events, setEvents] = useState([]);
     const [initialAllEvents, setInitialAllEvents] = useState([]);
     const [walletAddress, setWallet] = useState();
@@ -48,6 +51,7 @@ const Dashboard = (props) => {
 
     //called only once
     useEffect(() => { //TODO: implement
+        addViewBlindResultFailListener();
         addResultViewListener();
         // participateEventListener(); // TODO: change into view
         async function fetchData() {
@@ -72,7 +76,6 @@ const Dashboard = (props) => {
         console.log("optionsDescription " + optionsDescription);
         console.log("choseFrom " + choseFrom);
         let optionsDisplay = [];
-        const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
         const testStr = "this is a very long string just be here to test selection display";
         pollDescription += " Selection Descriptions are :";
         for (let i = 0; i < choseFrom.length; i++) {
@@ -84,7 +87,6 @@ const Dashboard = (props) => {
         history.push({ pathname: '/PollBoard', state: { id: pollID, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
     };
 
-    //TODO: test
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
         const { status } = await viewResult(walletAddress, pollID);
@@ -100,33 +102,54 @@ const Dashboard = (props) => {
             if (error) {
                 console.log("error");
             } else {
-                console.log("result data is: " + JSON.stringify(data.returnValues));
-                const votingState = data.returnValues.state;
-                const possibleSelection = ["DEFAULT", "A", "B", "C", "D", "E", "F", "G", "H"];
-                if (votingState == 0) {
-                    setResult("Voting in progress, please check back later");
+                let resultMsg = "";
+                if (data.returnValues.blind) {
+                    resultMsg += "Blind ";
                 } else {
-                    const votingResult = data.returnValues.result;
-                    const isTie = data.returnValues.tie;
-                    if (isTie) {
-                        let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < votingResult.length; i++) {
-                            resultMsg += possibleSelection[votingResult[i]] + ", ";
-                        }
-                        setResult(resultMsg);
+                    resultMsg += "Real time ";
+                }
+                if (data.returnValues.state == 0) {
+                    resultMsg += "poll in progress. "
+                } else {
+                    resultMsg += "poll ended. "
+                }
+
+                const votingResult = data.returnValues.result;
+                const isTie = data.returnValues.tie;
+                if (isTie) {
+                    resultMsg += "Tie Between options: ";
+                    for (let i = 0; i < votingResult.length; i++) {
+                        resultMsg += possibleSelection[votingResult[i]] + ", ";
+                    }
+                } else {
+                    if (votingResult.length == 0) {
+                        resultMsg += "No one voted.";
                     } else {
-                        if (votingResult.length == 0) {
-                            setResult("No one voted.");
-                        } else {
-                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
-                        }
+                        resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
                     }
                 }
+                setResult(resultMsg);
                 setShowModal(true);
                 console.log("Results logged successfully");
             }
         });
     }
+
+    function addViewBlindResultFailListener() {
+        pollContract.events.blindResultViewedFailed({}, (error, data) => {
+            console.log("entered listener!!!!!!!!!");
+            setLoading(false);
+            if (error) {
+                console.log("error");
+            } else {
+                const remainingMinutes = +data.returnValues.remainingSeconds/ 60;
+                setResult("The poll is blind and will end in "+ Math.ceil(remainingMinutes)  + " minutes. Come back later.");
+                setShowModal(true);
+                console.log("Results cannot view logged successfully");
+            }
+        });
+    }
+
 
     // TODO: delete it if no edge case handling needed
     // PRIORITY: level 3 (extra work todo)
@@ -296,7 +319,7 @@ const Dashboard = (props) => {
                         <a href="https://faucet.egorfine.com/" target='_blank' className="linkToFaucet" >Get more <span >testnet tokens</span></a>
                     </div>
                     <div position="absolute">
-                    <a href='/' className="backLink" >Back <span >To the Welcome Page</span></a>
+                    <a href='/' className="backLink" >LOG OUT</a>
                     </div>
                    
                     <div className="dropDown">
