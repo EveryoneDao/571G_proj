@@ -46,6 +46,7 @@ export default function AddressForm() {
     addNewEventCreatedListener();
     async function fetchData() {
       const { address, status } = await getCurrentWalletConnected();
+      console.log("first loading: "+address);
       if (typeof (status) == "string" && status.includes("Rejected")) {
         alert(status);
         location.href = "/";
@@ -97,7 +98,6 @@ export default function AddressForm() {
   const onCreatePollPressed = async () => {
     console.log("onCreatePollPressed");
     console.log(walletAddress);
-
     const pollName = document.getElementById("pollName").value;
     const pollDescription = document.getElementById("pollDescription").value;
     const pollDuration = document.getElementById("pollDuration").value * 60;
@@ -123,13 +123,21 @@ export default function AddressForm() {
   // return a poll object polls[pollId]
   // Should work as just to display the error message
   function addNewEventCreatedListener() {
+    let storedAddress = localStorage.getItem("walletAddress");
     pollContract.events.pollCreated({}, (error, data) => {
+      // console.log("addNewEventCreatedListener: " + JSON.stringify(data));
+      // console.log("address: "+ walletAddress); // undefined
+      // console.log(storedAddress);
+      console.log("returnValues: " + data.returnValues[0]);
       setLoading(false);
-      if (error) {
-        alert("Error message: " + error);
-      } else {
-        setShowModal(true);
-        console.log(data.returnValues);
+      if(storedAddress!= undefined && storedAddress == data.returnValues[0]){
+        console.log("hey   ");
+        if (error) {
+          alert("Error message: " + error);
+        } else {
+          setShowModal(true);
+          console.log(data.returnValues);
+        }
       }
     });
   }
