@@ -177,7 +177,7 @@ export default function PollBoard() {
             <Box sx={{ width: '100%', height: '100%' }}>
                 <Stack spacing={2} height="40vh" >
                     <div id="one">{name}</div>
-                    <span id="two">{description}  <br/><br/> Selection Descriptions are:  <br/> 
+                    <span id="two">{description}  <br/><br/> 
                         {data.map(desc => (
                             <span>{desc}<br/></span>
                         ))}
