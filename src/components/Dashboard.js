@@ -141,7 +141,6 @@ const Dashboard = (props) => {
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            console.log("entered listener!!!!!!!!!");
             setLoading(false);
             if (error) {
                 console.log("error");

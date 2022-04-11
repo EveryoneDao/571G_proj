@@ -96,6 +96,7 @@ div.c {
   width: 70%; 
   height: 1.3em; 
   white-space: nowrap;
+  font-size: 0.8rem;
 }
 .spinningInfo{
   font-size: 1rem !important;
@@ -119,4 +120,8 @@ div.c {
 
 #cardButton{
   font-size:0.57rem !important;
+}
+
+#selectButton{
+  height:1rem !important;
 }

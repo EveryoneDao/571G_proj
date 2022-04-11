@@ -160,7 +160,6 @@ export default function Voting_choice() {
   }
 
   function addRegistrationListener() {
-    //console.log("addParticipantRegisteredListener");
     pollContract.events.participantRegistered({}, (error, data) => {
       setLoading(false);
       console.log("entered addParticipantRegisteredListener");
@@ -177,10 +176,8 @@ export default function Voting_choice() {
   }
 
   function addLoginListener() {
-    //console.log("addLogInListener");
     pollContract.events.participantLoggedIn({}, (error, data) => {
       setLoading(false);
-      console.log("entered addLogInListener");
       if (error) {
         console.log("Login failed with error" + error);
         alert("Error message: " + error);

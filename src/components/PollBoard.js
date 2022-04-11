@@ -154,7 +154,6 @@ export default function PollBoard() {
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            console.log("entered listener!!!!!!!!!");
             setLoading(false);
             if (error) {
                 console.log("error");
@@ -166,8 +165,6 @@ export default function PollBoard() {
             }
         });
     }
-
-
 
     const handleModalClose = () => {
         setShowModal(false);
@@ -200,7 +197,7 @@ export default function PollBoard() {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>{msg}</Button> </div>
+                    <div className="c"> <Button variant="disabled" style={{ fontSize: '1rem' }}>{msg}</Button> </div>
                     <div>
                 {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
             </div>
@@ -208,9 +205,9 @@ export default function PollBoard() {
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
                         <h1 className = "cut-text-poll ">{elem}</h1>
-                        <Button variant="outlined" onClick
+                        <Button variant="outlined"  id = "selectButton"onClick
                             ={() => onSelectPressed(data.indexOf(elem))}
-                            style={{ fontSize: '1rem' }}>Select</Button>
+                            style={{ fontSize: '0.7rem'}}>Select</Button>
                     </Grid>
                 ))}
             </Grid>
