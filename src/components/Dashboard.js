@@ -55,10 +55,15 @@ const Dashboard = (props) => {
         addResultViewListener();
         async function fetchData() {
             const { address, status } = await getCurrentWalletConnected();
-            const events = await loadAllEvents(address);
-            setWallet(address);
-            setEvents(events);
-            setInitialAllEvents(events);
+            if(typeof(status) == "string" && status.includes("Rejected")) {
+                alert(status);
+                location.href = "/";
+            }else{
+                const events = await loadAllEvents(address);
+                setWallet(address);
+                setEvents(events);
+                setInitialAllEvents(events);
+            }
         }
         fetchData();
     }, []);

@@ -168,7 +168,7 @@ export const connectWallet = async () => {
                 method: "eth_requestAccounts",
             });
             const obj = {
-                status: "👆🏽 input the transfer to addresst in the text-field above.",
+                status: "👆🏽 input the transfer to address in the text-field above.",
                 address: addressArray[0],
             };
             return obj;
@@ -207,12 +207,12 @@ export const getCurrentWalletConnected = async () => {
             if (addressArray.length > 0) {
                 return {
                     address: addressArray[0],
-                    status: "👆🏽 input the transfer to addresst in the text-field above.",
+                    status: "👆🏽 input the transfer to address in the text-field above.",
                 };
             } else {
                 return {
                     address: "",
-                    status: "🦊 Connect to Metamask using the top right button.",
+                    status: "Access Rejected, 🦊 Please connect your meta mask wallet in the welcome page.",
                 };
             }
         } catch (err) {
