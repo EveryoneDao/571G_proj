@@ -88,6 +88,9 @@ export default function PollBoard() {
     // Expected behavior: 1. select message update(for further functionality)
     function addSelectListener() {
         pollContract.events.voteDone({}, (error, data) => {
+            console.log("addSelectListener: " + JSON.stringify(data));
+            console.log("local storage: "+ localStorage.getItem("walletAddress"));
+            
             setLoading(false);
             if (error) {
                 console.log("error");
@@ -105,7 +108,6 @@ export default function PollBoard() {
 
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { 
-        console.log(pollID);
         const res = await viewResult(walletAddress, pollID);
         setLoading(true);
         if (typeof (res) === "string" && res.includes("rejected")) {
@@ -117,46 +119,55 @@ export default function PollBoard() {
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addViewResultListener() {
+        let storedAddress = localStorage.getItem("walletAddress");
         pollContract.events.resultViewed({}, (error, data) => {
             setLoading(false);
-            if (error) {
-                console.log("error");
-            } else {
-                let resultMsg = "";
-                if (data.returnValues.blind) {
-                    resultMsg += "Blind ";
-                } else {
-                    resultMsg += "Real time ";
-                }
-                if (data.returnValues.state == 0) {
-                    resultMsg += "poll in progress. "
-                } else {
-                    resultMsg += "poll ended. "
-                }
-
-                const votingResult = data.returnValues.result;
-                const isTie = data.returnValues.tie;
-                if (isTie) {
-                    resultMsg += "Tie Between options: ";
-                    for (let i = 0; i < votingResult.length; i++) {
-                        resultMsg += possibleSelection[votingResult[i]] + ", ";
-                    }
-                } else {
-                    if (votingResult.length == 0) {
-                        resultMsg += "No one voted.";
+            // console.log("addResultViewListener: " + JSON.stringify(data));
+            // console.log("currentAddress: " + walletAddress);
+            // console.log("returned: " + data.returnValues[4]);
+            // console.log("local: "+ storedAddress);
+            if (data.returnValues != null && data.returnValues[4] != undefined) {
+                if (data.returnValues[4].toLowerCase() == storedAddress || data.returnValues[4].toLowerCase() == walletAddress) {
+                    if (error) {
+                        console.log("error");
                     } else {
-                        resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
+                        let resultMsg = "";
+                        if (data.returnValues.blind) {
+                            resultMsg += "Blind ";
+                        } else {
+                            resultMsg += "Real time ";
+                        }
+                        if (data.returnValues.state == 0) {
+                            resultMsg += "poll in progress. "
+                        } else {
+                            resultMsg += "poll ended. "
+                        }
+        
+                        const votingResult = data.returnValues.result;
+                        const isTie = data.returnValues.tie;
+                        if (isTie) {
+                            resultMsg += "Tie Between options: ";
+                            for (let i = 0; i < votingResult.length; i++) {
+                                resultMsg += possibleSelection[votingResult[i]] + ", ";
+                            }
+                        } else {
+                            if (votingResult.length == 0) {
+                                resultMsg += "No one voted.";
+                            } else {
+                                resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
+                            }
+                        }
+                        setResult(resultMsg);
+                        setShowModal(true);
+                        console.log("Results logged successfully");
                     }
-                }
-                setResult(resultMsg);
-                setShowModal(true);
-                console.log("Results logged successfully");
-            }
+            }}
         });
     }
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
+            console.log("addViewResultListener: " + JSON.stringify(data));
             setLoading(false);
             if (error) {
                 console.log("error");

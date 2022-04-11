@@ -128,10 +128,11 @@ export default function AddressForm() {
       // console.log("addNewEventCreatedListener: " + JSON.stringify(data));
       // console.log("address: "+ walletAddress); // undefined
       // console.log(storedAddress);
-      console.log("returnValues: " + data.returnValues[0]);
+      // console.log("returnValues: " + data.returnValues[0].toLowerCase());
       setLoading(false);
-      if(storedAddress!= undefined && storedAddress == data.returnValues[0]){
-        console.log("hey   ");
+      if((data.returnValues!= undefined && storedAddress == data.returnValues[0].toLowerCase())
+      ||(data.returnValues!= undefined && walletAddress == data.returnValues[0].toLowerCase())){
+        // console.log("hey   ");
         if (error) {
           alert("Error message: " + error);
         } else {

@@ -50,20 +50,22 @@ const Dashboard = (props) => {
 
 
     //called only once
-    useEffect(() => { 
-        addViewBlindResultFailListener();
-        addResultViewListener();
+    useEffect(() => {
         async function fetchData() {
             const { address, status } = await getCurrentWalletConnected();
-            if(typeof(status) == "string" && status.includes("Rejected")) {
+            if (typeof (status) == "string" && status.includes("Rejected")) {
                 // alert(status);
                 location.href = "/";
-            }else{
+            } else {
                 const events = await loadAllEvents(address);
+                console.log("on first loading: " + address);
                 setWallet(address);
+                localStorage.setItem("walletAddress", address);
                 setEvents(events);
                 setInitialAllEvents(events);
             }
+            addViewBlindResultFailListener();
+            addResultViewListener();
         }
         fetchData();
     }, []);
@@ -92,8 +94,8 @@ const Dashboard = (props) => {
     const onViewResultsPressed = async (pollID) => {
         const res = await viewResult(walletAddress, pollID);
         setLoading(true);
-        console.log("onViewResultsPressed "+ typeof(res));
-        if(typeof(res) === "string" && res.includes("rejected")){
+        console.log("onViewResultsPressed " + typeof (res));
+        if (typeof (res) === "string" && res.includes("rejected")) {
             setLoading(false);
         }
     };
@@ -102,54 +104,62 @@ const Dashboard = (props) => {
     // return value by the contract event:
     // event resultViewed(bool tie, Selection[] result, State state, bool blind);
     function addResultViewListener() {
+        let storedAddress = localStorage.getItem("walletAddress");
         pollContract.events.resultViewed({}, (error, data) => {
-            setLoading(false);
-            if (error) {
-                console.log("error");
-            } else {
-                let resultMsg = "";
-                if (data.returnValues.blind) {
-                    resultMsg += "Blind ";
-                } else {
-                    resultMsg += "Real time ";
-                }
-                if (data.returnValues.state == 0) {
-                    resultMsg += "poll in progress. "
-                } else {
-                    resultMsg += "poll ended. "
-                }
-
-                const votingResult = data.returnValues.result;
-                const isTie = data.returnValues.tie;
-                if (isTie) {
-                    resultMsg += "Tie Between options: ";
-                    for (let i = 0; i < votingResult.length; i++) {
-                        resultMsg += possibleSelection[votingResult[i]] + ", ";
-                    }
-                } else {
-                    if (votingResult.length == 0) {
-                        resultMsg += "No one voted.";
+            if (data.returnValues != null && data.returnValues[4] != undefined) {
+                if (data.returnValues[4].toLowerCase() == storedAddress || data.returnValues[4].toLowerCase() == walletAddress) {
+                    setLoading(false);
+                    if (error) {
+                        console.log("error");
                     } else {
-                        resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
+                        let resultMsg = "";
+                        if (data.returnValues.blind) {
+                            resultMsg += "Blind ";
+                        } else {
+                            resultMsg += "Real time ";
+                        }
+                        if (data.returnValues.state == 0) {
+                            resultMsg += "poll in progress. "
+                        } else {
+                            resultMsg += "poll ended. "
+                        }
+                        const votingResult = data.returnValues.result;
+                        const isTie = data.returnValues.tie;
+                        if (isTie) {
+                            resultMsg += "Tie Between options: ";
+                            for (let i = 0; i < votingResult.length; i++) {
+                                resultMsg += possibleSelection[votingResult[i]] + ", ";
+                            }
+                        } else {
+                            if (votingResult.length == 0) {
+                                resultMsg += "No one voted.";
+                            } else {
+                                resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
+                            }
+                        }
+                        setResult(resultMsg);
+                        setShowModal(true);
                     }
                 }
-                setResult(resultMsg);
-                setShowModal(true);
-                console.log("Results logged successfully");
             }
         });
     }
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            setLoading(false);
-            if (error) {
-                console.log("error");
-            } else {
-                const remainingMinutes = +data.returnValues.remainingSeconds/ 60;
-                setResult("The poll is blind and will end in "+ Math.ceil(remainingMinutes)  + " minutes. Come back later.");
-                setShowModal(true);
-                console.log("Results cannot view logged successfully");
+            console.log("addViewBlindResultFailListener: " + JSON.stringify(data));
+            if (data.returnValues != null && data.returnValues[4] != undefined) {
+                if (data.returnValues[4].toLowerCase() == storedAddress || data.returnValues[4].toLowerCase() == walletAddress) {
+                    setLoading(false);
+                    if (error) {
+                        console.log("error");
+                    } else {
+                        const remainingMinutes = +data.returnValues.remainingSeconds / 60;
+                        setResult("The poll is blind and will end in " + Math.ceil(remainingMinutes) + " minutes. Come back later.");
+                        setShowModal(true);
+                        console.log("Results cannot view logged successfully");
+                    }
+                }
             }
         });
     }
@@ -255,7 +265,7 @@ const Dashboard = (props) => {
         // want create by me but not
         if (isByMe == 1 && event.creator.toLowerCase() != address) return false;
         // want not create by me but yes
-        if (isByMe == 2 && event.creator.toLowerCase()  == address) return false;
+        if (isByMe == 2 && event.creator.toLowerCase() == address) return false;
         return true;
     };
 
@@ -323,9 +333,9 @@ const Dashboard = (props) => {
                         <a href="https://faucet.egorfine.com/" target='_blank' className="linkToFaucet" >Get more <span >testnet tokens</span></a>
                     </div>
                     <div position="absolute">
-                    <a href='/' className="backLink" >LOG OUT</a>
+                        <a href='/' className="backLink" >LOG OUT</a>
                     </div>
-                   
+
                     <div className="dropDown">
                         <Box sx={{ minWidth: 130, maxWidth: 200, ml: "80%", borderColor: 'primary.main' }} >
                             <FormControl sx={{ m: 1, width: 300 }}>
@@ -363,7 +373,7 @@ const Dashboard = (props) => {
                         </CardContent>
                         <CardActions position="center">
                             <Grid item xs={6}>
-                                <Link to={{ pathname: '/'}} >Test</Link>
+                                <Link to={{ pathname: '/' }} >Test</Link>
                             </Grid>
                             <Grid item xs={6}><Button id="cardButton" size="small" onClick={() => { alert("Welcome! Please Like our github repo at: \n \n https://github.com/taichenl/571G_proj!"); }}>View Results</Button>
                             </Grid>
@@ -384,10 +394,10 @@ const Dashboard = (props) => {
                             </CardContent>
                             <CardActions >
                                 <Grid item xs={6}>
-                                    <Button id="cardButton" size="small" font-size= "0.7rem" onClick
+                                    <Button id="cardButton" size="small" font-size="0.7rem" onClick
                                         ={() => onParticipatePressed(elem.id)}>PARTICIPATE</Button>
                                 </Grid>
-                                <Grid  item xs={6}><Button id="cardButton" size="small" font-size= "0.7rem"onClick
+                                <Grid item xs={6}><Button id="cardButton" size="small" font-size="0.7rem" onClick
                                     ={() => onViewResultsPressed(elem.id)}>View Results</Button>
                                 </Grid>
                             </CardActions>
