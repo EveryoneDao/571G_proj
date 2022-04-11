@@ -23,7 +23,7 @@ describe("Poll", function() {
         selectionsDescriptions = ["first choice", "second choice"];
     });
 
-    xdescribe("Participant Registration", function() {
+    describe("Participant Registration", function() {
         it("1. Unsuccessful registration if name is empty.", async function() {
             await expect(deployedPoll.connect(participant1).registerParticipant("",{value: "100000000000000000"})).to.be.revertedWith(
                 "Participant name is empty");
@@ -78,7 +78,7 @@ describe("Poll", function() {
         });
     });
 
-    xdescribe("New Poll Creation", function() {
+    describe("New Poll Creation", function() {
         it("1. Unsuccessful creation if poll name or discription is empty.", async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
 
@@ -124,7 +124,7 @@ describe("Poll", function() {
         })
 
         it("7. Successful creation if all requirements are met.", async function() {
-            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.be.revertedWith("Poll not created");
+            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.be.revertedWith("Participant not registered in the system");
 
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
             await expect(deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", 10, true, true, availableSelections, selectionsDescriptions)).to.emit(
@@ -149,7 +149,6 @@ describe("Poll", function() {
             assert.equal(createdPollIds[0] + "", 1);
             expect(createdPollIds.length).to.equal(1);
 
-            await expect(deployedPoll.connect(organizer1).viewPoll(1)).to.emit(deployedPoll, "pollViewed");
         });
 
         it("8. Correct poll Ids when multiple polls are created by different organizers", async function() {
@@ -179,7 +178,7 @@ describe("Poll", function() {
             assert.equal(organizer2CreatedPollIds[1] + "", 4);
         });
 
-        it("9. Correct poll Ids when filters are applied", async function() {
+        it("9. Correct poll Ids by participants", async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
             await deployedPoll.connect(organizer2).registerParticipant("Phoebe", {value: "100000000000000000"});
 
@@ -195,40 +194,15 @@ describe("Poll", function() {
             await expect(deployedPoll.connect(organizer2).createPoll("Poll4", "Test poll", 10, false, true, availableSelections, selectionsDescriptions)).to.emit(
                     deployedPoll, 'pollCreated').withArgs(organizer2.address, "Poll4", 10, false, true);
     
-            // All poll Ids created by organizer 1
-            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 0, 0)).to.emit(deployedPoll, "pollsViewed");
-            let filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(2);
-            assert.equal(filteredIds[0] + "", 1);
-            assert.equal(filteredIds[1] + "", 3);
+            let organizer1Ids = await deployedPoll.connect(organizer1).getParticipantCreatedPollIds();
+            expect(organizer1Ids.length).to.equal(2);
+            assert.equal(organizer1Ids[0] + "", 1);
+            assert.equal(organizer1Ids[1] + "", 3);
 
-            // All poll Ids
-            await expect(deployedPoll.connect(organizer1).viewAllPolls(false, 0, 0)).to.emit(deployedPoll, "pollsViewed");
-            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(4);
-            
-            // All poll Ids created by organizer 1 that are only blind
-            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 1, 2)).to.emit(deployedPoll, "pollsViewed");
-            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(0);
-
-            // All poll Ids created by organizer 1 that are only about Dao
-            await expect(deployedPoll.connect(organizer1).viewAllPolls(true, 2, 1)).to.emit(deployedPoll, "pollsViewed");
-            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(1);
-            assert.equal(filteredIds[0] + "", 3);
-
-            // All poll Ids created by organizer 2 that are both blind and about Dao
-            await expect(deployedPoll.connect(organizer2).viewAllPolls(true, 1, 1)).to.emit(deployedPoll, "pollsViewed");
-            filteredIds = await deployedPoll.connect(organizer2).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(0);
-
-
-            // All poll Ids that are only blind
-            await expect(deployedPoll.connect(organizer1).viewAllPolls(false, 1, 2)).to.emit(deployedPoll, "pollsViewed");
-            filteredIds = await deployedPoll.connect(organizer1).getFilteredViewPollIds();
-            expect(filteredIds.length).to.equal(1);
-            assert.equal(filteredIds[0] + "", 2);
+            let organizer2Ids = await deployedPoll.connect(organizer2).getParticipantCreatedPollIds();
+            expect(organizer2Ids.length).to.equal(2);
+            assert.equal(organizer2Ids[0] + "", 2);
+            assert.equal(organizer2Ids[1] + "", 4);
         });
     });
 
@@ -242,7 +216,7 @@ describe("Poll", function() {
             await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", pollDuration, false, true, availableSelections, selectionsDescriptions);
         });
 
-        xdescribe("Checking results before anyone votes", function() {
+        describe("Checking results before anyone votes", function() {
             it("1. Cannot view result of non-existent poll", async function() {
                 await expect(deployedPoll.connect(participant1).viewResult(2)).to.be.revertedWith("Poll not created");
             });
@@ -253,25 +227,25 @@ describe("Poll", function() {
         });
 
         describe("Voting and checking results when poll is still in progress.", function() {
-            xit("1. Cannot vote at a non-existent poll", async function() {
+            it("1. Cannot vote at a non-existent poll", async function() {
                 await expect(deployedPoll.connect(participant1).vote(2, 1)).to.be.revertedWith("Poll not created");
             });
 
-            xit("2. Unsuccessful voting if participant has not registered.", async function () {
+            it("2. Unsuccessful voting if participant has not registered.", async function () {
                 await expect(deployedPoll.connect(participant2).vote(1, 1)).to.be.revertedWith("Participant not registered in the system");
             });
 
-            xit("3. Successful voting at a poll if participant has registered.", async function() {
+            it("3. Successful voting at a poll if participant has registered.", async function() {
                 let pollCreatedTime = Date.now();
 
-                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false);
+                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(1, false);
                 
                 // Confirm poll has not ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");
             });
 
-            xit("4. Correct voting result after one participant voted.", async function() {
+            it("4. Correct voting result after one participant voted.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant1).vote(1, 1);
@@ -282,7 +256,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");            
             });
 
-            xit("5. Correct voting result if mutiple voting options received equal number of votes.", async function() {
+            it("5. Correct voting result if mutiple voting options received equal number of votes.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant1).vote(1, 1);
@@ -296,7 +270,7 @@ describe("Poll", function() {
                 assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");            
             });
 
-            xit("6. Correct voting result if one voting option recieved more votes than others.", async function() {
+            it("6. Correct voting result if one voting option recieved more votes than others.", async function() {
                 let pollCreatedTime = Date.now();
 
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
@@ -318,17 +292,18 @@ describe("Poll", function() {
 
                 await Promise.all([
                     deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"}), 
+                    
                     deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"}),
-                    expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, false),
-                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, false),
-                    expect(deployedPoll.connect(participant3).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, false),
+                    expect(deployedPoll.connect(participant1).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(1, false),
+                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(2, false),
+                    expect(deployedPoll.connect(participant3).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(2, false),
                     expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false),
-                    expect(deployedPoll.connect(participant1).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant1.address, true),
-                    expect(deployedPoll.connect(participant2).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true),
-                    expect(deployedPoll.connect(participant3).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(participant3.address, true),
+                    expect(deployedPoll.connect(participant1).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(2, true),
+                    expect(deployedPoll.connect(participant2).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(1, true),
+                    expect(deployedPoll.connect(participant3).vote(1, 1)).to.emit(deployedPoll, 'voteDone').withArgs(1, true),
                     expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[1], 0, false),
 
-                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(participant2.address, true),
+                    expect(deployedPoll.connect(participant2).vote(1, 2)).to.emit(deployedPoll, 'voteDone').withArgs(2, true),
                     expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 0, false)
                 ]);
 
@@ -338,19 +313,21 @@ describe("Poll", function() {
             });
         });
 
-        xdescribe("Voting and checking results after poll has ended", function() {
+        describe("Voting and checking results after poll has ended", function() {
             it("1. Unsuccessful voting if poll has ended. No one voted.", async function() {
+                //TODO: this has changed to testing a 2-min poll
+                await deployedPoll.connect(organizer1).createPoll("Poll", "Test poll", 120, false, true, availableSelections, selectionsDescriptions);
+
                 let pollCreatedTime = Date.now();
-                
-                await new Promise(r => setTimeout(r, pollDuration * 1000));
+
+                await new Promise(r => setTimeout(r, 180 * 1000));
 
                 // Confirm poll has now ended
                 let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful voting due to poll ending but poll didn't end");
 
-                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.be.revertedWith("Vote time has passed");
-                await expect(deployedPoll.connect(participant1).vote(1, 1)).to.be.revertedWith("The poll has ended");
-                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[], 1, false);
+                await expect(deployedPoll.connect(participant1).vote(2, 1)).to.be.revertedWith("The poll has ended");
+                await expect(deployedPoll.connect(participant1).viewResult(2)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[], 1, false);
             });
 
             it("2. Correct final results after poll has ended.", async function() {
@@ -358,6 +335,7 @@ describe("Poll", function() {
                 
                 await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
                 await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
+
                 await deployedPoll.connect(participant1).vote(1, 1);
                 await deployedPoll.connect(participant2).vote(1, 2);
                 await deployedPoll.connect(participant3).vote(1, 2);
@@ -373,13 +351,41 @@ describe("Poll", function() {
                 timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
                 assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful voting due to poll ending but poll didn't end");
 
-                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'voteEnded').withArgs(false, [2]);
+                await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 1, false);
+            });
+
+            it("3. Correct votes by participants.", async function() {
+                let pollCreatedTime = Date.now();
+                
+                await deployedPoll.connect(participant2).registerParticipant("Rachel", {value: "100000000000000000"});
+                await deployedPoll.connect(participant3).registerParticipant("Joey", {value: "100000000000000000"});
+
+                await deployedPoll.connect(participant1).viewPoll(1);
+                // await deployedPoll.connect(participant1).checkVotedChoice(1);
+                // expect(voted).to.equal(false);
+                // expect(mySelection).to.equal(0);
+
+                await deployedPoll.connect(participant1).vote(1, 1);
+                await deployedPoll.connect(participant2).vote(1, 2);
+                await deployedPoll.connect(participant3).vote(1, 2);
+
+                // Confirm poll is still in progress
+                let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
+                assert.isBelow(timeElapsedInSeconds, pollDuration, "Trying to test successful voting but voting period has ended");   
+
+                await new Promise(r => setTimeout(r, pollDuration * 1000));
+                //await network.provider.send("evm_increaseTime", [pollDuration])
+
+                // Confirm poll has now ended
+                timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
+                assert.isAtLeast(timeElapsedInSeconds, pollDuration, "Trying to test unsuccessful voting due to poll ending but poll didn't end");
+
                 await expect(deployedPoll.connect(participant1).viewResult(1)).to.emit(deployedPoll, 'resultViewed').withArgs(false,[2], 1, false);
             });
         });
     });
 
-    xdescribe("Poll Voting: voting is blind", function() {
+    describe("Poll Voting: voting is blind", function() {
         
         beforeEach(async function() {
             await deployedPoll.connect(organizer1).registerParticipant("Ross", {value: "100000000000000000"});
@@ -400,7 +406,7 @@ describe("Poll", function() {
             await deployedPoll.connect(participant2).vote(1, 2);
             await deployedPoll.connect(participant3).vote(1, 2);
             
-            expect(deployedPoll.connect(organizer1).viewResult(1)).to.be.revertedWith("This voting is blind, result not revealed yet");
+            expect(deployedPoll.connect(organizer1).viewResult(1)).to.emit(deployedPoll, 'blindResultViewedFailed');
 
             // Confirm poll is still in progress
             let timeElapsedInSeconds = (Date.now() - pollCreatedTime) / 1000;
