@@ -1,5 +1,6 @@
 require('dotenv').config();
-const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
+//const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
+const alchemyKey = "https://eth-ropsten.alchemyapi.io/v2/1Gi14w2BjldpByYRx3-Q0oZRv4fEaoOL";
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 
