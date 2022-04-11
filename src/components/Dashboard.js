@@ -50,10 +50,9 @@ const Dashboard = (props) => {
 
 
     //called only once
-    useEffect(() => { //TODO: implement
+    useEffect(() => { 
         addViewBlindResultFailListener();
         addResultViewListener();
-        // participateEventListener(); // TODO: change into view
         async function fetchData() {
             const { address, status } = await getCurrentWalletConnected();
             if(typeof(status) == "string" && status.includes("Rejected")) {
@@ -187,8 +186,7 @@ const Dashboard = (props) => {
         setShowModal(false);
     }
 
-    // 'All', 'About Dao', 'Not About Dao', 'Blind Vote', 'Non-Blind Vote', 'Created By Me', 'Not Created By Me',
-    // TODO: Need Test
+    // 'All', 'About Dao', 'Not About Dao', 'Blind Vote', 'Non-Blind Vote', 'Created By Me', 'Not Created By Me'
     const handleChange = async (event) => {
         let {
             target: { value },
@@ -255,15 +253,16 @@ const Dashboard = (props) => {
         if (aboutDAO == 2 && event.isAboutDao) return false;
 
         // want create by me but not
-        if (isByMe == 1 && event.creator != address) return false;
+        if (isByMe == 1 && event.creator.toLowerCase() != address) return false;
         // want not create by me but yes
-        if (isByMe == 2 && event.creator == address) return false;
+        if (isByMe == 2 && event.creator.toLowerCase()  == address) return false;
         return true;
     };
 
     function pollsLocalFilter(address, isByMe, isAboutDao, isBlind) {
-        console.log("is about DAO " + isAboutDao)
+        //console.log("is about DAO " + isAboutDao)
         let filterResults = [];
+        //console.log(address);
         for (let i = 0; i < events.length; i++) {
             if (satisfyFilterConstrain(events[i], isAboutDao, isBlind, isByMe, address)) {
                 filterResults.push(events[i]);

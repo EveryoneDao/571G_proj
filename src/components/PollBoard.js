@@ -103,9 +103,8 @@ export default function PollBoard() {
         });
     }
 
-    // TODO: Uncomment and test
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
-    const onViewResultsPressed = async () => { //TODO: test
+    const onViewResultsPressed = async () => { 
         console.log(pollID);
         const res = await viewResult(walletAddress, pollID);
         setLoading(true);
