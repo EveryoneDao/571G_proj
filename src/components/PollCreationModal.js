@@ -27,9 +27,9 @@ export default function PollCreationModal(props) {
     } 
 
     //called only once
-    useEffect(() => { //TODO: implement
+    useEffect(() => {
         async function fetchData() {
-            console.log(props);
+            //console.log(props);
             setOpen(props.status);
             setMessage(props.result);
         }

@@ -11,7 +11,7 @@ import './index.css';
 function App() {
   return (
     <div className="App">
-    <BrowserRouter>
+    <BrowserRouter  basename="/">
         <Switch>
           <Route exact path = "/">
             <FirstPage />
