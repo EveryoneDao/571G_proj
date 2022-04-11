@@ -77,11 +77,8 @@ const Dashboard = (props) => {
         console.log("choseFrom " + choseFrom);
         let optionsDisplay = [];
         const testStr = "this is a very long string just be here to test selection display";
-        pollDescription += " Selection Descriptions are :";
         for (let i = 0; i < choseFrom.length; i++) {
             optionsDisplay.push(possibleSelection[choseFrom[i]] + ": " + optionsDescription[i]);
-            let concatString = " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i];
-            pollDescription += concatString;
         }
         console.log("options " + optionsDisplay);
         history.push({ pathname: '/PollBoard', state: { id: pollID, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
