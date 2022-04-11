@@ -76,11 +76,8 @@ const Dashboard = (props) => {
         console.log("choseFrom " + choseFrom);
         let optionsDisplay = [];
         const testStr = "this is a very long string just be here to test selection display";
-        pollDescription += " Selection Descriptions are :";
         for (let i = 0; i < choseFrom.length; i++) {
             optionsDisplay.push(possibleSelection[choseFrom[i]] + ": " + optionsDescription[i]);
-            let concatString = " " + possibleSelection[choseFrom[i]] + ". " + optionsDescription[i];
-            pollDescription += concatString;
         }
         console.log("options " + optionsDisplay);
         history.push({ pathname: '/PollBoard', state: { id: pollID, description: pollDescription, name: pollName, ops: optionsDisplay, wallet: walletAddress } });
@@ -88,8 +85,12 @@ const Dashboard = (props) => {
 
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
-        const { status } = await viewResult(walletAddress, pollID);
+        const res = await viewResult(walletAddress, pollID);
         setLoading(true);
+        console.log("onViewResultsPressed "+ typeof(res));
+        if(typeof(res) === "string" && res.includes("rejected")){
+            setLoading(false);
+        }
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -136,7 +137,6 @@ const Dashboard = (props) => {
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            console.log("entered listener!!!!!!!!!");
             setLoading(false);
             if (error) {
                 console.log("error");

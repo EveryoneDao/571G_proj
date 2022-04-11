@@ -62,24 +62,23 @@ export default function PollBoard() {
                 if (prevVote[0]) {
                     setMsg("You previously voted " + possibleSelection[prevVote[1]] + ", feel free to change your mind.");
                 }
-            }else{
+            } else {
                 console.log("loc state undefined");
             }
         }
         fetchData();
-        // console.log("setData");
-        // console.log(data);
-        // console.log(pollID);
-        // console.log(walletAddress);
     }, []);
 
     // Expected behavior: 1. gas fee. 2. select message update(for further functionality)
     const onSelectPressed = async (optionIndex) => {
         //alert("Option " + optionIndex + " Selected");
         let selection = optionIndex + 1;
-        const { status } = await selectAnOption(walletAddress, pollID, selection);
+        const res = await selectAnOption(walletAddress, pollID, selection);
         setMsg("You have selected " + possibleSelection[selection] + ", Please wait.");
         setLoading(true);
+        if (typeof (res) === "string" && res.includes("rejected")) {
+            setLoading(false);
+        }
     };
 
     // Expected behavior: 1. select message update(for further functionality)
@@ -94,8 +93,8 @@ export default function PollBoard() {
                 const choice = data.returnValues.choice;
                 console.log(data);
                 console.log("what");
-                if (isRevote) {setMsg("🎉 You have re-voted " + possibleSelection[choice] + " successfully");} 
-                else {setMsg("🎉 You have voted " + possibleSelection[choice] + " successfully");}
+                if (isRevote) { setMsg("🎉 You have re-voted " + possibleSelection[choice] + " successfully"); }
+                else { setMsg("🎉 You have voted " + possibleSelection[choice] + " successfully"); }
             }
         });
     }
@@ -103,8 +102,11 @@ export default function PollBoard() {
     // Expected behavior: 1. gas fee. 2. pop up window as triggered by the contract event
     const onViewResultsPressed = async () => { 
         console.log(pollID);
-        const { status } = await viewResult(walletAddress, pollID);
+        const res = await viewResult(walletAddress, pollID);
         setLoading(true);
+        if (typeof (res) === "string" && res.includes("rejected")) {
+            setLoading(false);
+        }
     };
 
     // Expected behavior: when results is returned show it in the pop up window
@@ -151,20 +153,17 @@ export default function PollBoard() {
 
     function addViewBlindResultFailListener() {
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            console.log("entered listener!!!!!!!!!");
             setLoading(false);
             if (error) {
                 console.log("error");
             } else {
-                const remainingMinutes = +data.returnValues.remainingSeconds/ 60;
-                setResult("The poll is blind and will end in "+  Math.ceil(remainingMinutes) + " minutes. Come back later.");
+                const remainingMinutes = +data.returnValues.remainingSeconds / 60;
+                setResult("The poll is blind and will end in " + Math.ceil(remainingMinutes) + " minutes. Come back later.");
                 setShowModal(true);
                 console.log("Results cannot view logged successfully");
             }
         });
     }
-
-
 
     const handleModalClose = () => {
         setShowModal(false);
@@ -174,40 +173,44 @@ export default function PollBoard() {
     return (
         <div className={classes.root}>
             <div><ResultModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
-            <Box sx={{ width: '100%', height: '100%'}}>
-                    <Stack spacing={2} height = "40vh" >
-                        <div id="one">{name}</div>
-                        <span id="two">{description}</span>
-                    </Stack>
-                </Box>
+            <Box sx={{ width: '100%', height: '100%' }}>
+                <Stack spacing={2} height="40vh" >
+                    <div id="one">{name}</div>
+                    <span id="two">{description}  <br/><br/> 
+                        {data.map(desc => (
+                            <span>{desc}<br/></span>
+                        ))}
+                    </span>
+                </Stack>
+            </Box>
             <Grid
                 container
                 spacing={2}
                 direction="row"
                 justifyContent="flex-start"
                 alignItems="flex-start"
-                height= "80vh"
-            > 
+                height="80vh"
+            >
                 <Grid container direction="row" alignItems="flex-start">
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw', color:'#778899' }}>View Results</Button> </div>
+                        <div className="c"> <Button onClick={onViewResultsPressed} style={{ fontSize: '1vw', color: '#778899' }}>View Results</Button> </div>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw', color:'#778899'}}> Back </Link></Button> </div>
+                        <div className="c"> <Button ><Link to='/Dashboard' style={{ fontSize: '1vw', color: '#778899' }}> Back </Link></Button> </div>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <div className="c"> <Button variant="disabled" style={{ fontSize: '2rem' }}>{msg}</Button> </div>
+                    <div className="c"> <Button variant="disabled" style={{ fontSize: '1rem' }}>{msg}</Button> </div>
                     <div>
-                {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
-            </div>
+                        {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
+                    </div>
                 </Grid>
                 {data.map(elem => (
                     <Grid item xs={12} sm={6} md={3} key={data.indexOf(elem)}>
-                        <h1 className = "cut-text-poll ">{elem}</h1>
-                        <Button variant="outlined" onClick
+                        <h1 className="cut-text-poll ">{elem}</h1>
+                        <Button variant="outlined" id="selectButton" onClick
                             ={() => onSelectPressed(data.indexOf(elem))}
-                            style={{ fontSize: '1rem' }}>Select</Button>
+                            style={{ fontSize: '0.7rem' }}>Select</Button>
                     </Grid>
                 ))}
             </Grid>

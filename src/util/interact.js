@@ -62,9 +62,7 @@ export const viewAnEvent = async (address, pollID) => {
         const curEvent = await pollContract.methods.viewPoll(pollID).call({ from: address });
         return curEvent;
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -75,9 +73,7 @@ export const checkPrevVote = async (address, pollID) => {
         const prevChoice = await pollContract.methods.checkVotedChoice(pollID).call({ from: address });
         return prevChoice;
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -122,9 +118,7 @@ export const selectAnOption = async (address, pollID, selectOption) => {
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return "😥 " + error.message + " rejected";
     }
 }
 
@@ -163,9 +157,7 @@ export const viewResult = async (address, pollID) => {
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return error.message + " rejected";
     }
 }
 
@@ -224,10 +216,7 @@ export const getCurrentWalletConnected = async () => {
                 };
             }
         } catch (err) {
-            return {
-                address: "",
-                status: "😥 " + err.message,
-            };
+            return "😥 " + error.message + " rejected";
         }
     } else {
         return {
@@ -283,9 +272,7 @@ export const createFakeEvent = async (address, pollName, pollDescription, durati
             ),
         };
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        return "😥 " + error.message + " rejected";
     }
 };
 
@@ -298,7 +285,6 @@ export const createParticipate = async (address, userName) => {
                 "💡 Connect your Metamask wallet to update the message on the blockchain.",
         };
     }
-
     //set up transaction parameters
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
@@ -311,10 +297,10 @@ export const createParticipate = async (address, userName) => {
             method: "eth_sendTransaction",
             params: [transactionParameters],
         });
-        console.log("transaction successed");
+        console.log("transaction success");
         return ; 
     } catch (error) {
-        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message;
+        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message + " rejected";
     }
 };
 
