@@ -63,7 +63,7 @@ export const viewAnEvent = async (address, pollID) => {
         return curEvent;
     } catch (error) {
         return {
-            status: "😥 " + error.message,
+            status: "😥 " + error.message + " rejected",
         };
     }
 }
@@ -76,7 +76,7 @@ export const checkPrevVote = async (address, pollID) => {
         return prevChoice;
     } catch (error) {
         return {
-            status: "😥 " + error.message,
+            status: "😥 " + error.message + " rejected",
         };
     }
 }
@@ -123,7 +123,7 @@ export const selectAnOption = async (address, pollID, selectOption) => {
         };
     } catch (error) {
         return {
-            status: "😥 " + error.message,
+            status: "😥 " + error.message + " rejected",
         };
     }
 }
@@ -164,7 +164,7 @@ export const viewResult = async (address, pollID) => {
         };
     } catch (error) {
         return {
-            status: "😥 " + error.message,
+            status: "😥 " + error.message + " rejected",
         };
     }
 }
@@ -226,7 +226,7 @@ export const getCurrentWalletConnected = async () => {
         } catch (err) {
             return {
                 address: "",
-                status: "😥 " + err.message,
+                status: "😥 " + err.message+ " rejected",
             };
         }
     } else {
@@ -284,7 +284,7 @@ export const createFakeEvent = async (address, pollName, pollDescription, durati
         };
     } catch (error) {
         return {
-            status: "😥 " + error.message,
+            status: "😥 " + error.message + " rejected",
         };
     }
 };
@@ -298,7 +298,6 @@ export const createParticipate = async (address, userName) => {
                 "💡 Connect your Metamask wallet to update the message on the blockchain.",
         };
     }
-
     //set up transaction parameters
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
@@ -311,10 +310,10 @@ export const createParticipate = async (address, userName) => {
             method: "eth_sendTransaction",
             params: [transactionParameters],
         });
-        console.log("transaction successed");
+        console.log("transaction success");
         return ; 
     } catch (error) {
-        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message;
+        return  "Might use the wrong testnet to login, use Ropsten testnet plz; " + error.message + " rejected";
     }
 };
 

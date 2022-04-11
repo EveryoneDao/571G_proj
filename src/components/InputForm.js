@@ -113,6 +113,9 @@ export default function AddressForm() {
       await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
       alert("Event creation request Submitted");
       setLoading(true);
+      if(res.includes("rejected")){
+        setLoading(false);
+      }
     };
 
     // return a poll object polls[pollId]

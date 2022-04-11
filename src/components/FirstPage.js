@@ -101,6 +101,10 @@ export default function Voting_choice() {
     else {
       const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
       setLoading(true);
+      if(res.includes("rejected")){
+        setLoading(false);
+      }
+      console.log("failed " + res);
     }
   }
 
@@ -134,7 +138,7 @@ export default function Voting_choice() {
         if (accounts.length > 0) {
           setWallet(accounts[0]);
           setStatus(
-            "👆🏽 input the transfer to addresst in the text-field above."
+            "👆🏽 input the transfer to address in the text-field above."
           );
         } else {
           setWallet("");
@@ -158,6 +162,7 @@ export default function Voting_choice() {
   function addRegistrationListener() {
     //console.log("addParticipantRegisteredListener");
     pollContract.events.participantRegistered({}, (error, data) => {
+      setLoading(false);
       console.log("entered addParticipantRegisteredListener");
       if (error) {
         console.log("Registration failed with error" + error);
@@ -165,7 +170,6 @@ export default function Voting_choice() {
       } else {
         console.log("Registration successfully");
         alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
-        setLoading(false);
         //pathname: '/PollFeature' 
         location.href = "/Dashboard";
       }
@@ -175,26 +179,26 @@ export default function Voting_choice() {
   function addLoginListener() {
     //console.log("addLogInListener");
     pollContract.events.participantLoggedIn({}, (error, data) => {
+      setLoading(false);
       console.log("entered addLogInListener");
       if (error) {
         console.log("Login failed with error" + error);
         alert("Error message: " + error);
       } else {
         console.log("Login successfully");
-        alert(data.returnValues.name + " Logined In"); // TODO: Add into pop up or warning 
+        alert(data.returnValues.name + " Logged In"); // TODO: Add into pop up or warning 
         location.href = "/Dashboard";
       }
     });
   }
 
   return (
-    <React.Fragment className="whole">
+    <React.Fragment>
       <Typography variant="h6" color="inherit" align='right'>
         <Button variant='contained' color="primary" onClick={aboutClick}>About</Button>
         <Button variant='contained' onClick={featureClick}>Feature</Button>
       </Typography>
       <div className={classes.heroContent}>
-
         <Container maxWidth="sm">
           <button id="walletButton" onClick={connectWalletPressed}>
             {walletAddress.length > 0 ? (
