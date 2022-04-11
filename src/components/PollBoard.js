@@ -57,10 +57,10 @@ export default function PollBoard() {
                 setShowModal(false);
                 addSelectListener();
                 addViewResultListener();
-                console.log(address, pollID);
+                addViewBlindResultFailListener();
                 const prevVote = await checkPrevVote(address, loc.state.id);
                 if (prevVote[0]) {
-                    setMsg("You have previously vote " + possibleSelection[prevVote[1]] + ", feel free to change your mind.");
+                    setMsg("You previously voted " + possibleSelection[prevVote[1]] + ", feel free to change your mind.");
                 }
             }else{
                 console.log("loc state undefined");
@@ -90,12 +90,12 @@ export default function PollBoard() {
                 console.log("error");
                 setMsg("😥 " + error.message);
             } else {
-                const isRevote = data.returnValues.changed;
+                const isRevote = data.returnValues.voted;
                 const choice = data.returnValues.choice;
                 console.log(data);
                 console.log("what");
-                if (isRevote) {setMsg("🎉 You have re-vote " + possibleSelection[choice] + " successfully");} 
-                else {setMsg("🎉 You have vote " + possibleSelection[choice] + " successfully");}
+                if (isRevote) {setMsg("🎉 You have re-voted " + possibleSelection[choice] + " successfully");} 
+                else {setMsg("🎉 You have voted " + possibleSelection[choice] + " successfully");}
             }
         });
     }
@@ -117,32 +117,55 @@ export default function PollBoard() {
             if (error) {
                 console.log("error");
             } else {
-                console.log("result data is: " + JSON.stringify(data.returnValues));
-                const votingState = data.returnValues.state;
-                if(votingState == 0){
-                    setResult("Voting in progress, please check back later");
-                }else{
-                    const votingResult = data.returnValues.result;
-                    const isTie = data.returnValues.tie;
-                    if(isTie){
-                        let resultMsg = "Tie Between options: "
-                        for (let i = 0; i < votingResult.length; i++) {
-                            resultMsg += possibleSelection[votingResult[i]] + ", ";
-                        }
-                        setResult(resultMsg);
-                    }else{
-                        if(votingResult.length == 0){
-                            setResult("No one voted.");
-                        }else{
-                            setResult("Most participate voted: " + possibleSelection[votingResult[0]]);
-                        }
+                let resultMsg = "";
+                if (data.returnValues.blind) {
+                    resultMsg += "Blind ";
+                } else {
+                    resultMsg += "Real time ";
+                }
+                if (data.returnValues.state == 0) {
+                    resultMsg += "poll in progress. "
+                } else {
+                    resultMsg += "poll ended. "
+                }
+
+                const votingResult = data.returnValues.result;
+                const isTie = data.returnValues.tie;
+                if (isTie) {
+                    resultMsg += "Tie Between options: ";
+                    for (let i = 0; i < votingResult.length; i++) {
+                        resultMsg += possibleSelection[votingResult[i]] + ", ";
+                    }
+                } else {
+                    if (votingResult.length == 0) {
+                        resultMsg += "No one voted.";
+                    } else {
+                        resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
                     }
                 }
+                setResult(resultMsg);
                 setShowModal(true);
                 console.log("Results logged successfully");
             }
         });
     }
+
+    function addViewBlindResultFailListener() {
+        pollContract.events.blindResultViewedFailed({}, (error, data) => {
+            console.log("entered listener!!!!!!!!!");
+            setLoading(false);
+            if (error) {
+                console.log("error");
+            } else {
+                const remainingMinutes = +data.returnValues.remainingSeconds/ 60;
+                setResult("The poll is blind and will end in "+  Math.ceil(remainingMinutes) + " minutes. Come back later.");
+                setShowModal(true);
+                console.log("Results cannot view logged successfully");
+            }
+        });
+    }
+
+
 
     const handleModalClose = () => {
         setShowModal(false);
