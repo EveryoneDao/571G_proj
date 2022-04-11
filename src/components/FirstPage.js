@@ -163,15 +163,19 @@ export default function Voting_choice() {
   function addRegistrationListener() {
     pollContract.events.participantRegistered({}, (error, data) => {
       setLoading(false);
-      console.log("entered addParticipantRegisteredListener");
-      if (error) {
-        console.log("Registration failed with error" + error);
-        alert("Error message: " + error);
-      } else {
-        console.log("Registration successfully");
-        alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
-        //pathname: '/PollFeature' 
-        location.href = "/Dashboard";
+      const inputName = document.getElementById("nameInput").value;
+      console.log("entered addParticipantRegisteredListener" + JSON.stringify(data));
+      if(data.returnValues.name == inputName){
+        console.log("logged here ");
+        if (error) {
+          console.log("Registration failed with error" + error);
+          alert("Error message: " + error);
+        } else {
+          console.log("Registration successfully");
+          alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
+          //pathname: '/PollFeature' 
+          location.href = "/Dashboard";
+        }
       }
     });
   }
@@ -179,13 +183,18 @@ export default function Voting_choice() {
   function addLoginListener() {
     pollContract.events.participantLoggedIn({}, (error, data) => {
       setLoading(false);
-      if (error) {
-        console.log("Login failed with error" + error);
-        alert("Error message: " + error);
-      } else {
-        console.log("Login successfully");
-        alert(data.returnValues.name + " Logged In"); // TODO: Add into pop up or warning 
-        location.href = "/Dashboard";
+      const inputName = document.getElementById("nameInput").value;
+      console.log("addLoginListener" + JSON.stringify(data));
+      if(data.returnValues.name == inputName){
+        console.log("logged here ");
+        if (error) {
+          console.log("Login failed with error" + error);
+          alert("Error message: " + error);
+        } else {
+          console.log("Login successfully");
+          alert(data.returnValues.name + " Logged In"); // TODO: Add into pop up or warning 
+          location.href = "/Dashboard";
+        }
       }
     });
   }

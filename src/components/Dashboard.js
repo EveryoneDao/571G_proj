@@ -56,7 +56,7 @@ const Dashboard = (props) => {
         async function fetchData() {
             const { address, status } = await getCurrentWalletConnected();
             if(typeof(status) == "string" && status.includes("Rejected")) {
-                alert(status);
+                // alert(status);
                 location.href = "/";
             }else{
                 const events = await loadAllEvents(address);
