@@ -46,7 +46,10 @@ export default function AddressForm() {
     addNewEventCreatedListener();
     async function fetchData() {
       const { address, status } = await getCurrentWalletConnected();
-      console.log(address);
+      if (typeof (status) == "string" && status.includes("Rejected")) {
+        alert(status);
+        location.href = "/";
+      }
       setWallet(address);
     }
     fetchData();

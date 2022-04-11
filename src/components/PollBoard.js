@@ -45,6 +45,11 @@ export default function PollBoard() {
 
     useEffect(() => {
         async function fetchData() {
+            const { address, status } = await getCurrentWalletConnected();
+            if (typeof (status) == "string" && status.includes("Rejected")) {
+                alert(status);
+                location.href = "/";
+            }
             if (loc.state !== undefined) {
                 console.log("loc state is not undefined");
                 console.log(loc.state);
@@ -52,7 +57,6 @@ export default function PollBoard() {
                 setName(loc.state.name);
                 setPollDescription(loc.state.description);
                 setData(loc.state.ops);
-                const { address, status } = await getCurrentWalletConnected();
                 setWalletAddress(address);
                 setShowModal(false);
                 addSelectListener();
@@ -177,9 +181,9 @@ export default function PollBoard() {
             <Box sx={{ width: '100%', height: '100%' }}>
                 <Stack spacing={2} height="40vh" >
                     <div id="one">{name}</div>
-                    <span id="two">{description}  <br/><br/> 
+                    <span id="two">{description}  <br /><br />
                         {data.map(desc => (
-                            <span>{desc}<br/></span>
+                            <span>{desc}<br /></span>
                         ))}
                     </span>
                 </Stack>

@@ -67,7 +67,6 @@ export default function Checkout() {
   const classes = useStyles();
 
   const handleNext = () => {
-    //TODO
     location.href = "/Dashboard";
     console.log(localStorage.getItem("nameInput"));
     console.log(document.getElementById("pollName").value);
