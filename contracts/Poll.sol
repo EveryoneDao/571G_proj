@@ -22,6 +22,8 @@
     - view polls (p.2), add filters - blind, my poll, poll type
 */
 
+/*V3. listeners to return values */
+
 /*
     Other comments, time in solidity is 1 == 1 second
     https://ethereum.stackexchange.com/questions/3034/how-to-get-current-time-by-solidity
@@ -30,7 +32,7 @@
 */
 
 pragma solidity >=0.8.0;
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract Poll {
 
@@ -44,7 +46,6 @@ contract Poll {
         address participantAddr;
         string voterName;
         uint[] pollIds; // Created polls
-        uint[] votedPollIds; // Voted polls
     }
 
     struct PollEvent{
@@ -84,34 +85,9 @@ contract Poll {
         nextPollId = 1;
     }
 
-    event participantRegistered(string name);
-    event participantLoggedIn(string name);
-    event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
-    event voteDone(Selection choice, bool voted);
-    event blindResultViewedFailed(uint remainingSeconds);
-    event resultViewed(bool tie, Selection[] result, State state, bool blind); // state is used to determine whether the result is temporary
+    //event pollCreated(address organizer, string name, uint dur, bool blind, bool aboutDAO);
+    // pollEnded event in the future
 
-    modifier existingParticipantCheck(address addr, string memory name)
-    {
-        require(bytes(name).length > 0, "Participant name is empty");
-        bool registered = false;
-        if(participantName[name] == addr) {
-            emit participantLoggedIn(name);
-            registered = true;
-        }
-        if (!registered){
-            _;
-        }
-    }
-
-    modifier newParticipantCheck(string memory name)
-    {
-        require(participantName[name] == address(0x0), "Participant already registered");
-        require(msg.value >= registrationPrice, "Asset not enough to register");
-        require(msg.value == registrationPrice, "Amount sent not equal to the registration price");
-
-        _;
-    }
 
     modifier newPollCreateionCheck(string memory name, string memory desc, uint dur, Selection[] memory sel, string[] memory selDesc)
     {
@@ -203,19 +179,25 @@ contract Poll {
 
     // Do this when connecting to wallet and input a name 
     function registerParticipant(string memory _name) 
-        existingParticipantCheck(msg.sender, _name)
-        newParticipantCheck(_name) 
-        external payable 
+        external 
+        returns (string memory, bool)
     {
-        uint[] memory pollIds;
-        uint[] memory votedPollIds;
-        Participant memory newParticipant = Participant(msg.sender, _name, pollIds, votedPollIds);
-        participants[msg.sender] = newParticipant;
-        participantName[_name] = msg.sender;
+        require(bytes(_name).length > 0, "Participant name is empty");
+        bool registered = false;
+        if(participantName[_name] == msg.sender) {
+            registered = true;
+        }
+        if (!registered){
+            require(participantName[_name] == address(0x0), "Participant already registered");
 
-        numberOfParticipant += 1;
+            uint[] memory pollIds;
+            Participant memory newParticipant = Participant(msg.sender, _name, pollIds);
+            participants[msg.sender] = newParticipant;
+            participantName[_name] = msg.sender;
 
-        emit participantRegistered(_name);
+            numberOfParticipant += 1;
+        }
+        return (_name, registered);
     }
 
     function _newPoll(string memory name, string memory desc, uint dur, bool blind, bool aboutDAO, Selection[] memory sel, string[] memory selDesc)
@@ -236,6 +218,7 @@ contract Poll {
         participantCheck()
         newPollCreateionCheck(name, desc, dur, sel, selDesc) 
         external
+        returns (string memory, uint)
     {
         participants[msg.sender].pollIds.push(nextPollId);
 
@@ -244,7 +227,7 @@ contract Poll {
 
         nextPollId += 1;
 
-        emit pollCreated(msg.sender, name, dur, blind, aboutDAO);
+        return (name, dur);
     }
 
     function vote(uint pollId, Selection choice)
@@ -253,6 +236,7 @@ contract Poll {
         updateResult(pollId) 
         voteCheck(pollId, choice) 
         external
+        returns (Selection, bool)
     {
         bool voted = false; // Reflects first vote or change of mind vote
 
@@ -271,20 +255,23 @@ contract Poll {
             polls[pollId].voted.push(msg.sender);
             pollResults[pollId].votedChoices.push(choice);
         }
-        emit voteDone(choice, voted); 
+        return (choice, voted);
     }
 
     function viewResult(uint pollId) 
         pollCheck(pollId)
         updateResult(pollId) 
         external
-    {
-        //console.log("current time in solidity - check", block.timestamp);
-        if (polls[pollId].blind && polls[pollId].state != State.ENDED &&
-            polls[pollId].startTime + polls[pollId].votingDuration >= block.timestamp) {
-            emit blindResultViewedFailed(polls[pollId].startTime + polls[pollId].votingDuration - block.timestamp);
+        returns (bool tie, Selection[] memory result, State state, bool blind, uint remainingSec)
+    {       
+         //console.log("current time in solidity - check", block.timestamp);
+        uint remainingSeconds = polls[pollId].startTime + polls[pollId].votingDuration - block.timestamp;
+        if (polls[pollId].blind && polls[pollId].state != State.ENDED && remainingSeconds >= 0) {
+            bool defaultTie; 
+            Selection[] memory defaultResult;
+            return (defaultTie, defaultResult, polls[pollId].state, polls[pollId].blind, remainingSeconds);
         } else {
-            emit resultViewed(pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind);
+            return (pollResults[pollId].tie, pollResults[pollId].result, polls[pollId].state, polls[pollId].blind, remainingSeconds);
         }
     }
 

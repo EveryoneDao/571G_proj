@@ -31,7 +31,7 @@ import PollCreationModal from './PollCreationModal.js';
 import { useEffect, useState } from "react";
 import {
   pollContract,
-  createFakeEvent,
+  createEvent,
   getCurrentWalletConnected
 } from "../util/interact.js"
 import { AlternateEmail } from '@mui/icons-material';
@@ -44,7 +44,6 @@ export default function AddressForm() {
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
-    addNewEventCreatedListener();
     async function fetchData() {
       const { address, status } = await getCurrentWalletConnected();
       if (typeof (status) == "string" && status.includes("Rejected")) {
@@ -109,33 +108,28 @@ export default function AddressForm() {
       alert("Please enter the poll name to proceed. ")
       return;
     }
+    console.log(pollDuration);
+    if (pollDuration == 0) {
+      alert("Please provide a valid poll duration. ")
+      return;
+    }
     if (pollDescription.length == 0) {
       alert("Please provide your event description. ")
       return;
     }
-    const res = await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
-    //alert("Event creation request Submitted");
-    setLoading(true);
-    if (typeof (res) === "string" && res.includes("rejected")) {
-      setLoading(false);
-    }
+    console.log(options);
+    console.log(optionDescription);
+    const res = await createEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
+    console.log(res);
+    const time = Math.ceil(+res[1] / 60);
+    setResult(res[0] + " created. It will end after " + time + " minutes.");
+    setShowModal(true);
+    // setLoading(true);
+    // if (typeof (res) === "string" && res.includes("rejected")) {
+    //   setLoading(false);
+    // }
   };
 
-  // return a poll object polls[pollId]
-  // Should work as just to display the error message
-  function addNewEventCreatedListener() {
-    pollContract.events.pollCreated({}, (error, data) => {
-      setLoading(false);
-      if (error) {
-        alert("Error message: " + error);
-      } else {
-        const time = Math.ceil(+data.returnValues.dur / 60);
-        setResult(data.returnValues.name + " created. It will end after " + time + " minutes.");
-        setShowModal(true);
-        console.log(data.returnValues);
-      }
-    });
-  }
 
   const [form] = Form.useForm();
   var keyArray = [];

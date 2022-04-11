@@ -84,12 +84,11 @@ export default function Voting_choice() {
       setWallet(address);
       setStatus(status);
       addWalletListener();
-      addRegistrationListener();
-      addLoginListener();
-      // addSmartContractListener();
     }
     fetchData();
   }, [walletAddress]);
+
+
 
   const continueWithName = async () => {
     localStorage.setItem("nameInput", document.getElementById("nameInput").value);
@@ -102,11 +101,17 @@ export default function Voting_choice() {
     }
     else {
       const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
-      setLoading(true);
-      if(typeof(res) === "string" && res.includes("rejected")){
-        setLoading(false);
+
+      const name = res[0];
+      const registered = res[1];
+      console.log(res);
+      if (registered) {
+        setMsg(name + " Logged In");
+      } else {
+        setMsg(name + " Registered");
       }
-      console.log("failed " + res);
+  
+      location.href = "/Dashboard";
     }
   }
 
@@ -159,36 +164,6 @@ export default function Voting_choice() {
         </p>
       );
     }
-  }
-
-  function addRegistrationListener() {
-    pollContract.events.participantRegistered({}, (error, data) => {
-      setLoading(false);
-      console.log("entered addParticipantRegisteredListener");
-      if (error) {
-        console.log("Registration failed with error" + error);
-        setMsg("Error message: " + error);
-      } else {
-        console.log("Registration successfully");
-        setMsg(data.returnValues.name + " Registered");
-        //pathname: '/PollFeature' 
-        location.href = "/Dashboard";
-      }
-    });
-  }
-
-  function addLoginListener() {
-    pollContract.events.participantLoggedIn({}, (error, data) => {
-      setLoading(false);
-      if (error) {
-        console.log("Login failed with error" + error);
-        setMsg("Error message: " + error);
-      } else {
-        console.log("Login successfully");
-        setMsg(data.returnValues.name + " Logged In");
-        location.href = "/Dashboard";
-      }
-    });
   }
 
   return (

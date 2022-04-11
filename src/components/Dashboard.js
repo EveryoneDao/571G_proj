@@ -51,8 +51,6 @@ const Dashboard = (props) => {
 
     //called only once
     useEffect(() => { 
-        addViewBlindResultFailListener();
-        addResultViewListener();
         async function fetchData() {
             const { address, status } = await getCurrentWalletConnected();
             if(typeof(status) == "string" && status.includes("Rejected")) {
@@ -91,36 +89,37 @@ const Dashboard = (props) => {
     // Expected behavior: 1. gas fee. 2. Display the result in pop up modal
     const onViewResultsPressed = async (pollID) => {
         const res = await viewResult(walletAddress, pollID);
-        setLoading(true);
-        console.log("onViewResultsPressed "+ typeof(res));
-        if(typeof(res) === "string" && res.includes("rejected")){
-            setLoading(false);
-        }
-    };
 
-    // Expected behavior: when results is returned show it in the pop up window
-    // return value by the contract event:
-    // event resultViewed(bool tie, Selection[] result, State state, bool blind);
-    function addResultViewListener() {
-        pollContract.events.resultViewed({}, (error, data) => {
-            setLoading(false);
-            if (error) {
-                console.log("error");
+        console.log(res);
+        // setLoading(true);
+        // console.log("onViewResultsPressed "+ typeof(res));
+        // if(typeof(res) === "string" && res.includes("rejected")){
+        //     setLoading(false);
+        // }
+
+        setLoading(false);
+        if (res == "err") {
+            console.log("error");
+        } else {
+            const isBlind = res.blind;
+            const state = res.state;
+            let resultMsg = "";
+            if (isBlind) {
+                resultMsg += "Blind ";
             } else {
-                let resultMsg = "";
-                if (data.returnValues.blind) {
-                    resultMsg += "Blind ";
-                } else {
-                    resultMsg += "Real time ";
-                }
-                if (data.returnValues.state == 0) {
-                    resultMsg += "poll in progress. "
-                } else {
-                    resultMsg += "poll ended. "
-                }
+                resultMsg += "Real time ";
+            }
+            if (state == 0) {
+                resultMsg += "poll in progress. "
+            } else {
+                resultMsg += "poll ended. "
+            }
 
-                const votingResult = data.returnValues.result;
-                const isTie = data.returnValues.tie;
+            if (isBlind && state ==0) {
+                resultMsg += " Come back later.";
+            } else {
+                const votingResult = res.result;
+                const isTie = res.tie;
                 if (isTie) {
                     resultMsg += "Tie Between options: ";
                     for (let i = 0; i < votingResult.length; i++) {
@@ -133,26 +132,13 @@ const Dashboard = (props) => {
                         resultMsg += "Most participate voted: " + possibleSelection[votingResult[0]];
                     }
                 }
-                setResult(resultMsg);
-                setShowModal(true);
-                console.log("Results logged successfully");
             }
-        });
-    }
+            setResult(resultMsg);
+            setShowModal(true);
+            console.log("Results logged successfully");
+        }
+    };
 
-    function addViewBlindResultFailListener() {
-        pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            setLoading(false);
-            if (error) {
-                console.log("error");
-            } else {
-                const remainingMinutes = +data.returnValues.remainingSeconds/ 60;
-                setResult("The poll is blind and will end in "+ Math.ceil(remainingMinutes)  + " minutes. Come back later.");
-                setShowModal(true);
-                console.log("Results cannot view logged successfully");
-            }
-        });
-    }
 
 
     // TODO: delete it if no edge case handling needed
