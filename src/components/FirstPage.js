@@ -73,6 +73,8 @@ export default function Voting_choice() {
 
   const [toAddress, setToAddress] = useState("");
 
+  const [msg, setMsg] = useState("Hey");
+
   //called only once
   useEffect(() => {
     async function fetchData() {
@@ -93,10 +95,10 @@ export default function Voting_choice() {
     localStorage.setItem("nameInput", document.getElementById("nameInput").value);
     const name = document.getElementById("nameInput").value;
     if (name == "") {
-      alert("The name input field is empty. Please enter a valid name.")
+      setMsg("The name input field is empty. Please enter a valid name.")
     }
     else if (walletAddress.length == 0) {
-      alert("You need to connect to metamask to proceed. ")
+      setMsg("You need to connect to metamask to proceed. ")
     }
     else {
       const res = await createParticipate(walletAddress, document.getElementById("nameInput").value);
@@ -166,10 +168,10 @@ export default function Voting_choice() {
       console.log("entered addParticipantRegisteredListener");
       if (error) {
         console.log("Registration failed with error" + error);
-        alert("Error message: " + error);
+        setMsg("Error message: " + error);
       } else {
         console.log("Registration successfully");
-        alert(data.returnValues.name + " Registered"); // TODO: Add into pop up or warning 
+        setMsg(data.returnValues.name + " Registered");
         //pathname: '/PollFeature' 
         location.href = "/Dashboard";
       }
@@ -181,10 +183,10 @@ export default function Voting_choice() {
       setLoading(false);
       if (error) {
         console.log("Login failed with error" + error);
-        alert("Error message: " + error);
+        setMsg("Error message: " + error);
       } else {
         console.log("Login successfully");
-        alert(data.returnValues.name + " Logged In"); // TODO: Add into pop up or warning 
+        setMsg(data.returnValues.name + " Logged In");
         location.href = "/Dashboard";
       }
     });
@@ -226,6 +228,7 @@ export default function Voting_choice() {
                 </Button>
               </Grid>
             </Grid>
+            <div className="c"> <Button variant="disabled" style={{ fontSize: '0.9rem' }}>{msg}</Button> </div>
             <div>
                 {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
             </div>

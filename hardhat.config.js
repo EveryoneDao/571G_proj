@@ -7,8 +7,12 @@ require('dotenv').config();
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 
-const { API_URL, PRIVATE_KEY } = process.env;
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+// const { API_URL, PRIVATE_KEY } = process.env;
+// const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
+const API_URL = "https://eth-ropsten.alchemyapi.io/v2/1Gi14w2BjldpByYRx3-Q0oZRv4fEaoOL";
+const PRIVATE_KEY = "db7ee4ef8472a54629aeadbcf74237919347f0a58ec030fb090049b42e23d779";
+const ETHERSCAN_API_KEY = "TZCIGV7JW28SKBGGXCP7GMWX3ACSR7W6KM"; 
 // console.log(ETHERSCAN_API_KEY)
 module.exports = {
   solidity: {

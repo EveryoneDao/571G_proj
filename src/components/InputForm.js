@@ -40,6 +40,7 @@ export default function AddressForm() {
 
   const [walletAddress, setWallet] = useState();
   const [showModal, setShowModal] = useState(false);
+  const [result, setResult] = useState("");
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
@@ -128,6 +129,8 @@ export default function AddressForm() {
       if (error) {
         alert("Error message: " + error);
       } else {
+        const time = Math.ceil(+data.returnValues.dur / 60);
+        setResult(data.returnValues.name + " created. It will end after " + time + " minutes.");
         setShowModal(true);
         console.log(data.returnValues);
       }
@@ -150,7 +153,7 @@ export default function AddressForm() {
   var des;
   return (
     <React.Fragment>
-      <div><PollCreationModal status={showModal} handleModalClose={handleModalClose} /></div>
+      <div><PollCreationModal result={result} status={showModal} handleModalClose={handleModalClose} /></div>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -222,6 +225,7 @@ export default function AddressForm() {
           </Form>
           {loading && <div><CircularProgress color="inherit" /><span className="spinningInfo">Information Retrieving in progress</span></div>}
         </Grid>
+        
         {/* <Grid item xs={12} sm={12}>
         <button onClick={() => onCreatePollPressed()}> Submit2 </button>
         </Grid> */}
