@@ -111,7 +111,7 @@ export default function AddressForm() {
       }
       console.log(options.length);
       await createFakeEvent(walletAddress, pollName, pollDescription, pollDuration, isBlind, isAboutDao, options, optionDescription);
-      alert("Event creation request Submitted");
+      //alert("Event creation request Submitted");
       setLoading(true);
     };
 
