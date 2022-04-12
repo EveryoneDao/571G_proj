@@ -146,10 +146,15 @@ const Dashboard = (props) => {
     }
 
     function addViewBlindResultFailListener() {
+        let storedAddress = localStorage.getItem("walletAddress");
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
             console.log("addViewBlindResultFailListener: " + JSON.stringify(data));
-            if (data.returnValues != null && data.returnValues[4] != undefined) {
-                if (data.returnValues[4].toLowerCase() == storedAddress || data.returnValues[4].toLowerCase() == walletAddress) {
+            console.log("currentAddress: " + walletAddress);
+            console.log("returned: " + data.returnValues[4]);
+            console.log("local: "+ storedAddress);
+            console.log("sender: "+ data.returnValues.sender);
+            if (data.returnValues != null && data.returnValues.sender != undefined) {
+                if (data.returnValues.sender.toLowerCase() == storedAddress || data.returnValues.sender.toLowerCase() == walletAddress) {
                     setLoading(false);
                     if (error) {
                         console.log("error");

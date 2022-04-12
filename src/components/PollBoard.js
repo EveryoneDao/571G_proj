@@ -85,23 +85,27 @@ export default function PollBoard() {
         }
     };
 
-    // Expected behavior: 1. select message update(for further functionality)
     function addSelectListener() {
+        let storedAddress = localStorage.getItem("walletAddress");
         pollContract.events.voteDone({}, (error, data) => {
             console.log("addSelectListener: " + JSON.stringify(data));
             console.log("local storage: "+ localStorage.getItem("walletAddress"));
-            
+            console.log("sender: "+ data.returnValues.sender);
             setLoading(false);
-            if (error) {
-                console.log("error");
-                setMsg("😥 " + error.message);
-            } else {
-                const isRevote = data.returnValues.voted;
-                const choice = data.returnValues.choice;
-                console.log(data);
-                console.log("what");
-                if (isRevote) { setMsg("🎉 You have re-voted " + possibleSelection[choice] + " successfully"); }
-                else { setMsg("🎉 You have voted " + possibleSelection[choice] + " successfully"); }
+            if (data.returnValues != null && data.returnValues.sender != undefined) {
+                if (data.returnValues.sender.toLowerCase() == storedAddress || data.returnValues.sender.toLowerCase() == walletAddress) {
+                    if (error) {
+                        console.log("error");
+                        setMsg("😥 " + error.message);
+                    } else {
+                        const isRevote = data.returnValues.voted;
+                        const choice = data.returnValues.choice;
+                        console.log(data);
+                        console.log("what");
+                        if (isRevote) { setMsg("🎉 You have re-voted " + possibleSelection[choice] + " successfully"); }
+                        else { setMsg("🎉 You have voted " + possibleSelection[choice] + " successfully"); }
+                    }
+                }
             }
         });
     }
@@ -166,16 +170,25 @@ export default function PollBoard() {
     }
 
     function addViewBlindResultFailListener() {
+        let storedAddress = localStorage.getItem("walletAddress");
         pollContract.events.blindResultViewedFailed({}, (error, data) => {
-            console.log("addViewResultListener: " + JSON.stringify(data));
-            setLoading(false);
-            if (error) {
-                console.log("error");
-            } else {
-                const remainingMinutes = +data.returnValues.remainingSeconds / 60;
-                setResult("The poll is blind and will end in " + Math.ceil(remainingMinutes) + " minutes. Come back later.");
-                setShowModal(true);
-                console.log("Results cannot view logged successfully");
+            // console.log("addViewBlindResultFailListener: " + JSON.stringify(data));
+            // console.log("currentAddress: " + walletAddress);
+            // console.log("returned: " + data.returnValues[4]);
+            // console.log("local: "+ storedAddress);
+            // console.log("sender: "+ data.returnValues.sender);
+            if (data.returnValues != null && data.returnValues.sender != undefined) {
+                if (data.returnValues.sender.toLowerCase() == storedAddress || data.returnValues.sender.toLowerCase() == walletAddress) {
+                    setLoading(false);
+                    if (error) {
+                        console.log("error");
+                    } else {
+                        const remainingMinutes = +data.returnValues.remainingSeconds / 60;
+                        setResult("The poll is blind and will end in " + Math.ceil(remainingMinutes) + " minutes. Come back later.");
+                        setShowModal(true);
+                        console.log("Results cannot view logged successfully");
+                    }
+                }
             }
         });
     }
