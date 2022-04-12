@@ -115,6 +115,9 @@ export default function AddressForm() {
       alert("Event Submitted");
       // const { status2 } = await createFakeEvent(address, walletAddress, pollName, pollDescription,pollDuration, isBlind, isAboutDao, options, optionDescription);
       // setStatus(status2);
+
+
+      
       console.log("on create poll finished");
       location.href = "http://localhost:3000/PollFeature";
       setLoading(true);
